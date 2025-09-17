@@ -17,8 +17,7 @@ public static class EstilosApp
     public static Color ColorAlerta = ColorTranslator.FromHtml("#E74C3C");
     public static Color ColorSubmenuBG = Color.FromArgb(0, 100, 100);
 
-
-    // --- MÉTODOS DE APLICACIÓN DE ESTILOS ---
+    // --- MÉTODOS DE ESTILO (MENÚ PRINCIPAL) ---
 
     /// <summary>
     /// Aplica un color de fondo estándar a un control Panel.
@@ -31,7 +30,7 @@ public static class EstilosApp
     /// <summary>
     /// Aplica un estilo visual estandarizado a un botón de Menú Principal (Nivel 1).
     /// </summary>
-    /// <param name="btn">El control Button a estilizar.</param>
+
     public static void EstiloBotonMenu(Button btn)
     {
         btn.FlatStyle = FlatStyle.Flat;
@@ -47,7 +46,7 @@ public static class EstilosApp
     /// <summary>
     /// Aplica un estilo visual estandarizado a un botón de Submenú (Nivel 2).
     /// </summary>
-    /// <param name="btn">El control Button a estilizar.</param>
+
     public static void EstiloBotonSubmenu(Button btn)
     {
         btn.FlatStyle = FlatStyle.Flat;
@@ -58,5 +57,40 @@ public static class EstilosApp
         btn.Padding = new Padding(30, 0, 0, 0); // Mayor indentación para Nivel 2
         btn.Height = 35;
         btn.Dock = DockStyle.Top;
+    }
+
+    // --- NUEVOS MÉTODOS DE ESTILO (LOGIN FORM) ---
+
+    /// <summary>
+    /// Aplica el estilo de acción principal (color Activo) a un botón, 
+    /// usado para el botón "INGRESAR" del Login. (Spec: #1ABC9C)
+    /// </summary>
+    public static void EstiloBotonAccionPrincipal(Button btn)
+    {
+        btn.BackColor = ColorActivo;
+        btn.ForeColor = Color.White;
+        btn.FlatStyle = FlatStyle.Flat;
+        btn.FlatAppearance.BorderSize = 0;
+    }
+
+    /// <summary>
+    /// Aplica el estilo estándar para campos de texto de Login (Usuario/Contraseña).
+    /// </summary>
+    public static void EstiloTextBoxLogin(TextBox txt)
+    {
+        txt.BackColor = Color.White;
+        txt.ForeColor = ColorTextoOscuro; // Spec: #2C3E50
+        txt.BorderStyle = BorderStyle.FixedSingle;
+    }
+
+    /// <summary>
+    /// Aplica el estilo estándar para las etiquetas de mensaje de error.
+    /// Las oculta por defecto y asigna el color de Alerta.
+    /// </summary>
+    public static void EstiloLabelError(Label lbl)
+    {
+        lbl.ForeColor = ColorAlerta; // Spec: #E74C3C
+        lbl.BackColor = Color.Transparent;
+        lbl.Visible = false; // Oculto por defecto
     }
 }
