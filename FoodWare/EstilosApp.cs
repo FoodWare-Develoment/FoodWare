@@ -30,10 +30,11 @@ public static class EstilosApp
     /// <summary>
     /// Aplica un estilo visual estandarizado a un botón de Menú Principal (Nivel 1).
     /// </summary>
+
     public static void EstiloBotonMenu(Button btn)
     {
         btn.FlatStyle = FlatStyle.Flat;
-        btn.FlatAppearance.BorderSize = 0;
+        btn.FlatAppearance.BorderSize = 0; // Requerido para FlatStyle para quitar el borde
         btn.ForeColor = Color.White;
         btn.BackColor = ColorMenu;
         btn.TextAlign = ContentAlignment.MiddleLeft;
@@ -45,6 +46,7 @@ public static class EstilosApp
     /// <summary>
     /// Aplica un estilo visual estandarizado a un botón de Submenú (Nivel 2).
     /// </summary>
+
     public static void EstiloBotonSubmenu(Button btn)
     {
         btn.FlatStyle = FlatStyle.Flat;
@@ -52,7 +54,7 @@ public static class EstilosApp
         btn.ForeColor = Color.White;
         btn.BackColor = ColorSubmenuBG;
         btn.TextAlign = ContentAlignment.MiddleLeft;
-        btn.Padding = new Padding(30, 0, 0, 0);
+        btn.Padding = new Padding(30, 0, 0, 0); // Mayor indentación para Nivel 2
         btn.Height = 35;
         btn.Dock = DockStyle.Top;
     }
