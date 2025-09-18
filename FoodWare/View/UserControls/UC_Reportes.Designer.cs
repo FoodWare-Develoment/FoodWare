@@ -1,4 +1,4 @@
-﻿namespace FoodWare.UserControls
+﻿namespace FoodWare.View.UserControls
 {
     partial class UC_Reportes
     {

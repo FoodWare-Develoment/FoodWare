@@ -24,7 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets-Images\" />
+    <Folder Include="Controller\Logic\" />
+    <Folder Include="Model\DataAccess\" />
+    <Folder Include="Model\Entities\" />
+    <Folder Include="View\Assets-Images\" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-namespace FoodWare
+using FoodWare.View.Forms;
+namespace FoodWare.Controller
 {
     internal static class Program
     {
@@ -13,7 +14,7 @@ namespace FoodWare
 
             // 2. Creamos y mostramos el LoginForm primero como un Diálogo (ShowDialog).
             // La ejecución del código se detiene aquí hasta que el LoginForm se cierre.
-            LoginForm loginForm = new LoginForm();
+            LoginForm loginForm = new();
             loginForm.ShowDialog();
 
             // 3. Revisamos el resultado DESPUÉS de que se cerró el login.

@@ -7,8 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FoodWare.View.Helpers;
 
-namespace FoodWare
+namespace FoodWare.View.Forms
 {
     /// <summary>
     /// Formulario de Inicio de Sesión. Valida al usuario y, si tiene éxito,

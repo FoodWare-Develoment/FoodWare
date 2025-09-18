@@ -1,8 +1,9 @@
 using System;
 using System.Windows.Forms;
-using FoodWare.UserControls;
+using FoodWare.View.UserControls;
+using FoodWare.View.Helpers;
 
-namespace FoodWare
+namespace FoodWare.View.Forms
 {
     /// <summary>
     /// Formulario principal y contenedor (Shell) de la aplicación FoodWare.
