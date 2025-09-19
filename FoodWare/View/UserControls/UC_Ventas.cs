@@ -2,17 +2,17 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace FoodWare.UserControls
+namespace FoodWare.View.UserControls
 {
-    public partial class UC_Inventario : UserControl
+    public partial class UC_Ventas : UserControl
     {
-        public UC_Inventario()
+        public UC_Ventas()
         {
             InitializeComponent();
 
             var lbl = new Label
             {
-                Text = "Inventario",
+                Text = "Ventas",
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font("Segoe UI", 14, FontStyle.Bold)

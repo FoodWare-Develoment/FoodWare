@@ -1,4 +1,4 @@
-﻿namespace FoodWare
+﻿namespace FoodWare.View.Forms
 {
     partial class FormMain
     {

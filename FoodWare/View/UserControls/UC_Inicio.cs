@@ -2,7 +2,7 @@
 using System.Drawing; // Aunque ya no se usa aquí, es estándar dejarlo por si acaso.
 using System.Windows.Forms;
 
-namespace FoodWare.UserControls
+namespace FoodWare.View.UserControls
 {
     /// <summary>
     /// Módulo (UserControl) que actúa como la pantalla principal o Dashboard.

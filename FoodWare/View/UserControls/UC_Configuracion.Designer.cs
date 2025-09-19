@@ -1,6 +1,6 @@
-﻿namespace FoodWare.UserControls
+﻿namespace FoodWare.View.UserControls
 {
-    partial class UC_Finanzas
+    partial class UC_Configuracion
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -15,10 +15,10 @@
         {
             this.SuspendLayout();
             // 
-            // UC_Finanzas
+            // UC_Reportes
             // 
             this.AutoScaleMode = AutoScaleMode.Font;
-            this.Name = "UC_Finanzas";
+            this.Name = "UC_Configuracion";
             this.Size = new System.Drawing.Size(800, 450);
             this.ResumeLayout(false);
         }

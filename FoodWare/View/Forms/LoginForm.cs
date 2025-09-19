@@ -7,8 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FoodWare.View.Helpers;
+using FoodWare.Controller.Logic;
 
-namespace FoodWare
+namespace FoodWare.View.Forms
 {
     /// <summary>
     /// Formulario de Inicio de Sesión. Valida al usuario y, si tiene éxito,
@@ -60,9 +62,15 @@ namespace FoodWare
         /// </summary>
         private void BtnIngresar_Click(object sender, EventArgs e)
         {
-            // TODO: Reemplazar esta simulación con la lógica real de validación contra la BD.
-            bool loginValido = (txtUsuario.Text == "admin" && txtPassword.Text == "123");
+            // --- Modificacion de MVC ---
 
+            // 1. La Vista crea una instancia del Controlador
+            LoginController loginCtrl = new LoginController();
+
+            // 2. La Vista recoge los datos y se los pasa al Controlador
+            bool loginValido = loginCtrl.ValidarLogin(this.txtUsuario.Text, this.txtPassword.Text);
+
+            // 3. La Vista reacciona a la respuesta del Controlador
             if (loginValido)
             {
                 // ÉXITO: Informa al Program.cs que el resultado es OK y cierra.
@@ -71,8 +79,7 @@ namespace FoodWare
             }
             else
             {
-                // FRACASO (Orden Lógico Corregido para evitar el bug de TextChanged):
-                // Limpia la contraseña (disparando TextChanged) y enfoca ANTES de mostrar el error.
+                // FRACASO:
                 txtPassword.Text = "";
                 txtPassword.Focus();
                 MostrarError("Usuario o contraseña incorrectos.");
