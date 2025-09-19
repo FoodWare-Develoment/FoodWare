@@ -95,5 +95,87 @@ namespace FoodWare.View.Helpers
             lbl.BackColor = Color.Transparent;
             lbl.Visible = false; // Oculto por defecto
         }
+
+        // --- MÉTODOS DE ESTILO (CONTROLES DE MÓDULO) ---
+
+        /// <summary>
+        /// Aplica un estilo visual estándar a un DataGridView.
+        /// </summary>
+        public static void EstiloDataGridView(DataGridView dgv)
+        {
+            dgv.BackgroundColor = ColorFondo;
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.RowHeadersVisible = false;
+
+            // Estilo del Header
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = ColorBarra;
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgv.ColumnHeadersHeight = 30;
+
+            // Estilo de las Filas
+            dgv.DefaultCellStyle.BackColor = ColorFondo;
+            dgv.DefaultCellStyle.ForeColor = ColorTextoOscuro;
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9);
+            dgv.DefaultCellStyle.SelectionBackColor = ColorActivo;
+            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.RowTemplate.Height = 25;
+
+            // Comportamiento
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.ReadOnly = true;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a un botón de acción "Positiva" (Guardar, Crear).
+        /// </summary>
+        public static void EstiloBotonModulo(Button btn)
+        {
+            btn.BackColor = ColorAccion; // Verde
+            btn.ForeColor = Color.White;
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btn.Height = 30;
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a un botón de acción "Peligro" (Eliminar).
+        /// </summary>
+        public static void EstiloBotonModuloAlerta(Button btn)
+        {
+            btn.BackColor = ColorAlerta; // Rojo
+            btn.ForeColor = Color.White;
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btn.Height = 30;
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a una etiqueta de formulario.
+        /// </summary>
+        public static void EstiloLabelModulo(Label lbl)
+        {
+            lbl.ForeColor = ColorTextoOscuro;
+            lbl.BackColor = Color.Transparent;
+            lbl.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a una caja de texto de formulario.
+        /// </summary>
+        public static void EstiloTextBoxModulo(TextBox txt)
+        {
+            txt.BackColor = Color.White;
+            txt.ForeColor = ColorTextoOscuro;
+            txt.BorderStyle = BorderStyle.FixedSingle;
+            txt.Font = new Font("Segoe UI", 9);
+        }
     }
 }

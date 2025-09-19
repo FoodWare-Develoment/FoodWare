@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Model\DataAccess\" />
     <Folder Include="View\Assets-Images\" />
   </ItemGroup>
 
