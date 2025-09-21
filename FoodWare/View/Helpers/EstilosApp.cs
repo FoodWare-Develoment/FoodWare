@@ -141,7 +141,6 @@ namespace FoodWare.View.Helpers
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
             btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            btn.Height = 30;
         }
 
         /// <summary>
@@ -154,7 +153,19 @@ namespace FoodWare.View.Helpers
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
             btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            btn.Height = 30;
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a un botón de acción "Secundaria" (Limpiar, Cancelar).
+        /// </summary>
+        public static void EstiloBotonModuloSecundario(Button btn)
+        {
+            btn.BackColor = Color.White;
+            btn.ForeColor = ColorTextoOscuro; // Color gris/azul
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderColor = ColorTextoOscuro;
+            btn.FlatAppearance.BorderSize = 1;
+            btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
         }
 
         /// <summary>

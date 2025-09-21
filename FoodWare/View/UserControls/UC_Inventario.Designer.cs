@@ -46,41 +46,48 @@
             panelInputs.Dock = DockStyle.Top;
             panelInputs.Location = new Point(0, 0);
             panelInputs.Name = "panelInputs";
-            panelInputs.Size = new Size(800, 179);
+            panelInputs.Size = new Size(960, 179);
             panelInputs.TabIndex = 0;
             // 
             // btnGuardar
             // 
-            btnGuardar.Location = new Point(654, 14);
+            btnGuardar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnGuardar.Location = new Point(802, 16);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(104, 49);
             btnGuardar.TabIndex = 13;
             btnGuardar.Text = "Guardar";
             btnGuardar.UseVisualStyleBackColor = true;
+            btnGuardar.Click += BtnGuardar_Click;
             // 
             // btnEliminar
             // 
-            btnEliminar.Location = new Point(654, 67);
+            btnEliminar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnEliminar.Location = new Point(802, 67);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(104, 49);
             btnEliminar.TabIndex = 12;
             btnEliminar.Text = "Eliminar";
             btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += BtnEliminar_Click;
             // 
             // btnLimpiar
             // 
-            btnLimpiar.Location = new Point(654, 119);
+            btnLimpiar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLimpiar.Location = new Point(802, 119);
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Size = new Size(104, 49);
             btnLimpiar.TabIndex = 10;
             btnLimpiar.Text = "Limpiar";
             btnLimpiar.UseVisualStyleBackColor = true;
+            btnLimpiar.Click += BtnLimpiar_Click;
             // 
             // txtPrecio
             // 
+            txtPrecio.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtPrecio.Location = new Point(164, 137);
             txtPrecio.Name = "txtPrecio";
-            txtPrecio.Size = new Size(428, 27);
+            txtPrecio.Size = new Size(590, 27);
             txtPrecio.TabIndex = 7;
             // 
             // lblPrecio
@@ -126,43 +133,46 @@
             // 
             // txtStock
             // 
+            txtStock.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtStock.Location = new Point(164, 96);
             txtStock.Name = "txtStock";
-            txtStock.Size = new Size(428, 27);
+            txtStock.Size = new Size(590, 27);
             txtStock.TabIndex = 2;
             // 
             // txtCategoria
             // 
+            txtCategoria.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtCategoria.Location = new Point(164, 56);
             txtCategoria.Name = "txtCategoria";
-            txtCategoria.Size = new Size(428, 27);
+            txtCategoria.Size = new Size(590, 27);
             txtCategoria.TabIndex = 1;
             // 
             // txtNombre
             // 
+            txtNombre.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtNombre.Location = new Point(164, 17);
             txtNombre.Name = "txtNombre";
-            txtNombre.Size = new Size(428, 27);
+            txtNombre.Size = new Size(590, 27);
             txtNombre.TabIndex = 0;
             // 
             // dgvInventario
             // 
+            dgvInventario.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvInventario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvInventario.Dock = DockStyle.Bottom;
-            dgvInventario.Location = new Point(0, 199);
+            dgvInventario.Location = new Point(0, 179);
             dgvInventario.Name = "dgvInventario";
             dgvInventario.RowHeadersWidth = 51;
-            dgvInventario.Size = new Size(800, 251);
+            dgvInventario.Size = new Size(960, 485);
             dgvInventario.TabIndex = 1;
             // 
             // UC_Inventario
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(dgvInventario);
+            AutoScaleMode = AutoScaleMode.None;
             Controls.Add(panelInputs);
+            Controls.Add(dgvInventario);
             Name = "UC_Inventario";
-            Size = new Size(800, 450);
+            Size = new Size(960, 664);
+            Load += UC_Inventario_Load;
             panelInputs.ResumeLayout(false);
             panelInputs.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvInventario).EndInit();
