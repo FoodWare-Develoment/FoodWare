@@ -64,8 +64,18 @@ namespace FoodWare.View.UserControls
                 // 1. La Vista RECOGE datos
                 string nombre = txtNombre.Text;
                 string cat = txtCategoria.Text;
-                int stock = int.Parse(txtStock.Text); // (Se recomienda usar TryParse para validar)
-                decimal precio = decimal.Parse(txtPrecio.Text); // (Se recomienda usar TryParse)
+                if (!int.TryParse(txtStock.Text, out int stock))
+                {
+                    MessageBox.Show("Stock debe ser un número entero válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtStock.Focus();
+                    return;
+                }
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
+                {
+                    MessageBox.Show("Precio debe ser un número válido (puede llevar decimales).", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtPrecio.Focus();
+                    return;
+                }
 
                 // 2. La Vista ENVÍA datos al controlador
                 _controller.GuardarNuevoProducto(nombre, cat, stock, precio);
