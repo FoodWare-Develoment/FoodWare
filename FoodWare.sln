@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22 d17.14
+VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodWare", "FoodWare\FoodWare.csproj", "{D31BCA4E-E4AA-473D-B047-994889E9E1A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodWare.Theme", "FoodWare.Theme\FoodWare.Theme.csproj", "{881CD7F5-4F63-4D9E-8DCE-239E9A2F5CD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodWare.Validations", "FoodWare.Validations\FoodWare.Validations.csproj", "{206E4830-0788-4566-AEDE-63A0DF025A25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{D31BCA4E-E4AA-473D-B047-994889E9E1A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D31BCA4E-E4AA-473D-B047-994889E9E1A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D31BCA4E-E4AA-473D-B047-994889E9E1A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881CD7F5-4F63-4D9E-8DCE-239E9A2F5CD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{881CD7F5-4F63-4D9E-8DCE-239E9A2F5CD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{881CD7F5-4F63-4D9E-8DCE-239E9A2F5CD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{881CD7F5-4F63-4D9E-8DCE-239E9A2F5CD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{206E4830-0788-4566-AEDE-63A0DF025A25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{206E4830-0788-4566-AEDE-63A0DF025A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{206E4830-0788-4566-AEDE-63A0DF025A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{206E4830-0788-4566-AEDE-63A0DF025A25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

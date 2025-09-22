@@ -25,6 +25,12 @@
 
   <ItemGroup>
     <Folder Include="View\Assets-Images\" />
+    <Folder Include="View\Helpers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoodWare.Theme\FoodWare.Theme.csproj" />
+    <ProjectReference Include="..\FoodWare.Validations\FoodWare.Validations.csproj" />
   </ItemGroup>
 
 </Project>
