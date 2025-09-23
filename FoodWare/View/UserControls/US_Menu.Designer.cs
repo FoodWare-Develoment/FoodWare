@@ -13,14 +13,15 @@
 
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            SuspendLayout();
             // 
-            // UC_Configuracion
+            // UC_Menu
             // 
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.Name = "UC_Menu";
-            this.Size = new System.Drawing.Size(800, 450);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Name = "UC_Menu";
+            Size = new Size(800, 450);
+            ResumeLayout(false);
         }
     }
 }
