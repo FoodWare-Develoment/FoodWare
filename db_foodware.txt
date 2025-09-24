@@ -1,0 +1,48 @@
+CREATE DATABASE db_foodware;
+
+USE db_foodware;
+
+
+CREATE TABLE empleados (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nombres NVARCHAR(50) NOT NULL,
+    apellido_paterno NVARCHAR(50) NOT NULL,
+    apellido_materno NVARCHAR(50) NOT NULL,
+    correo NVARCHAR(100) NOT NULL,
+    telefono NVARCHAR(15) NULL,
+    puesto NVARCHAR(50) NOT NULL,
+    salario DECIMAL(10,2) NOT NULL,
+    turno NVARCHAR(20) NOT NULL CHECK (turno IN ('matutino', 'vespertino', 'nocturno','medio tiempo')),
+    fecha_creacion DATETIME NULL DEFAULT GETDATE(),
+    activo BIT NULL DEFAULT 1
+);
+
+CREATE TABLE inventario (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nombre NVARCHAR(60) NOT NULL,
+    categoria NVARCHAR(20) NOT NULL CHECK (categoria IN ('carnes', 'verduras', 'frutas', 'enlatados', 'especias')),
+    stock DECIMAL(10, 2) NOT NULL,
+    medida NVARCHAR(10) NOT NULL CHECK (medida IN ('kg', 'ml', 'pz', 'lt', 'gr')),
+    precio DECIMAL(10,2) NOT NULL
+);
+
+
+CREATE UNIQUE INDEX IX_empleados_correo ON empleados(correo);
+
+-- REGISTROS FICTICIOS
+
+INSERT INTO empleados (nombres, apellido_paterno, apellido_materno, correo, telefono, puesto, salario, turno) 
+VALUES 
+('María', 'Gómez', 'López', 'maria.gomez@foodware.com', '555-123-4567', 'Gerente', 25000.00, 'matutino'),
+('Carlos', 'Rodríguez', 'Martínez', 'carlos.rodriguez@foodware.com', '555-987-6543', 'Chef Ejecutivo', 22000.00, 'vespertino'),
+('Ana', 'Hernández', 'García', 'ana.hernandez@foodware.com', '555-456-7890', 'Supervisor', 18000.00, 'nocturno'),
+('Juan', 'Pérez', 'Sánchez', 'juan.perez@foodware.com', '555-111-2233', 'Mesero', 12000.00, 'medio tiempo'),
+('Laura', 'Díaz', 'Ramírez', 'laura.diaz@foodware.com', '555-444-5566', 'Cajera', 11000.00, 'matutino');
+
+INSERT INTO inventario (nombre, categoria, stock, medida, precio) 
+VALUES 
+('Filete de Res', 'carnes', 15.5, 'kg', 280.00),
+('Tomate Rojo', 'verduras', 25.0, 'kg', 45.50),
+('Manzana Golden', 'frutas', 12.3, 'kg', 65.00),
+('Atún en Lata', 'enlatados', 50, 'pz', 25.00),
+('Pimienta Negra', 'especias', 2.5, 'gr', 15.75);
