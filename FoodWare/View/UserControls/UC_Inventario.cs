@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using FoodWare.View.Helpers;
-using FoodWare.Controller.Logic;
-using FoodWare.Model.Entities;
-
+using FoodWare.View.Helpers;      // Para EstilosApp
+using FoodWare.Controller.Logic;  // Para MenuController
+using FoodWare.Model.Entities;    // Para la clase Platillo
+using FoodWare.Validations;      // Para nuestra librería de validación
 
 namespace FoodWare.View.UserControls
 {
@@ -15,7 +15,7 @@ namespace FoodWare.View.UserControls
         public UC_Inventario()
         {
             InitializeComponent();
-            AplicarEstilos(); // ¡Llamamos a nuestro método de estilos!
+            AplicarEstilos(); // Llamamos a nuestro método de estilos
             _controller = new InventarioController();
         }
 
@@ -53,7 +53,7 @@ namespace FoodWare.View.UserControls
         {
             if (!DesignMode) // Esto evita que el código se ejecute en el diseñador
             {
-                CargarGrid(); // Le decimos que llene la tabla
+                CargarGridInventario(); // Le decimos que llene la tabla
             }
         }
 
@@ -61,29 +61,52 @@ namespace FoodWare.View.UserControls
         {
             try
             {
-                // 1. La Vista RECOGE datos
+                // 1. RECOGE y VALIDA datos (Usando nuestra libreria)
                 string nombre = txtNombre.Text;
                 string cat = txtCategoria.Text;
-                if (!int.TryParse(txtStock.Text, out int stock))
+
+                // 2. La Vista VALIDA datos (Usamos nuestra librería)
+
+                // Validación de Nombre
+                if (Validar.EsTextoVacio(nombre))
                 {
-                    MessageBox.Show("Stock debe ser un número entero válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El nombre no puede estar vacío.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtNombre.Focus();
+                    return;
+                }
+
+                //Validación de Categoría
+                if (Validar.EsTextoVacio(cat))
+                {
+                    MessageBox.Show("La categoría no puede estar vacía.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtCategoria.Focus();
+                    return;
+                }
+
+                // Validación de Stock
+                if (!Validar.EsEnteroPositivo(txtStock.Text, out int stock))
+                {
+                    MessageBox.Show("El stock debe ser un número entero positivo.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtStock.Focus();
                     return;
                 }
-                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
+
+                // Validación de Precio (refactorizada)
+                if (!Validar.EsDecimalPositivo(txtPrecio.Text, out decimal precio))
                 {
-                    MessageBox.Show("Precio debe ser un número válido (puede llevar decimales).", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El precio debe ser un número positivo válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtPrecio.Focus();
                     return;
                 }
 
-                // 2. La Vista ENVÍA datos al controlador
+                // 3. La Vista ENVÍA datos al controlador
+                // (Si llegamos aquí, todos los datos son válidos)
                 _controller.GuardarNuevoProducto(nombre, cat, stock, precio);
 
-                // 3. La Vista se ACTUALIZA
+                // 4. La Vista se ACTUALIZA
                 MessageBox.Show("¡Producto guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CargarGrid(); // Refresca la tabla
-                LimpiarCampos(); // Limpia las cajas de texto
+                CargarGridInventario(); // Refresca la tabla
+                LimpiarCampos(); // <-- ¡Tu mejora de UX!
             }
             catch (Exception ex)
             {
@@ -107,7 +130,8 @@ namespace FoodWare.View.UserControls
                     _controller.EliminarProducto(id);
 
                     // 4. Actualiza la vista
-                    CargarGrid();
+                    CargarGridInventario();
+                    LimpiarCampos();
                 }
             }
             else
@@ -121,7 +145,7 @@ namespace FoodWare.View.UserControls
         /// <summary>
         /// Pide los productos al controlador y actualiza el DataGridView.
         /// </summary>
-        private void CargarGrid()
+        private void CargarGridInventario()
         {
             var productos = _controller.CargarProductos();
             this.dgvInventario.DataSource = null;

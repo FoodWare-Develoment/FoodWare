@@ -20,9 +20,6 @@ namespace FoodWare.View.UserControls
             InitializeComponent();
         }
 
-        // TODO: (Guía de Proyecto): Este UserControl (con la imagen de bienvenida)
-        // sigue siendo un marcador de posición. En la fase 2 del proyecto,
-        // este control debe ser reemplazado por el Dashboard real de KPIs
-        // (Ventas del día, Mesas abiertas, Alertas de inventario, etc.).
+        
     }
 }
