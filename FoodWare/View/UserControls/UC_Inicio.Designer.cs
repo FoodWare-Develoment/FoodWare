@@ -23,8 +23,8 @@
             pictureBoxBienvenida.Image = Properties.Resources.InicioBienvenida;
             pictureBoxBienvenida.Location = new Point(0, 0);
             pictureBoxBienvenida.Name = "pictureBoxBienvenida";
-            pictureBoxBienvenida.Size = new Size(800, 450);
-            pictureBoxBienvenida.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBoxBienvenida.Size = new Size(960, 664);
+            pictureBoxBienvenida.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxBienvenida.TabIndex = 0;
             pictureBoxBienvenida.TabStop = false;
             // 
@@ -34,7 +34,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(pictureBoxBienvenida);
             Name = "UC_Inicio";
-            Size = new Size(800, 450);
+            Size = new Size(960, 664);
             ((System.ComponentModel.ISupportInitialize)pictureBoxBienvenida).EndInit();
             ResumeLayout(false);
         }
