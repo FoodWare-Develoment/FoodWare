@@ -19,10 +19,8 @@ namespace FoodWare.Controller.Logic
         /// <returns>True si el login es válido, false si no lo es.</returns>
         public bool ValidarLogin(string username, string password)
         {
-            //
-            // ¡AQUÍ ESTÁ LA LÓGICA QUE MOVIMOS!
-            //
-            // TODO: Reemplazar esta simulación con la lógica real de validación contra la BD.
+            
+            // Reemplazar esta simulación con la lógica real de validación contra la BD.
             bool loginValido = (username == "admin" && password == "123");
 
             // El controlador solo devuelve el resultado.

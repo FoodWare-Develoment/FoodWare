@@ -91,7 +91,7 @@
             btnConfig.Size = new Size(240, 23);
             btnConfig.TabIndex = 0;
             btnConfig.Text = "Configuracion";
-            btnConfig.Click += btnConfig_Click;
+            btnConfig.Click += BtnConfig_Click;
             // 
             // panelAnalisisSubmenu
             // 
@@ -110,7 +110,7 @@
             btnReportes.Size = new Size(240, 23);
             btnReportes.TabIndex = 0;
             btnReportes.Text = "Reportes";
-            btnReportes.Click += btnReportes_Click;
+            btnReportes.Click += BtnReportes_Click;
             // 
             // btnAnalisis
             // 
@@ -120,7 +120,7 @@
             btnAnalisis.Size = new Size(240, 23);
             btnAnalisis.TabIndex = 2;
             btnAnalisis.Text = "Analisis";
-            btnAnalisis.Click += btnAnalisis_Click;
+            btnAnalisis.Click += BtnAnalisis_Click;
             // 
             // panelAdminSubmenu
             // 
@@ -140,7 +140,7 @@
             btnFinanzas.Size = new Size(240, 23);
             btnFinanzas.TabIndex = 0;
             btnFinanzas.Text = "Finanzas";
-            btnFinanzas.Click += btnFinanzas_Click;
+            btnFinanzas.Click += BtnFinanzas_Click;
             // 
             // btnEmpleados
             // 
@@ -150,7 +150,7 @@
             btnEmpleados.Size = new Size(240, 23);
             btnEmpleados.TabIndex = 1;
             btnEmpleados.Text = "Empleados";
-            btnEmpleados.Click += btnEmpleados_Click;
+            btnEmpleados.Click += BtnEmpleados_Click;
             // 
             // btnAdmin
             // 
@@ -160,7 +160,7 @@
             btnAdmin.Size = new Size(240, 23);
             btnAdmin.TabIndex = 4;
             btnAdmin.Text = "Administracion";
-            btnAdmin.Click += btnAdmin_Click;
+            btnAdmin.Click += BtnAdmin_Click;
             // 
             // panelGPSubmenu
             // 
@@ -182,7 +182,7 @@
             btnVentas.Size = new Size(240, 23);
             btnVentas.TabIndex = 0;
             btnVentas.Text = "Ventas";
-            btnVentas.Click += btnVentas_Click;
+            btnVentas.Click += BtnVentas_Click;
             // 
             // btnMenu
             // 
@@ -192,7 +192,7 @@
             btnMenu.Size = new Size(240, 23);
             btnMenu.TabIndex = 1;
             btnMenu.Text = "Menu";
-            btnMenu.Click += btnMenu_Click;
+            btnMenu.Click += BtnMenu_Click;
             // 
             // btnInventario
             // 
@@ -202,7 +202,7 @@
             btnInventario.Size = new Size(240, 23);
             btnInventario.TabIndex = 2;
             btnInventario.Text = "Inventario";
-            btnInventario.Click += btnInventario_Click;
+            btnInventario.Click += BtnInventario_Click;
             // 
             // btnInicio
             // 
@@ -212,7 +212,7 @@
             btnInicio.Size = new Size(240, 23);
             btnInicio.TabIndex = 3;
             btnInicio.Text = "Inicio";
-            btnInicio.Click += btnInicio_Click;
+            btnInicio.Click += BtnInicio_Click;
             // 
             // btnGP
             // 
@@ -222,7 +222,7 @@
             btnGP.Size = new Size(240, 23);
             btnGP.TabIndex = 6;
             btnGP.Text = "Gestion Principal";
-            btnGP.Click += btnGP_Click;
+            btnGP.Click += BtnGP_Click;
             // 
             // panelBarra
             // 
@@ -262,7 +262,7 @@
             txtBusqueda.Name = "txtBusqueda";
             txtBusqueda.Size = new Size(240, 27);
             txtBusqueda.TabIndex = 101;
-            txtBusqueda.KeyDown += txtBusqueda_KeyDown;
+            txtBusqueda.KeyDown += TxtBusqueda_KeyDown;
             // 
             // panelContenido
             // 

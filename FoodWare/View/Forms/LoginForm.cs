@@ -65,7 +65,7 @@ namespace FoodWare.View.Forms
             // --- Modificacion de MVC ---
 
             // 1. La Vista crea una instancia del Controlador
-            LoginController loginCtrl = new LoginController();
+            LoginController loginCtrl = new();
 
             // 2. La Vista recoge los datos y se los pasa al Controlador
             bool loginValido = loginCtrl.ValidarLogin(this.txtUsuario.Text, this.txtPassword.Text);
