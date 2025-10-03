@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using FoodWare.View.Helpers;      // Para EstilosApp
+using FoodWare.Model.Interfaces; // Para IProductoRepository
+using FoodWare.Model.DataAccess; // Para ProductoMockRepository
 using FoodWare.Controller.Logic;  // Para MenuController
 using FoodWare.Model.Entities;    // Para la clase Platillo
 using FoodWare.Validations;      // Para nuestra librería de validación
+using FoodWare.View.Helpers;      // Para EstilosApp
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Menu : UserControl
     {
-        private MenuController _controller;
+        private readonly MenuController _controller;
 
         public UC_Menu()
         {
             InitializeComponent();
-            _controller = new MenuController();
-            AplicarEstilos();
+            AplicarEstilos(); // Llamamos a nuestro método de estilos
+
+            // 1. La Vista decide qué repositorio usar. Por ahora, el FALSO (Mock).
+            IPlatilloRepository repositorioParaUsar = new PlatilloMockRepository();
+
+            // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
+            _controller = new MenuController(repositorioParaUsar);
         }
         /// <summary>
         /// Aplica los estilos de EstilosApp a este UserControl.
@@ -91,45 +98,39 @@ namespace FoodWare.View.UserControls
         {
             try
             {
-                // 1. RECOGE y VALIDA datos (Usando nuestra libreria)
+                // 1. La Vista ahora solo RECOGE los datos.
+                // La validación compleja ya no es su responsabilidad.
                 string nombre = txtNombre.Text;
                 string cat = txtCategoria.Text;
 
-                // Validamos nombre
-                if (Validar.EsTextoVacio(nombre))
-                {
-                    MessageBox.Show("El nombre no puede estar vacío.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtNombre.Focus();
-                    return;
-                }
+                // Se convierten los valores aquí, ya que el controlador espera los tipos correctos.
+                // Si la conversión falla, la vista puede manejarlo localmente.
 
-                // Validamos categoría
-                if (Validar.EsTextoVacio(cat))
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
                 {
-                    MessageBox.Show("La categoría no puede estar vacía.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtCategoria.Focus();
-                    return;
-                }
-
-                // Usamos la versión de la librería que nos da el decimal
-                if (!Validar.EsDecimalPositivo(txtPrecio.Text, out decimal precio))
-                {
-                    MessageBox.Show("Precio debe ser un número positivo válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El precio debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtPrecio.Focus();
                     return;
                 }
 
-                // 2. ENVÍA datos al controlador
+                // 2. La Vista ENVÍA los datos al controlador.
                 _controller.GuardarNuevoPlatillo(nombre, cat, precio);
 
-                // 3. ACTUALIZA la Vista
+                // 3. Si todo salió bien (no hubo excepciones), la Vista se ACTUALIZA.
                 MessageBox.Show("¡Platillo guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CargarGridPlatillos(); // Refresca el grid
-                LimpiarCampos();       // Limpia los campos
+                CargarGridPlatillos();
+                LimpiarCampos();
             }
+            // 4. La Vista ahora está preparada para capturar ERRORES DE NEGOCIO del controlador.
+            catch (ArgumentException aex)
+            {
+                // Muestra el mensaje de error específico que viene del controlador.
+                MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            // 5. Y también está preparada para cualquier otro error inesperado.
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

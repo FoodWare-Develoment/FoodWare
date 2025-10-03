@@ -10,15 +10,22 @@ namespace FoodWare.Model.DataAccess
 {
     public class PlatilloMockRepository : IPlatilloRepository
     {
-        private static List<Platillo> _platillos = new()
+        private readonly List<Platillo> _platillos;
+        private int _nextId;
+
+        // Usamos el constructor para inicializar los datos falsos.
+        public PlatilloMockRepository()
         {
+            _platillos =
+        [
             new() { IdPlatillo = 1, Nombre = "Hamburguesa Clásica", Categoria = "Platos Fuertes", PrecioVenta = 120m },
             new() { IdPlatillo = 2, Nombre = "Refresco de Cola", Categoria = "Bebidas", PrecioVenta = 35m },
             new() { IdPlatillo = 3, Nombre = "Pastel de Chocolate", Categoria = "Postres", PrecioVenta = 75m }
-        };
-        private static int _nextId = 4;
+        ];
+            _nextId = 4;
+        }
 
-        public List<Platillo> ObtenerTodos() => _platillos.ToList();
+        public List<Platillo> ObtenerTodos() => [.. _platillos];
 
         public void Agregar(Platillo platillo)
         {

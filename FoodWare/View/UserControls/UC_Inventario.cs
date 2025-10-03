@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using FoodWare.View.Helpers;      // Para EstilosApp
+using FoodWare.Model.Interfaces; // Para IProductoRepository
+using FoodWare.Model.DataAccess; // Para ProductoMockRepository
 using FoodWare.Controller.Logic;  // Para MenuController
 using FoodWare.Model.Entities;    // Para la clase Platillo
 using FoodWare.Validations;      // Para nuestra librería de validación
+using FoodWare.View.Helpers;      // Para EstilosApp
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Inventario : UserControl
     {
-        private InventarioController _controller;
+        private readonly InventarioController _controller;
 
         public UC_Inventario()
         {
             InitializeComponent();
             AplicarEstilos(); // Llamamos a nuestro método de estilos
-            _controller = new InventarioController();
+
+            // 1. La Vista decide qué repositorio usar. Por ahora, el FALSO (Mock).
+            IProductoRepository repositorioParaUsar = new ProductoMockRepository();
+
+            // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
+            _controller = new InventarioController(repositorioParaUsar);
         }
 
         /// <summary>
@@ -61,56 +68,45 @@ namespace FoodWare.View.UserControls
         {
             try
             {
-                // 1. RECOGE y VALIDA datos (Usando nuestra libreria)
+                // 1. La Vista ahora solo RECOGE los datos.
+                // La validación compleja ya no es su responsabilidad.
                 string nombre = txtNombre.Text;
                 string cat = txtCategoria.Text;
 
-                // 2. La Vista VALIDA datos (Usamos nuestra librería)
-
-                // Validación de Nombre
-                if (Validar.EsTextoVacio(nombre))
+                // Se convierten los valores aquí, ya que el controlador espera los tipos correctos.
+                // Si la conversión falla, la vista puede manejarlo localmente.
+                if (!int.TryParse(txtStock.Text, out int stock))
                 {
-                    MessageBox.Show("El nombre no puede estar vacío.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtNombre.Focus();
-                    return;
-                }
-
-                //Validación de Categoría
-                if (Validar.EsTextoVacio(cat))
-                {
-                    MessageBox.Show("La categoría no puede estar vacía.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtCategoria.Focus();
-                    return;
-                }
-
-                // Validación de Stock
-                if (!Validar.EsEnteroPositivo(txtStock.Text, out int stock))
-                {
-                    MessageBox.Show("El stock debe ser un número entero positivo.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El stock debe ser un número entero válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtStock.Focus();
                     return;
                 }
 
-                // Validación de Precio (refactorizada)
-                if (!Validar.EsDecimalPositivo(txtPrecio.Text, out decimal precio))
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
                 {
-                    MessageBox.Show("El precio debe ser un número positivo válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El precio debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtPrecio.Focus();
                     return;
                 }
 
-                // 3. La Vista ENVÍA datos al controlador
-                // (Si llegamos aquí, todos los datos son válidos)
+                // 2. La Vista ENVÍA los datos al controlador.
                 _controller.GuardarNuevoProducto(nombre, cat, stock, precio);
 
-                // 4. La Vista se ACTUALIZA
+                // 3. Si todo salió bien (no hubo excepciones), la Vista se ACTUALIZA.
                 MessageBox.Show("¡Producto guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CargarGridInventario(); // Refresca la tabla
-                LimpiarCampos(); // <-- ¡Tu mejora de UX!
+                CargarGridInventario();
+                LimpiarCampos();
             }
+            // 4. La Vista ahora está preparada para capturar ERRORES DE NEGOCIO del controlador.
+            catch (ArgumentException aex)
+            {
+                // Muestra el mensaje de error específico que viene del controlador.
+                MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            // 5. Y también está preparada para cualquier otro error inesperado.
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -136,7 +132,7 @@ namespace FoodWare.View.UserControls
             }
             else
             {
-                MessageBox.Show("Selecciona un producto para eliminar.");
+                MessageBox.Show("Por favor, selecciona un producto de la lista para eliminar.", "Ningún producto seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

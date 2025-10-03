@@ -11,12 +11,14 @@ namespace FoodWare.Controller.Logic
 {
     public class MenuController
     {
-        // Cambiamos el tipo de repositorio
+        // solo conozca la INTERFAZ (la idea de un repositorio).
         private readonly IPlatilloRepository _repositorio;
 
-        public MenuController()
+        // Añadimos un constructor que ACEPTA la dependencia.
+        public MenuController(IPlatilloRepository repositorio)
         {
-            _repositorio = new PlatilloMockRepository();
+            // Le asignamos el repositorio que nos "inyectaron" desde fuera.
+            _repositorio = repositorio;
         }
 
         public List<Platillo> CargarPlatillos()
@@ -24,15 +26,34 @@ namespace FoodWare.Controller.Logic
             return _repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Guarda un nuevo platillo en el repositorio.
+        /// </summary>
+        /// <param name="nombre">Nombre del producto. No puede ser nulo o vacío.</param>
+        /// <param name="categoria">Categoría del producto.</param>
+        /// <param name="precio">Precio de costo del platillo. No puede ser negativo.</param>
+        /// <exception cref="ArgumentException">Se lanza si el nombre o categoria está vacío o si el precio son negativos.</exception>
         public void GuardarNuevoPlatillo(string nombre, string categoria, decimal precio)
         {
-            // ¡Usamos la validación del controlador!
-            if (string.IsNullOrEmpty(nombre) || precio <= 0)
+            // Las validaciones ahora son más específicas.
+            if (string.IsNullOrWhiteSpace(nombre))
             {
-                throw new System.Exception("Datos del platillo inválidos.");
+                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
+                throw new ArgumentException("El nombre del platillo no puede estar vacío.", nameof(nombre));
             }
 
-            Platillo nuevo = new Platillo
+            if (string.IsNullOrWhiteSpace(categoria))
+            {
+                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
+                throw new ArgumentException("La categoria del platillo no puede estar vacío.", nameof(categoria));
+            }
+
+            if (precio < 0)
+            {
+                throw new ArgumentException("El precio no puede ser un valor negativo.", nameof(precio));
+            }
+
+            Platillo nuevo = new()
             {
                 Nombre = nombre,
                 Categoria = categoria,

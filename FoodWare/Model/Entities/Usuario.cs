@@ -12,8 +12,8 @@ namespace FoodWare.Model.Entities
     public class Usuario
     {
         public int IdUsuario { get; set; }
-        public string NombreUsuario { get; set; }
-        public string Contraseña { get; set; } // En el futuro será un hash
-        public string Rol { get; set; } // Ej. "Administrador", "Mesero"
+        public required string NombreUsuario { get; set; }
+        public required string Contraseña { get; set; } // En el futuro será un hash
+        public required string Rol { get; set; } // Ej. "Administrador", "Mesero"
     }
 }

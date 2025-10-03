@@ -11,19 +11,27 @@ namespace FoodWare.Model.DataAccess
     // Enlace con IProductoRepository
     public class ProductoMockRepository : IProductoRepository
     {
-        // Nuestra "base de datos" falsa
-        private static List<Producto> _productos = new()
+        private readonly List<Producto> _productos;
+        private int _nextId;
+
+        /// <summary>
+        /// Constructor que inicializa la "base de datos" falsa para esta instancia.
+        /// </summary>
+        public ProductoMockRepository()
         {
-            new() { IdProducto = 1, Nombre = "Tomate", Categoria = "Verduras", StockActual = 50, PrecioCosto = 20.5m },
-            new() { IdProducto = 2, Nombre = "Pechuga de Pollo", Categoria = "Carnes", StockActual = 30, PrecioCosto = 80m },
-            new() { IdProducto = 3, Nombre = "Pan de Hamburguesa", Categoria = "Panadería", StockActual = 100, PrecioCosto = 5m }
-        };
-        private static int _nextId = 4; // Para simular el auto-incremento
+            _productos =
+            [
+                new() { IdProducto = 1, Nombre = "Tomate", Categoria = "Verduras", StockActual = 50, PrecioCosto = 20.5m },
+                new() { IdProducto = 2, Nombre = "Pechuga de Pollo", Categoria = "Carnes", StockActual = 30, PrecioCosto = 80m },
+                new() { IdProducto = 3, Nombre = "Pan de Hamburguesa", Categoria = "Panadería", StockActual = 100, PrecioCosto = 5m }
+            ];
+            _nextId = 4; // Simula el auto-incremento
+        }
 
         public List<Producto> ObtenerTodos()
         {
             // Devuelve una copia para simular que vienen de la BD
-            return _productos.ToList();
+            return [.. _productos];
         }
 
         public Producto ObtenerPorId(int id)

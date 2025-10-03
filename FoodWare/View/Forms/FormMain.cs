@@ -35,7 +35,7 @@ namespace FoodWare.View.Forms
             panelAnalisisSubmenu.Visible = false;
 
             // Placeholder de búsqueda
-            try { txtBusqueda.PlaceholderText = "Buscar en FoodWare"; } catch { }
+            txtBusqueda.PlaceholderText = "Buscar en FoodWare";
         }
 
         /// <summary>
@@ -120,31 +120,31 @@ namespace FoodWare.View.Forms
         // --- EVENT HANDLERS (EVENTOS DE CLICK) ---
 
         // Botones padres (Categorías)
-        private void btnGP_Click(object sender, EventArgs e) => MostrarSubmenu(panelGPSubmenu);
-        private void btnAdmin_Click(object sender, EventArgs e) => MostrarSubmenu(panelAdminSubmenu);
-        private void btnAnalisis_Click(object sender, EventArgs e) => MostrarSubmenu(panelAnalisisSubmenu);
+        private void BtnGP_Click(object sender, EventArgs e) => MostrarSubmenu(panelGPSubmenu);
+        private void BtnAdmin_Click(object sender, EventArgs e) => MostrarSubmenu(panelAdminSubmenu);
+        private void BtnAnalisis_Click(object sender, EventArgs e) => MostrarSubmenu(panelAnalisisSubmenu);
 
         // Botones hijos (Módulos)
-        private void btnInicio_Click(object sender, EventArgs e) { AbrirModulo(new UC_Inicio()); OcultarSubmenu(); }
-        private void btnInventario_Click(object sender, EventArgs e) { AbrirModulo(new UC_Inventario()); OcultarSubmenu(); }
-        private void btnMenu_Click(object sender, EventArgs e) { AbrirModulo(new UC_Menu()); OcultarSubmenu(); }
-        private void btnVentas_Click(object sender, EventArgs e) { AbrirModulo(new UC_Ventas()); OcultarSubmenu(); }
-        private void btnEmpleados_Click(object sender, EventArgs e) { AbrirModulo(new UC_Empleados()); OcultarSubmenu(); }
-        private void btnFinanzas_Click(object sender, EventArgs e) { AbrirModulo(new UC_Finanzas()); OcultarSubmenu(); }
-        private void btnReportes_Click(object sender, EventArgs e) { AbrirModulo(new UC_Reportes()); OcultarSubmenu(); }
-        private void btnConfig_Click(object sender, EventArgs e) { AbrirModulo(new UC_Configuracion()); OcultarSubmenu(); }
+        private void BtnInicio_Click(object sender, EventArgs e) { AbrirModulo(new UC_Inicio()); OcultarSubmenu(); }
+        private void BtnInventario_Click(object sender, EventArgs e) { AbrirModulo(new UC_Inventario()); OcultarSubmenu(); }
+        private void BtnMenu_Click(object sender, EventArgs e) { AbrirModulo(new UC_Menu()); OcultarSubmenu(); }
+        private void BtnVentas_Click(object sender, EventArgs e) { AbrirModulo(new UC_Ventas()); OcultarSubmenu(); }
+        private void BtnEmpleados_Click(object sender, EventArgs e) { AbrirModulo(new UC_Empleados()); OcultarSubmenu(); }
+        private void BtnFinanzas_Click(object sender, EventArgs e) { AbrirModulo(new UC_Finanzas()); OcultarSubmenu(); }
+        private void BtnReportes_Click(object sender, EventArgs e) { AbrirModulo(new UC_Reportes()); OcultarSubmenu(); }
+        private void BtnConfig_Click(object sender, EventArgs e) { AbrirModulo(new UC_Configuracion()); OcultarSubmenu(); }
 
 
         // --- EVENTOS DE BÚSQUEDA ---
 
-        private void txtBusqueda_KeyDown(object sender, KeyEventArgs e)
+        private void TxtBusqueda_KeyDown(object sender, KeyEventArgs e)
         {
             // Detecta la tecla "Enter" en el cuadro de búsqueda
             if (e.KeyCode == Keys.Enter)
             {
                 e.SuppressKeyPress = true; // Evita el sonido "ding" de Windows
 
-                // TODO: Implementar la lógica de búsqueda global aquí.
+                // Implementar la lógica de búsqueda global aquí.
                 MessageBox.Show("Buscando: " + txtBusqueda.Text); // Acción placeholder
             }
         }

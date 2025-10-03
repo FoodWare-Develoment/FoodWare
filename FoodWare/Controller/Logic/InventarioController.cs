@@ -11,16 +11,14 @@ namespace FoodWare.Controller.Logic
 {
     public class InventarioController
     {
-        // El controlador SÓLO conoce la interfaz
-        private readonly ProductoMockRepository _repositorio;
+        // solo conozca la INTERFAZ (la idea de un repositorio).
+        private readonly IProductoRepository _repositorio;
 
-        public InventarioController()
+        // Añadimos un constructor que ACEPTA la dependencia.
+        public InventarioController(IProductoRepository repositorio)
         {
-            // Le decimos que use el Repositorio FALSO.
-            _repositorio = new ProductoMockRepository();
-
-            // Cuando tengamos la BD, solo tendremos que camiar esta linea:
-            // _repositorio = new ProductoSqlRepository(); 
+            // Le asignamos el repositorio que nos "inyectaron" desde fuera.
+            _repositorio = repositorio;
         }
 
         // El controlador expone los métodos que la Vista necesita
@@ -29,15 +27,40 @@ namespace FoodWare.Controller.Logic
             return _repositorio.ObtenerTodos();
         }
 
+        /// <summary>
+        /// Guarda un nuevo producto en el repositorio.
+        /// </summary>
+        /// <param name="nombre">Nombre del producto. No puede ser nulo o vacío.</param>
+        /// <param name="categoria">Categoría del producto.</param>
+        /// <param name="stock">Cantidad inicial en stock. No puede ser negativo.</param>
+        /// <param name="precio">Precio de costo del producto. No puede ser negativo.</param>
+        /// <exception cref="ArgumentException">Se lanza si el nombre está vacío o si el stock o precio son negativos.</exception>
         public void GuardarNuevoProducto(string nombre, string categoria, int stock, decimal precio)
         {
-            // Aquí podríamos agregar validaciones
-            if (string.IsNullOrEmpty(nombre) || stock < 0 || precio < 0)
+            // Las validaciones ahora son más específicas.
+            if (string.IsNullOrWhiteSpace(nombre))
             {
-                throw new System.Exception("Datos del producto inválidos.");
+                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
+                throw new ArgumentException("El nombre del producto no puede estar vacío.", nameof(nombre));
             }
 
-            Producto nuevo = new Producto
+            if (string.IsNullOrWhiteSpace(categoria))
+            {
+                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
+                throw new ArgumentException("La categoria del producto no puede estar vacío.", nameof(categoria));
+            }
+
+            if (stock < 0)
+            {
+                throw new ArgumentException("El stock no puede ser un valor negativo.", nameof(stock));
+            }
+
+            if (precio < 0)
+            {
+                throw new ArgumentException("El precio no puede ser un valor negativo.", nameof(precio));
+            }
+
+            Producto nuevo = new()
             {
                 Nombre = nombre,
                 Categoria = categoria,

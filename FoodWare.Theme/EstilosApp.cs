@@ -9,15 +9,18 @@ namespace FoodWare.View.Helpers
     /// </summary>
     public static class EstilosApp
     {
+        // --- DECLARAR LA CONSTANTE AQUÍ ---
+        private const string FuentePrincipal = "Segoe UI";
+
         // --- PALETA DE COLORES PRINCIPAL ---
-        public static Color ColorMenu = ColorTranslator.FromHtml("#2C3E50");
-        public static Color ColorBarra = ColorTranslator.FromHtml("#34495E");
-        public static Color ColorFondo = ColorTranslator.FromHtml("#ECF0F1");
-        public static Color ColorTextoOscuro = ColorTranslator.FromHtml("#2C3E50");
-        public static Color ColorActivo = ColorTranslator.FromHtml("#1ABC9C");
-        public static Color ColorAccion = ColorTranslator.FromHtml("#27AE60");
-        public static Color ColorAlerta = ColorTranslator.FromHtml("#E74C3C");
-        public static Color ColorSubmenuBG = Color.FromArgb(0, 100, 100);
+        public static readonly Color ColorMenu = ColorTranslator.FromHtml("#2C3E50");
+        public static readonly Color ColorBarra = ColorTranslator.FromHtml("#34495E");
+        public static readonly Color ColorFondo = ColorTranslator.FromHtml("#ECF0F1");
+        public static readonly Color ColorTextoOscuro = ColorTranslator.FromHtml("#2C3E50");
+        public static readonly Color ColorActivo = ColorTranslator.FromHtml("#1ABC9C");
+        public static readonly Color ColorAccion = ColorTranslator.FromHtml("#27AE60");
+        public static readonly Color ColorAlerta = ColorTranslator.FromHtml("#E74C3C");
+        public static readonly Color ColorSubmenuBG = Color.FromArgb(0, 100, 100);
 
         // --- MÉTODOS DE ESTILO (MENÚ PRINCIPAL) ---
 
@@ -112,13 +115,13 @@ namespace FoodWare.View.Helpers
             dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dgv.ColumnHeadersDefaultCellStyle.BackColor = ColorBarra;
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font(FuentePrincipal, 10, FontStyle.Bold);
             dgv.ColumnHeadersHeight = 30;
 
             // Estilo de las Filas
             dgv.DefaultCellStyle.BackColor = ColorFondo;
             dgv.DefaultCellStyle.ForeColor = ColorTextoOscuro;
-            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9);
+            dgv.DefaultCellStyle.Font = new Font(FuentePrincipal, 9);
             dgv.DefaultCellStyle.SelectionBackColor = ColorActivo;
             dgv.DefaultCellStyle.SelectionForeColor = Color.White;
             dgv.RowTemplate.Height = 25;
@@ -140,7 +143,7 @@ namespace FoodWare.View.Helpers
             btn.ForeColor = Color.White;
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
-            btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btn.Font = new Font(FuentePrincipal, 9, FontStyle.Bold);
         }
 
         /// <summary>
@@ -152,7 +155,7 @@ namespace FoodWare.View.Helpers
             btn.ForeColor = Color.White;
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
-            btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btn.Font = new Font(FuentePrincipal, 9, FontStyle.Bold);
         }
 
         /// <summary>
@@ -165,7 +168,7 @@ namespace FoodWare.View.Helpers
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderColor = ColorTextoOscuro;
             btn.FlatAppearance.BorderSize = 1;
-            btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btn.Font = new Font(FuentePrincipal, 9, FontStyle.Bold);
         }
 
         /// <summary>
@@ -175,7 +178,7 @@ namespace FoodWare.View.Helpers
         {
             lbl.ForeColor = ColorTextoOscuro;
             lbl.BackColor = Color.Transparent;
-            lbl.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            lbl.Font = new Font(FuentePrincipal, 9, FontStyle.Bold);
         }
 
         /// <summary>
@@ -186,7 +189,7 @@ namespace FoodWare.View.Helpers
             txt.BackColor = Color.White;
             txt.ForeColor = ColorTextoOscuro;
             txt.BorderStyle = BorderStyle.FixedSingle;
-            txt.Font = new Font("Segoe UI", 9);
+            txt.Font = new Font(FuentePrincipal, 9);
         }
     }
 }
