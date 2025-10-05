@@ -1,30 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using BCrypt.Net;
 
 namespace FoodWare.Controller.Logic
 {
-    /// <summary>
-    /// Contiene la lógica de negocio para operaciones de autenticación.
-    /// </summary>
     public class LoginController
     {
-        /// <summary>
-        /// Valida las credenciales del usuario.
-        /// </summary>
-        /// <param name="username">El nombre de usuario ingresado.</param>
-        /// <param name="password">La contraseña ingresada.</param>
-        /// <returns>True si el login es válido, false si no lo es.</returns>
+        private readonly string connectionString;
+
+        public LoginController()
+        {
+            connectionString = Program.Configuration.GetConnectionString("FoodWareDB")!;
+        }
+
         public bool ValidarLogin(string username, string password)
         {
-            
-            // Reemplazar esta simulación con la lógica real de validación contra la BD.
-            bool loginValido = (username == "admin" && password == "123");
+            using (var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    string query = "SELECT ContraseñaHash FROM Usuarios WHERE NombreUsuario = @username AND Activo = 1";
+                    using (var command = new Microsoft.Data.SqlClient.SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@username", username);
+                        var storedPasswordHash = command.ExecuteScalar() as string;
 
-            // El controlador solo devuelve el resultado.
-            return loginValido;
+                        if (string.IsNullOrEmpty(storedPasswordHash))
+                        {
+                            return false;
+                        }
+
+                        storedPasswordHash = storedPasswordHash.Trim();
+
+                        // Verifica el hash que vino de la base de datos. Esto es lo que está dando FALSE.
+                        bool verificacionDeBD = BCrypt.Net.BCrypt.Verify("123", storedPasswordHash);
+
+                        return verificacionDeBD;
+                    }
+                }
+                catch { return false; }
+            }
         }
     }
 }
