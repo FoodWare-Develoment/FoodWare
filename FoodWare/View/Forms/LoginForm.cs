@@ -7,8 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using FoodWare.View.Helpers;
+using FoodWare.Controller;
 using FoodWare.Controller.Logic;
+using FoodWare.View.Helpers;
 
 namespace FoodWare.View.Forms
 {
@@ -62,27 +63,42 @@ namespace FoodWare.View.Forms
         /// </summary>
         private void BtnIngresar_Click(object sender, EventArgs e)
         {
-            // --- Modificacion de MVC ---
 
-            // 1. La Vista crea una instancia del Controlador
+            // 1. La Vista crea una instancia del Controlador.
             LoginController loginCtrl = new();
 
-            // 2. La Vista recoge los datos y se los pasa al Controlador
-            bool loginValido = loginCtrl.ValidarLogin(this.txtUsuario.Text, this.txtPassword.Text);
+            // 2. La Vista recoge los datos de los campos de texto y se los pasa al Controlador.
+            LoginResult resultado = loginCtrl.ValidarLogin(this.txtUsuario.Text, this.txtPassword.Text);
 
-            // 3. La Vista reacciona a la respuesta del Controlador
-            if (loginValido)
+            // 3. La Vista reacciona a la respuesta del Controlador usando un 'switch'
+            // para manejar de forma clara y ordenada cada posible resultado.
+            switch (resultado)
             {
-                // ÉXITO: Informa al Program.cs que el resultado es OK y cierra.
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            else
-            {
-                // FRACASO:
-                txtPassword.Text = "";
-                txtPassword.Focus();
-                MostrarError("Usuario o contraseña incorrectos.");
+                case LoginResult.Exitoso:
+                    // Caso de éxito: Cerramos el login y devolvemos 'OK' para que el programa principal continúe.
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                    break;
+
+                case LoginResult.CredencialesInvalidas:
+                    MostrarError("Usuario o contraseña incorrectos.");
+
+                    // 1. Desactivamos temporalmente el evento para que no se dispare al limpiar el texto.
+                    this.txtPassword.TextChanged -= TxtPassword_TextChanged;
+
+                    // 2. Ahora sí, borramos el texto sin el efecto secundario de ocultar el mensaje.
+                    txtPassword.Clear();
+
+                    // 3. Reactivamos el evento para que el mensaje se oculte si el usuario empieza a escribir de nuevo.
+                    this.txtPassword.TextChanged += TxtPassword_TextChanged;
+                    
+                    txtPassword.Focus();
+                    break;
+
+                case LoginResult.ErrorDeBaseDeDatos:
+                    // Caso de error de sistema: Informamos al usuario que hay un problema técnico, sin dar detalles.
+                    MostrarError("Error al conectar con el servidor. Intente más tarde.");
+                    break;
             }
         }
 
@@ -90,7 +106,7 @@ namespace FoodWare.View.Forms
         /// (Buena práctica UX): Oculta el mensaje de error tan pronto como el usuario 
         /// intenta corregir el nombre de usuario.
         /// </summary>
-        private void TxtUsuario_TextChanged(object sender, EventArgs e)
+        private void TxtUsuario_TextChanged(object? sender, EventArgs e)
         {
             lblMensajeError.Visible = false;
         }
@@ -99,7 +115,7 @@ namespace FoodWare.View.Forms
         /// (Buena práctica UX): Oculta el mensaje de error tan pronto como el usuario
         /// intenta corregir la contraseña.
         /// </summary>
-        private void TxtPassword_TextChanged(object sender, EventArgs e)
+        private void TxtPassword_TextChanged(object? sender, EventArgs e)
         {
             lblMensajeError.Visible = false;
         }
