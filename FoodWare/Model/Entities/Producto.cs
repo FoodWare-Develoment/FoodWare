@@ -11,7 +11,9 @@ namespace FoodWare.Model.Entities
         public int IdProducto { get; set; }
         public required string Nombre { get; set; }
         public required string Categoria { get; set; }
-        public int StockActual { get; set; }
+        public required string UnidadMedida { get; set; }
+        public decimal StockActual { get; set; }
+        public decimal StockMinimo { get; set; }
         public decimal PrecioCosto { get; set; }
     }
 }

@@ -9,17 +9,10 @@ using FoodWare.Model.DataAccess; // Importante
 
 namespace FoodWare.Controller.Logic
 {
-    public class MenuController
+    public class MenuController(IPlatilloRepository repositorio)
     {
         // solo conozca la INTERFAZ (la idea de un repositorio).
-        private readonly IPlatilloRepository _repositorio;
-
-        // Añadimos un constructor que ACEPTA la dependencia.
-        public MenuController(IPlatilloRepository repositorio)
-        {
-            // Le asignamos el repositorio que nos "inyectaron" desde fuera.
-            _repositorio = repositorio;
-        }
+        private readonly IPlatilloRepository _repositorio = repositorio;
 
         public List<Platillo> CargarPlatillos()
         {

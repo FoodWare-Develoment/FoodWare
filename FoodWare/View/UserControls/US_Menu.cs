@@ -19,8 +19,8 @@ namespace FoodWare.View.UserControls
             InitializeComponent();
             AplicarEstilos(); // Llamamos a nuestro método de estilos
 
-            // 1. La Vista decide qué repositorio usar. Por ahora, el FALSO (Mock).
-            IPlatilloRepository repositorioParaUsar = new PlatilloMockRepository();
+            // 1. La Vista decide qué repositorio usar.
+            IPlatilloRepository repositorioParaUsar = new PlatilloSqlRepository();
 
             // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
             _controller = new MenuController(repositorioParaUsar);
