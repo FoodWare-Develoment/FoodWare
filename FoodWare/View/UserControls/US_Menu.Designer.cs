@@ -14,14 +14,14 @@
         private void InitializeComponent()
         {
             panelInputs = new Panel();
+            cmbCategoria = new ComboBox();
+            btnActualizar = new Button();
             btnGuardar = new Button();
             btnEliminar = new Button();
-            btnLimpiar = new Button();
             txtPrecio = new TextBox();
             lblPrecio = new Label();
             lblCategoria = new Label();
             lblNombre = new Label();
-            txtCategoria = new TextBox();
             txtNombre = new TextBox();
             dgvMenu = new DataGridView();
             panelInputs.SuspendLayout();
@@ -30,25 +30,45 @@
             // 
             // panelInputs
             // 
+            panelInputs.Controls.Add(cmbCategoria);
+            panelInputs.Controls.Add(btnActualizar);
             panelInputs.Controls.Add(btnGuardar);
             panelInputs.Controls.Add(btnEliminar);
-            panelInputs.Controls.Add(btnLimpiar);
             panelInputs.Controls.Add(txtPrecio);
             panelInputs.Controls.Add(lblPrecio);
             panelInputs.Controls.Add(lblCategoria);
             panelInputs.Controls.Add(lblNombre);
-            panelInputs.Controls.Add(txtCategoria);
             panelInputs.Controls.Add(txtNombre);
             panelInputs.Dock = DockStyle.Top;
             panelInputs.Location = new Point(0, 0);
             panelInputs.Name = "panelInputs";
-            panelInputs.Size = new Size(960, 179);
+            panelInputs.Size = new Size(960, 180);
             panelInputs.TabIndex = 0;
+            // 
+            // cmbCategoria
+            // 
+            cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCategoria.FormattingEnabled = true;
+            cmbCategoria.Location = new Point(164, 75);
+            cmbCategoria.Name = "cmbCategoria";
+            cmbCategoria.Size = new Size(590, 28);
+            cmbCategoria.TabIndex = 15;
+            // 
+            // btnActualizar
+            // 
+            btnActualizar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnActualizar.Location = new Point(802, 119);
+            btnActualizar.Name = "btnActualizar";
+            btnActualizar.Size = new Size(104, 49);
+            btnActualizar.TabIndex = 14;
+            btnActualizar.Text = "Actualizar";
+            btnActualizar.UseVisualStyleBackColor = true;
+            btnActualizar.Click += BtnActualizar_Click;
             // 
             // btnGuardar
             // 
             btnGuardar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnGuardar.Location = new Point(802, 16);
+            btnGuardar.Location = new Point(802, 13);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(104, 49);
             btnGuardar.TabIndex = 13;
@@ -59,24 +79,13 @@
             // btnEliminar
             // 
             btnEliminar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnEliminar.Location = new Point(802, 67);
+            btnEliminar.Location = new Point(802, 66);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(104, 49);
             btnEliminar.TabIndex = 12;
             btnEliminar.Text = "Eliminar";
             btnEliminar.UseVisualStyleBackColor = true;
             btnEliminar.Click += BtnEliminar_Click;
-            // 
-            // btnLimpiar
-            // 
-            btnLimpiar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnLimpiar.Location = new Point(802, 119);
-            btnLimpiar.Name = "btnLimpiar";
-            btnLimpiar.Size = new Size(104, 49);
-            btnLimpiar.TabIndex = 10;
-            btnLimpiar.Text = "Limpiar";
-            btnLimpiar.UseVisualStyleBackColor = true;
-            btnLimpiar.Click += BtnLimpiar_Click;
             // 
             // txtPrecio
             // 
@@ -117,14 +126,6 @@
             lblNombre.Text = "Nombre";
             lblNombre.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // txtCategoria
-            // 
-            txtCategoria.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtCategoria.Location = new Point(164, 75);
-            txtCategoria.Name = "txtCategoria";
-            txtCategoria.Size = new Size(590, 27);
-            txtCategoria.TabIndex = 1;
-            // 
             // txtNombre
             // 
             txtNombre.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -137,7 +138,7 @@
             // 
             dgvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvMenu.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvMenu.Location = new Point(0, 179);
+            dgvMenu.Location = new Point(0, 180);
             dgvMenu.Name = "dgvMenu";
             dgvMenu.RowHeadersWidth = 51;
             dgvMenu.Size = new Size(960, 485);
@@ -157,7 +158,6 @@
             ResumeLayout(false);
         }
         private Panel panelInputs;
-        private TextBox txtCategoria;
         private TextBox txtNombre;
         private Label lblCategoria;
         private Label lblNombre;
@@ -165,7 +165,8 @@
         private Label lblPrecio;
         private Button btnGuardar;
         private Button btnEliminar;
-        private Button btnLimpiar;
         private DataGridView dgvMenu;
+        private ComboBox cmbCategoria;
+        private Button btnActualizar;
     }
 }
