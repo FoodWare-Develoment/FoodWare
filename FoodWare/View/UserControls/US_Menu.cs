@@ -19,11 +19,18 @@ namespace FoodWare.View.UserControls
             InitializeComponent();
             AplicarEstilos(); // Llamamos a nuestro método de estilos
 
-            // 1. La Vista decide qué repositorio usar. Por ahora, el FALSO (Mock).
-            IPlatilloRepository repositorioParaUsar = new PlatilloMockRepository();
+            // 1. La Vista decide qué repositorio usar.
+            IPlatilloRepository repositorioParaUsar = new PlatilloSqlRepository();
 
             // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
             _controller = new MenuController(repositorioParaUsar);
+
+            // Agrega más categorías según sea necesario
+            cmbCategoria.Items.Add("Entradas");
+            cmbCategoria.Items.Add("Platos Fuertes");
+            cmbCategoria.Items.Add("Postres");
+            cmbCategoria.Items.Add("Bebidas");
+            cmbCategoria.Items.Add("Sopas y Ensaladas");
         }
         /// <summary>
         /// Aplica los estilos de EstilosApp a este UserControl.
@@ -41,13 +48,15 @@ namespace FoodWare.View.UserControls
 
             // Cajas de Texto
             EstilosApp.EstiloTextBoxModulo(txtNombre);
-            EstilosApp.EstiloTextBoxModulo(txtCategoria);
             EstilosApp.EstiloTextBoxModulo(txtPrecio);
+
+            // ComboBox
+            EstilosApp.EstiloComboBoxModulo(cmbCategoria);
 
             // Botones
             EstilosApp.EstiloBotonModulo(btnGuardar);
             EstilosApp.EstiloBotonModuloAlerta(btnEliminar);
-            EstilosApp.EstiloBotonModuloSecundario(btnLimpiar);
+            EstilosApp.EstiloBotonModuloSecundario(btnActualizar);
 
             // Grid
             EstilosApp.EstiloDataGridView(dgvMenu);
@@ -89,7 +98,7 @@ namespace FoodWare.View.UserControls
         private void LimpiarCampos()
         {
             txtNombre.Text = "";
-            txtCategoria.Text = "";
+            cmbCategoria.SelectedIndex = -1;
             txtPrecio.Text = "";
             txtNombre.Focus(); // Pone el cursor de vuelta en el primer campo
         }
@@ -101,7 +110,7 @@ namespace FoodWare.View.UserControls
                 // 1. La Vista ahora solo RECOGE los datos.
                 // La validación compleja ya no es su responsabilidad.
                 string nombre = txtNombre.Text;
-                string cat = txtCategoria.Text;
+                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
 
                 // Se convierten los valores aquí, ya que el controlador espera los tipos correctos.
                 // Si la conversión falla, la vista puede manejarlo localmente.
@@ -114,7 +123,7 @@ namespace FoodWare.View.UserControls
                 }
 
                 // 2. La Vista ENVÍA los datos al controlador.
-                _controller.GuardarNuevoPlatillo(nombre, cat, precio);
+                _controller.GuardarNuevoPlatillo(nombre, categoria, precio);
 
                 // 3. Si todo salió bien (no hubo excepciones), la Vista se ACTUALIZA.
                 MessageBox.Show("¡Platillo guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -172,9 +181,11 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        private void BtnLimpiar_Click(object sender, EventArgs e)
+        private void BtnActualizar_Click(object sender, EventArgs e)
         {
-            LimpiarCampos();
+            // La lógica para actualizar un producto irá aquí más adelante.
+            // Por ahora, podemos poner un mensaje temporal.
+            MessageBox.Show("La función de actualizar se implementará pronto.", "Función no disponible", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

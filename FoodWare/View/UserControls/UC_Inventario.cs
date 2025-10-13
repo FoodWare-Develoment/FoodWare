@@ -20,10 +20,36 @@ namespace FoodWare.View.UserControls
             AplicarEstilos(); // Llamamos a nuestro método de estilos
 
             // 1. La Vista decide qué repositorio usar. Por ahora, el FALSO (Mock).
-            IProductoRepository repositorioParaUsar = new ProductoMockRepository();
+            IProductoRepository repositorioParaUsar = new ProductoSqlRepository();
 
             // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
             _controller = new InventarioController(repositorioParaUsar);
+
+            // Agrega más categorías según sea necesario
+            cmbCategoria.Items.Add("Abarrotes Secos");
+            cmbCategoria.Items.Add("Proteínas");
+            cmbCategoria.Items.Add("Frutas y Verduras");
+            cmbCategoria.Items.Add("Lácteos y Derivados");
+            cmbCategoria.Items.Add("Panadería y Tortilleria");
+            cmbCategoria.Items.Add("Congelados");
+            cmbCategoria.Items.Add("Bebidas Alcohólicas");
+            cmbCategoria.Items.Add("Bebidas No Alcohólicas");
+            cmbCategoria.Items.Add("Desechables y Empaques");
+            cmbCategoria.Items.Add("Productos de Limpieza");
+            cmbCategoria.Items.Add("Otros");
+
+            // Agrega más unidades de medida según sea necesario
+            cmbUnidadMedida.Items.Add("kg");
+            cmbUnidadMedida.Items.Add("g");
+            cmbUnidadMedida.Items.Add("L");
+            cmbUnidadMedida.Items.Add("mL");
+            cmbUnidadMedida.Items.Add("Unidad");
+            cmbUnidadMedida.Items.Add("Bolsa");
+            cmbUnidadMedida.Items.Add("Paquete");
+            cmbUnidadMedida.Items.Add("Caja");
+            cmbUnidadMedida.Items.Add("Lata");
+            cmbUnidadMedida.Items.Add("Frasco");
+            cmbUnidadMedida.Items.Add("Botella");
         }
 
         /// <summary>
@@ -38,18 +64,25 @@ namespace FoodWare.View.UserControls
             // Etiquetas
             EstilosApp.EstiloLabelModulo(lblNombre);
             EstilosApp.EstiloLabelModulo(lblCategoria);
+            EstilosApp.EstiloLabelModulo(lblUnidad);
             EstilosApp.EstiloLabelModulo(lblStock);
+            EstilosApp.EstiloLabelModulo(lblStockMinimo);
             EstilosApp.EstiloLabelModulo(lblPrecio);
 
             // Cajas de Texto
             EstilosApp.EstiloTextBoxModulo(txtNombre);
-            EstilosApp.EstiloTextBoxModulo(txtCategoria);
             EstilosApp.EstiloTextBoxModulo(txtStock);
+            EstilosApp.EstiloTextBoxModulo(txtStockMinimo);
             EstilosApp.EstiloTextBoxModulo(txtPrecio);
+
+            // ComboBox
+            EstilosApp.EstiloComboBoxModulo(cmbCategoria);
+            EstilosApp.EstiloComboBoxModulo(cmbUnidadMedida);
 
             // Botones
             EstilosApp.EstiloBotonModulo(btnGuardar);
             EstilosApp.EstiloBotonModuloAlerta(btnEliminar);
+            EstilosApp. EstiloBotonModuloSecundario(btnActualizar);
             EstilosApp.EstiloBotonModuloSecundario(btnLimpiar);
 
             // Grid
@@ -71,14 +104,22 @@ namespace FoodWare.View.UserControls
                 // 1. La Vista ahora solo RECOGE los datos.
                 // La validación compleja ya no es su responsabilidad.
                 string nombre = txtNombre.Text;
-                string cat = txtCategoria.Text;
+                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
+                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? "";
 
                 // Se convierten los valores aquí, ya que el controlador espera los tipos correctos.
                 // Si la conversión falla, la vista puede manejarlo localmente.
-                if (!int.TryParse(txtStock.Text, out int stock))
+                if (!decimal.TryParse(txtStock.Text, out decimal stock))
                 {
-                    MessageBox.Show("El stock debe ser un número entero válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El stock debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtStock.Focus();
+                    return;
+                }
+
+                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo))
+                {
+                    MessageBox.Show("El stockMinimo debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtStockMinimo.Focus();
                     return;
                 }
 
@@ -90,7 +131,7 @@ namespace FoodWare.View.UserControls
                 }
 
                 // 2. La Vista ENVÍA los datos al controlador.
-                _controller.GuardarNuevoProducto(nombre, cat, stock, precio);
+                _controller.GuardarNuevoProducto(nombre, categoria, unidad, stock, stockminimo, precio);
 
                 // 3. Si todo salió bien (no hubo excepciones), la Vista se ACTUALIZA.
                 MessageBox.Show("¡Producto guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -173,8 +214,10 @@ namespace FoodWare.View.UserControls
         private void LimpiarCampos()
         {
             txtNombre.Text = "";
-            txtCategoria.Text = "";
+            cmbCategoria.SelectedIndex = -1;
+            cmbUnidadMedida.SelectedIndex = -1;
             txtStock.Text = "";
+            txtStockMinimo.Text = "";
             txtPrecio.Text = "";
         }
 

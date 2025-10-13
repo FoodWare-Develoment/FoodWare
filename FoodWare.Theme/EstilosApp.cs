@@ -191,5 +191,16 @@ namespace FoodWare.View.Helpers
             txt.BorderStyle = BorderStyle.FixedSingle;
             txt.Font = new Font(FuentePrincipal, 9);
         }
+
+        /// <summary>
+        /// Aplica un estilo estándar a un ComboBox de formulario.
+        /// </summary>
+        public static void EstiloComboBoxModulo(ComboBox cmb)
+        {
+            cmb.BackColor = Color.White;
+            cmb.ForeColor = ColorTextoOscuro;
+            cmb.FlatStyle = FlatStyle.Flat; // Un borde más moderno
+            cmb.Font = new Font(FuentePrincipal, 9);
+        }
     }
 }

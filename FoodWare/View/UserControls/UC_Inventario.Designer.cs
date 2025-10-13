@@ -14,6 +14,11 @@
         private void InitializeComponent()
         {
             panelInputs = new Panel();
+            cmbUnidadMedida = new ComboBox();
+            btnActualizar = new Button();
+            lblUnidad = new Label();
+            txtStockMinimo = new TextBox();
+            lblStockMinimo = new Label();
             btnGuardar = new Button();
             btnEliminar = new Button();
             btnLimpiar = new Button();
@@ -23,15 +28,21 @@
             lblCategoria = new Label();
             lblNombre = new Label();
             txtStock = new TextBox();
-            txtCategoria = new TextBox();
             txtNombre = new TextBox();
             dgvInventario = new DataGridView();
+            cmbCategoria = new ComboBox();
             panelInputs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvInventario).BeginInit();
             SuspendLayout();
             // 
             // panelInputs
             // 
+            panelInputs.Controls.Add(cmbCategoria);
+            panelInputs.Controls.Add(cmbUnidadMedida);
+            panelInputs.Controls.Add(btnActualizar);
+            panelInputs.Controls.Add(lblUnidad);
+            panelInputs.Controls.Add(txtStockMinimo);
+            panelInputs.Controls.Add(lblStockMinimo);
             panelInputs.Controls.Add(btnGuardar);
             panelInputs.Controls.Add(btnEliminar);
             panelInputs.Controls.Add(btnLimpiar);
@@ -41,18 +52,64 @@
             panelInputs.Controls.Add(lblCategoria);
             panelInputs.Controls.Add(lblNombre);
             panelInputs.Controls.Add(txtStock);
-            panelInputs.Controls.Add(txtCategoria);
             panelInputs.Controls.Add(txtNombre);
             panelInputs.Dock = DockStyle.Top;
             panelInputs.Location = new Point(0, 0);
             panelInputs.Name = "panelInputs";
-            panelInputs.Size = new Size(960, 179);
+            panelInputs.Size = new Size(960, 269);
             panelInputs.TabIndex = 0;
+            // 
+            // cmbUnidadMedida
+            // 
+            cmbUnidadMedida.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbUnidadMedida.FormattingEnabled = true;
+            cmbUnidadMedida.Location = new Point(164, 99);
+            cmbUnidadMedida.Name = "cmbUnidadMedida";
+            cmbUnidadMedida.Size = new Size(590, 28);
+            cmbUnidadMedida.TabIndex = 19;
+            // 
+            // btnActualizar
+            // 
+            btnActualizar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnActualizar.Location = new Point(800, 140);
+            btnActualizar.Name = "btnActualizar";
+            btnActualizar.Size = new Size(104, 49);
+            btnActualizar.TabIndex = 18;
+            btnActualizar.Text = "Actualizar";
+            btnActualizar.UseVisualStyleBackColor = true;
+            // 
+            // lblUnidad
+            // 
+            lblUnidad.AutoSize = true;
+            lblUnidad.Location = new Point(44, 97);
+            lblUnidad.Name = "lblUnidad";
+            lblUnidad.Size = new Size(57, 20);
+            lblUnidad.TabIndex = 16;
+            lblUnidad.Text = "Unidad";
+            lblUnidad.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // txtStockMinimo
+            // 
+            txtStockMinimo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtStockMinimo.Location = new Point(164, 183);
+            txtStockMinimo.Name = "txtStockMinimo";
+            txtStockMinimo.Size = new Size(590, 27);
+            txtStockMinimo.TabIndex = 15;
+            // 
+            // lblStockMinimo
+            // 
+            lblStockMinimo.AutoSize = true;
+            lblStockMinimo.Location = new Point(44, 183);
+            lblStockMinimo.Name = "lblStockMinimo";
+            lblStockMinimo.Size = new Size(100, 20);
+            lblStockMinimo.TabIndex = 14;
+            lblStockMinimo.Text = "Stock Minimo";
+            lblStockMinimo.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnGuardar
             // 
             btnGuardar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnGuardar.Location = new Point(802, 16);
+            btnGuardar.Location = new Point(800, 17);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(104, 49);
             btnGuardar.TabIndex = 13;
@@ -63,7 +120,7 @@
             // btnEliminar
             // 
             btnEliminar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnEliminar.Location = new Point(802, 67);
+            btnEliminar.Location = new Point(800, 79);
             btnEliminar.Name = "btnEliminar";
             btnEliminar.Size = new Size(104, 49);
             btnEliminar.TabIndex = 12;
@@ -74,7 +131,7 @@
             // btnLimpiar
             // 
             btnLimpiar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnLimpiar.Location = new Point(802, 119);
+            btnLimpiar.Location = new Point(800, 202);
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Size = new Size(104, 49);
             btnLimpiar.TabIndex = 10;
@@ -85,7 +142,7 @@
             // txtPrecio
             // 
             txtPrecio.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtPrecio.Location = new Point(164, 137);
+            txtPrecio.Location = new Point(164, 224);
             txtPrecio.Name = "txtPrecio";
             txtPrecio.Size = new Size(590, 27);
             txtPrecio.TabIndex = 7;
@@ -93,7 +150,7 @@
             // lblPrecio
             // 
             lblPrecio.AutoSize = true;
-            lblPrecio.Location = new Point(44, 137);
+            lblPrecio.Location = new Point(44, 224);
             lblPrecio.Name = "lblPrecio";
             lblPrecio.Size = new Size(50, 20);
             lblPrecio.TabIndex = 6;
@@ -103,7 +160,7 @@
             // lblStock
             // 
             lblStock.AutoSize = true;
-            lblStock.Location = new Point(44, 96);
+            lblStock.Location = new Point(44, 140);
             lblStock.Name = "lblStock";
             lblStock.Size = new Size(45, 20);
             lblStock.TabIndex = 5;
@@ -134,18 +191,10 @@
             // txtStock
             // 
             txtStock.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtStock.Location = new Point(164, 96);
+            txtStock.Location = new Point(164, 140);
             txtStock.Name = "txtStock";
             txtStock.Size = new Size(590, 27);
             txtStock.TabIndex = 2;
-            // 
-            // txtCategoria
-            // 
-            txtCategoria.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtCategoria.Location = new Point(164, 56);
-            txtCategoria.Name = "txtCategoria";
-            txtCategoria.Size = new Size(590, 27);
-            txtCategoria.TabIndex = 1;
             // 
             // txtNombre
             // 
@@ -159,11 +208,20 @@
             // 
             dgvInventario.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvInventario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvInventario.Location = new Point(0, 179);
+            dgvInventario.Location = new Point(0, 269);
             dgvInventario.Name = "dgvInventario";
             dgvInventario.RowHeadersWidth = 51;
-            dgvInventario.Size = new Size(960, 485);
+            dgvInventario.Size = new Size(960, 399);
             dgvInventario.TabIndex = 1;
+            // 
+            // cmbCategoria
+            // 
+            cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCategoria.FormattingEnabled = true;
+            cmbCategoria.Location = new Point(164, 56);
+            cmbCategoria.Name = "cmbCategoria";
+            cmbCategoria.Size = new Size(590, 28);
+            cmbCategoria.TabIndex = 20;
             // 
             // UC_Inventario
             // 
@@ -180,7 +238,6 @@
         }
         private Panel panelInputs;
         private TextBox txtStock;
-        private TextBox txtCategoria;
         private TextBox txtNombre;
         private Label lblStock;
         private Label lblCategoria;
@@ -191,5 +248,11 @@
         private Button btnEliminar;
         private Button btnLimpiar;
         private DataGridView dgvInventario;
+        private TextBox txtStockMinimo;
+        private Label lblStockMinimo;
+        private Label lblUnidad;
+        private Button btnActualizar;
+        private ComboBox cmbUnidadMedida;
+        private ComboBox cmbCategoria;
     }
 }
