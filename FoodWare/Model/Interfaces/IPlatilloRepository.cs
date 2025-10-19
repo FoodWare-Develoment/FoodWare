@@ -13,10 +13,10 @@ namespace FoodWare.Model.Interfaces
     /// </summary>
     public interface IPlatilloRepository
     {
-        List<Platillo> ObtenerTodos();              // R - Read (Leer todos)
-        Platillo ObtenerPorId(int id);              // R - Read (Leer uno)
-        void Agregar(Platillo platillo);            // C - Create (Crear)
-        void Actualizar(Platillo platillo);         // U - Update (Actualizar)
-        void Eliminar(int id);                      // D - Delete (Eliminar)
+        Task<List<Platillo>> ObtenerTodosAsync();              // R - Read (Leer todos)
+        Task <Platillo> ObtenerPorIdAsync(int id);              // R - Read (Leer uno)
+        Task AgregarAsync(Platillo platillo);            // C - Create (Crear)
+        Task ActualizarAsync(Platillo platillo);         // U - Update (Actualizar)
+        Task EliminarAsync(int id);                      // D - Delete (Eliminar)
     }
 }

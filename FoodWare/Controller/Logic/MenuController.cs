@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
-using FoodWare.Model.DataAccess; // Importante
+using FoodWare.Model.DataAccess;
 
 namespace FoodWare.Controller.Logic
 {
@@ -14,9 +14,12 @@ namespace FoodWare.Controller.Logic
         // solo conozca la INTERFAZ (la idea de un repositorio).
         private readonly IPlatilloRepository _repositorio = repositorio;
 
-        public List<Platillo> CargarPlatillos()
+        /// <summary>
+        /// Carga los platillos de forma asíncrona.
+        /// </summary>
+        public async Task<List<Platillo>> CargarPlatillosAsync()
         {
-            return _repositorio.ObtenerTodos();
+            return await _repositorio.ObtenerTodosAsync();
         }
 
         /// <summary>
@@ -26,18 +29,19 @@ namespace FoodWare.Controller.Logic
         /// <param name="categoria">Categoría del producto.</param>
         /// <param name="precio">Precio de costo del platillo. No puede ser negativo.</param>
         /// <exception cref="ArgumentException">Se lanza si el nombre o categoria está vacío o si el precio son negativos.</exception>
-        public void GuardarNuevoPlatillo(string nombre, string categoria, decimal precio)
+        /// <summary>
+        /// Guarda un nuevo platillo en el repositorio de forma asíncrona.
+        /// </summary>
+        public async Task GuardarNuevoPlatilloAsync(string nombre, string categoria, decimal precio)
         {
             // Las validaciones ahora son más específicas.
             if (string.IsNullOrWhiteSpace(nombre))
             {
-                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
                 throw new ArgumentException("El nombre del platillo no puede estar vacío.", nameof(nombre));
             }
 
             if (string.IsNullOrWhiteSpace(categoria))
             {
-                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
                 throw new ArgumentException("La categoria del platillo no puede estar vacío.", nameof(categoria));
             }
 
@@ -52,12 +56,17 @@ namespace FoodWare.Controller.Logic
                 Categoria = categoria,
                 PrecioVenta = precio
             };
-            _repositorio.Agregar(nuevo);
+
+            // Llamamos al método asíncrono
+            await _repositorio.AgregarAsync(nuevo);
         }
 
-        public void EliminarPlatillo(int id)
+        /// <summary>
+        /// Elimina un platillo de forma asíncrona.
+        /// </summary>
+        public async Task EliminarPlatilloAsync(int id)
         {
-            _repositorio.Eliminar(id);
+            await _repositorio.EliminarAsync(id);
         }
     }
 }

@@ -7,6 +7,7 @@ using FoodWare.Controller.Logic;  // Para MenuController
 using FoodWare.Model.Entities;    // Para la clase Platillo
 using FoodWare.Validations;      // Para nuestra librería de validación
 using FoodWare.View.Helpers;      // Para EstilosApp
+using System.Threading.Tasks;   //Para tareas asincronas
 
 namespace FoodWare.View.UserControls
 {
@@ -62,33 +63,52 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloDataGridView(dgvMenu);
         }
 
-        private void UC_Menu_Load(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador de carga del UserControl. Se convierte en 'async void'
+        /// </summary>
+        private async void UC_Menu_Load(object sender, EventArgs e)
         {
             if (!DesignMode)
             {
-                CargarGridPlatillos();
+                // Llamamos al método asíncrono
+                await CargarGridPlatillosAsync();
             }
         }
 
         /// <summary>
         /// Pide los platillos al Controlador y actualiza el DataGridView.
         /// </summary>
-        private void CargarGridPlatillos()
+        /// <summary>
+        /// Pide los platillos al Controlador y actualiza el DataGridView de forma asíncrona.
+        /// </summary>
+        private async Task CargarGridPlatillosAsync()
         {
-            var platillos = _controller.CargarPlatillos();
-            this.dgvMenu.DataSource = null; // Limpia el grid
-            this.dgvMenu.DataSource = platillos; // Carga los nuevos datos
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                var platillos = await _controller.CargarPlatillosAsync();
+                this.dgvMenu.DataSource = null;
+                this.dgvMenu.DataSource = platillos;
 
-            // Opcional: ajustar columnas
-            var columnas = this.dgvMenu.Columns;
-            if (columnas != null && columnas["IdPlatillo"] is not null)
-            {
-                columnas["IdPlatillo"]!.HeaderText = "ID";
-                columnas["IdPlatillo"]!.Width = 50;
+                // Opcional: ajustar columnas
+                var columnas = this.dgvMenu.Columns;
+                if (columnas != null && columnas["IdPlatillo"] is not null)
+                {
+                    columnas["IdPlatillo"]!.HeaderText = "ID";
+                    columnas["IdPlatillo"]!.Width = 50;
+                }
+                if (columnas != null && columnas["PrecioVenta"] is not null)
+                {
+                    columnas["PrecioVenta"]!.HeaderText = "Precio de Venta";
+                }
             }
-            if (columnas != null && columnas["PrecioVenta"] is not null)
+            catch (Exception ex)
             {
-                columnas["PrecioVenta"]!.HeaderText = "Precio de Venta";
+                MessageBox.Show($"Error al cargar el menú: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
         }
 
@@ -103,17 +123,16 @@ namespace FoodWare.View.UserControls
             txtNombre.Focus(); // Pone el cursor de vuelta en el primer campo
         }
 
-        private void BtnGuardar_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador del clic en 'Guardar'. Se convierte en 'async void'.
+        /// </summary>
+        private async void BtnGuardar_Click(object sender, EventArgs e)
         {
             try
             {
-                // 1. La Vista ahora solo RECOGE los datos.
-                // La validación compleja ya no es su responsabilidad.
+                // 1. La Vista RECOGE los datos.
                 string nombre = txtNombre.Text;
                 string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
-
-                // Se convierten los valores aquí, ya que el controlador espera los tipos correctos.
-                // Si la conversión falla, la vista puede manejarlo localmente.
 
                 if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
                 {
@@ -122,37 +141,42 @@ namespace FoodWare.View.UserControls
                     return;
                 }
 
-                // 2. La Vista ENVÍA los datos al controlador.
-                _controller.GuardarNuevoPlatillo(nombre, categoria, precio);
+                // --- Llamada Asíncrona ---
+                this.Cursor = Cursors.WaitCursor;
 
-                // 3. Si todo salió bien (no hubo excepciones), la Vista se ACTUALIZA.
+                // 2. La Vista ENVÍA los datos al controlador.
+                await _controller.GuardarNuevoPlatilloAsync(nombre, categoria, precio);
+
+                // 3. Si todo salió bien, la Vista se ACTUALIZA.
                 MessageBox.Show("¡Platillo guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CargarGridPlatillos();
+
                 LimpiarCampos();
+                await CargarGridPlatillosAsync(); // Recargamos el grid
             }
-            // 4. La Vista ahora está preparada para capturar ERRORES DE NEGOCIO del controlador.
-            catch (ArgumentException aex)
+            catch (ArgumentException aex) // Errores de validación
             {
-                // Muestra el mensaje de error específico que viene del controlador.
                 MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            // 5. Y también está preparada para cualquier otro error inesperado.
-            catch (Exception ex)
+            catch (Exception ex) // Errores inesperados
             {
                 MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
         }
 
-        private void BtnEliminar_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador del clic en 'Eliminar'. Se convierte en 'async void'.
+        /// </summary>
+        private async void BtnEliminar_Click(object sender, EventArgs e)
         {
-            // 1. Verifica si hay una fila seleccionada
             if (this.dgvMenu.CurrentRow != null && this.dgvMenu.CurrentRow.DataBoundItem is Platillo platilloSeleccionado)
             {
-                // 2. Obtenemos el ID y el Nombre del platillo seleccionado
                 int id = platilloSeleccionado.IdPlatillo;
                 string nombre = platilloSeleccionado.Nombre;
 
-                // 3. Pide confirmación al usuario
                 var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{nombre}'?",
                                                "Confirmar eliminación",
                                                MessageBoxButtons.YesNo,
@@ -162,16 +186,22 @@ namespace FoodWare.View.UserControls
                 {
                     try
                     {
-                        // 4. Envía la orden al controlador
-                        _controller.EliminarPlatillo(id);
+                        this.Cursor = Cursors.WaitCursor;
+
+                        // --- Llamada Asíncrona ---
+                        await _controller.EliminarPlatilloAsync(id);
 
                         // 5. Actualiza la vista
-                        CargarGridPlatillos();
+                        await CargarGridPlatillosAsync();
                         LimpiarCampos();
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show("Error: " + ex.Message, "Error al eliminar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
                     }
                 }
             }

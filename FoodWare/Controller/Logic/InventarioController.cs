@@ -3,9 +3,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
-using FoodWare.Model.DataAccess; // Necesario para crear el Mock
 
 namespace FoodWare.Controller.Logic
 {
@@ -15,9 +15,13 @@ namespace FoodWare.Controller.Logic
         private readonly IProductoRepository _repositorio = repositorio;
 
         // El controlador expone los métodos que la Vista necesita
-        public List<Producto> CargarProductos()
+        /// <summary>
+        /// Carga la lista de productos de forma asíncrona.
+        /// </summary>
+        public async Task<List<Producto>> CargarProductosAsync()
         {
-            return _repositorio.ObtenerTodos();
+            // Simplemente esperamos el resultado del repositorio
+            return await _repositorio.ObtenerTodosAsync();
         }
 
         /// <summary>
@@ -28,57 +32,52 @@ namespace FoodWare.Controller.Logic
         /// <param name="stock">Cantidad inicial en stock. No puede ser negativo.</param>
         /// <param name="precio">Precio de costo del producto. No puede ser negativo.</param>
         /// <exception cref="ArgumentException">Se lanza si el nombre está vacío o si el stock o precio son negativos.</exception>
-        public void GuardarNuevoProducto(string nombre, string categoria, string unidad, decimal stock, decimal stockminimo, decimal precio)
+        /// <summary>
+        /// Guarda un nuevo producto en el repositorio de forma asíncrona.
+        /// </summary>
+        public async Task GuardarNuevoProductoAsync(string nombre, string categoria, string unidad, decimal stock, decimal stockminimo, decimal precio)
         {
             // Las validaciones ahora son más específicas.
             if (string.IsNullOrWhiteSpace(nombre))
             {
-                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
                 throw new ArgumentException("El nombre del producto no puede estar vacío.", nameof(nombre));
             }
 
             if (string.IsNullOrWhiteSpace(categoria))
             {
-                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
                 throw new ArgumentException("La categoria del producto no puede estar vacío.", nameof(categoria));
             }
 
             if (string.IsNullOrWhiteSpace(unidad))
             {
-                // Esta excepción indica que un argumento (parámetro) tiene un valor inválido.
                 throw new ArgumentException("La unidad del producto no puede estar vacío.", nameof(unidad));
             }
 
-            if (stock < 0)
+            if (stock < 0 || stockminimo < 0 || precio < 0)
             {
-                throw new ArgumentException("El stock no puede ser un valor negativo.", nameof(stock));
-            }
-
-            if (stockminimo < 0)
-            {
-                throw new ArgumentException("El stockminimo no puede ser un valor negativo.", nameof(stockminimo));
-            }
-
-            if (precio < 0)
-            {
-                throw new ArgumentException("El precio no puede ser un valor negativo.", nameof(precio));
+                throw new ArgumentException("Los valores numéricos no pueden ser negativos.");
             }
 
             Producto nuevo = new()
             {
                 Nombre = nombre,
                 Categoria = categoria,
-                UnidadMedida = unidad,
+                UnidadMedida = unidad, // <-- EL CAMPO QUE FALTABA
                 StockActual = stock,
                 StockMinimo = stockminimo,
                 PrecioCosto = precio
             };
-            _repositorio.Agregar(nuevo);
+
+            // Llamamos al método asíncrono del repositorio
+            await _repositorio.AgregarAsync(nuevo);
         }
 
-        public void EliminarProducto(int id)
+        /// <summary>
+        /// Elimina un producto de forma asíncrona.
+        /// </summary>
+        public async Task EliminarProductoAsync(int id)
         {
-            _repositorio.Eliminar(id);
+            await _repositorio.EliminarAsync(id);
         }
 
         // Aquí iran métodos para Actualizar...

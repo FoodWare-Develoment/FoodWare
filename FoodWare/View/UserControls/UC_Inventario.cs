@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks;     // Para tareas asíncronas
 using System.Windows.Forms;
-using FoodWare.Model.Interfaces; // Para IProductoRepository
-using FoodWare.Model.DataAccess; // Para ProductoMockRepository
 using FoodWare.Controller.Logic;  // Para MenuController
 using FoodWare.Model.Entities;    // Para la clase Platillo
+using FoodWare.Model.Interfaces; // Para IProductoRepository
+using FoodWare.Model.DataAccess;  // Para ProductoSqlRepository
 using FoodWare.Validations;      // Para nuestra librería de validación
 using FoodWare.View.Helpers;      // Para EstilosApp
 
@@ -19,7 +20,7 @@ namespace FoodWare.View.UserControls
             InitializeComponent();
             AplicarEstilos(); // Llamamos a nuestro método de estilos
 
-            // 1. La Vista decide qué repositorio usar. Por ahora, el FALSO (Mock).
+            // 1. Usamos el repositorio SQL real.
             IProductoRepository repositorioParaUsar = new ProductoSqlRepository();
 
             // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
@@ -89,26 +90,32 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloDataGridView(dgvInventario);
         }
 
-        private void UC_Inventario_Load(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador de carga del UserControl. Se convierte en 'async void'
+        /// para permitir la carga de datos sin bloquear la UI.
+        /// </summary>
+        private async void UC_Inventario_Load(object sender, EventArgs e)
         {
-            if (!DesignMode) // Esto evita que el código se ejecute en el diseñador
+            if (!DesignMode)
             {
-                CargarGridInventario(); // Le decimos que llene la tabla
+                // Ahora llamamos a la versión asíncrona
+                await CargarGridInventarioAsync();
             }
         }
 
-        private void BtnGuardar_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador del clic en 'Guardar'. Se convierte en 'async void'
+        /// para guardar sin bloquear la UI.
+        /// </summary>
+        private async void BtnGuardar_Click(object sender, EventArgs e)
         {
             try
             {
-                // 1. La Vista ahora solo RECOGE los datos.
-                // La validación compleja ya no es su responsabilidad.
+                // 1. La Vista RECOGE los datos.
                 string nombre = txtNombre.Text;
                 string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
-                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? "";
+                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? ""; // <-- CAMPO CORREGIDO
 
-                // Se convierten los valores aquí, ya que el controlador espera los tipos correctos.
-                // Si la conversión falla, la vista puede manejarlo localmente.
                 if (!decimal.TryParse(txtStock.Text, out decimal stock))
                 {
                     MessageBox.Show("El stock debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -116,7 +123,7 @@ namespace FoodWare.View.UserControls
                     return;
                 }
 
-                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo))
+                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo)) // <-- CAMPO CORREGIDO
                 {
                     MessageBox.Show("El stockMinimo debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtStockMinimo.Focus();
@@ -130,45 +137,65 @@ namespace FoodWare.View.UserControls
                     return;
                 }
 
-                // 2. La Vista ENVÍA los datos al controlador.
-                _controller.GuardarNuevoProducto(nombre, categoria, unidad, stock, stockminimo, precio);
+                // --- Llamada Asíncrona ---
+                this.Cursor = Cursors.WaitCursor; // Indicador visual
 
-                // 3. Si todo salió bien (no hubo excepciones), la Vista se ACTUALIZA.
+                // 2. La Vista ENVÍA los datos al controlador
+                await _controller.GuardarNuevoProductoAsync(nombre, categoria, unidad, stock, stockminimo, precio);
+
+                // 3. Si todo salió bien, la Vista se ACTUALIZA.
                 MessageBox.Show("¡Producto guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CargarGridInventario();
+
                 LimpiarCampos();
+
+                // Recargamos el grid de forma asíncrona
+                await CargarGridInventarioAsync();
             }
-            // 4. La Vista ahora está preparada para capturar ERRORES DE NEGOCIO del controlador.
-            catch (ArgumentException aex)
+            catch (ArgumentException aex) // Errores de validación del Controlador
             {
-                // Muestra el mensaje de error específico que viene del controlador.
                 MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            // 5. Y también está preparada para cualquier otro error inesperado.
-            catch (Exception ex)
+            catch (Exception ex) // Errores inesperados (BD, etc.)
             {
                 MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
         }
 
-        private void BtnEliminar_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador del clic en 'Eliminar'. Se convierte en 'async void'.
+        /// </summary>
+        private async void BtnEliminar_Click(object sender, EventArgs e)
         {
-            // Verifica si hay una fila seleccionada en el grid
+            // Verifica si hay una fila seleccionada
             if (this.dgvInventario.CurrentRow != null && this.dgvInventario.CurrentRow.DataBoundItem is Producto producto)
             {
                 int id = producto.IdProducto;
-
-                // 2. Pide confirmación
                 var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{producto.Nombre}'?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
                 if (confirm == DialogResult.Yes)
                 {
-                    // 3. Envía la orden al controlador
-                    _controller.EliminarProducto(id);
+                    try
+                    {
+                        this.Cursor = Cursors.WaitCursor;
+                        // --- Llamada Asíncrona ---
+                        await _controller.EliminarProductoAsync(id);
 
-                    // 4. Actualiza la vista
-                    CargarGridInventario();
-                    LimpiarCampos();
+                        // Actualiza la vista
+                        await CargarGridInventarioAsync();
+                        LimpiarCampos();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al eliminar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                    }
                 }
             }
             else
@@ -182,29 +209,48 @@ namespace FoodWare.View.UserControls
         /// <summary>
         /// Pide los productos al controlador y actualiza el DataGridView.
         /// </summary>
-        private void CargarGridInventario()
+        /// <summary>
+        /// Pide los productos al controlador y actualiza el DataGridView de forma asíncrona.
+        /// </summary>
+        private async Task CargarGridInventarioAsync()
         {
-            var productos = _controller.CargarProductos();
-            this.dgvInventario.DataSource = null;
-            this.dgvInventario.DataSource = productos;
+            try
+            {
+                // Mostramos un indicador de carga
+                this.Cursor = Cursors.WaitCursor;
+                dgvInventario.DataSource = null;
 
-            // Opcional: ajustar columnas
-            var columnas = this.dgvInventario.Columns;
-            if (columnas != null && columnas["IdProducto"] is not null)
-            {
-                columnas["IdProducto"]!.HeaderText = "ID";
-                columnas["IdProducto"]!.Width = 50;
-            }
-            // Verifica que la columna "StockActual" existe antes de acceder a ella
-            if (columnas != null && columnas["StockActual"] is not null)
-            {
-                columnas["StockActual"]!.HeaderText = "Stock Actual";
-            }
+                // 1. Obtenemos los datos de forma asíncrona
+                var productos = await _controller.CargarProductosAsync();
 
-            if (columnas != null && columnas["PrecioCosto"] is not null)
+                // 2. Volvemos al hilo de la UI para actualizar el Grid
+                this.dgvInventario.DataSource = productos;
+
+                // Opcional: ajustar columnas
+                var columnas = this.dgvInventario.Columns;
+                if (columnas != null && columnas["IdProducto"] is not null)
+                {
+                    columnas["IdProducto"]!.HeaderText = "ID";
+                    columnas["IdProducto"]!.Width = 50;
+                }
+                if (columnas != null && columnas["StockActual"] is not null)
+                {
+                    columnas["StockActual"]!.HeaderText = "Stock Actual";
+                }
+                if (columnas != null && columnas["PrecioCosto"] is not null)
+                {
+                    columnas["PrecioCosto"]!.HeaderText = "Precio Costo";
+                    columnas["PrecioCosto"]!.Width = 150;
+                }
+            }
+            catch (Exception ex)
             {
-                columnas["PrecioCosto"]!.HeaderText = "Precio Costo";
-                columnas["PrecioCosto"]!.Width = 150;
+                MessageBox.Show($"Error al cargar el inventario: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Nos aseguramos de regresar el cursor a la normalidad
+                this.Cursor = Cursors.Default;
             }
         }
 
