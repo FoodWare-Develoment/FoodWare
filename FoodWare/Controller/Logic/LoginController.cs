@@ -1,8 +1,9 @@
 ﻿using BCrypt.Net;
 using System;
 using System.Diagnostics;
-using FoodWare.Model.Interfaces; // <-- AÑADIR ESTE USING
-using System.Threading.Tasks; // <-- AÑADIR ESTE USING
+using FoodWare.Model.Interfaces; 
+using System.Threading.Tasks;
+using FoodWare.Model.DataAccess;
 
 namespace FoodWare.Controller.Logic
 {
