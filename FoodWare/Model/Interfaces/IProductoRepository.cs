@@ -13,10 +13,10 @@ namespace FoodWare.Model.Interfaces
     /// </summary>
     public interface IProductoRepository
     {
-        List<Producto> ObtenerTodos();        // R - Read (Leer todos)
-        Producto ObtenerPorId(int id);      // R - Read (Leer uno)
-        void Agregar(Producto producto);      // C - Create (Crear)
-        void Actualizar(Producto producto);   // U - Update (Actualizar)
-        void Eliminar(int id);                // D - Delete (Eliminar)
+        Task<List<Producto>> ObtenerTodosAsync();        // R - Read (Leer todos)
+        Task<Producto> ObtenerPorIdAsync(int id);      // R - Read (Leer uno)
+        Task AgregarAsync(Producto producto);      // C - Create (Crear)
+        Task ActualizarAsync(Producto producto);   // U - Update (Actualizar)
+        Task EliminarAsync(int id);                // D - Delete (Eliminar)
     }
 }

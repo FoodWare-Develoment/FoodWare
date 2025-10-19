@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using FoodWare.Controller;
 using FoodWare.Controller.Logic;
 using FoodWare.View.Helpers;
+using FoodWare.Model.Interfaces; 
+using FoodWare.Model.DataAccess;
 
 namespace FoodWare.View.Forms
 {
@@ -19,6 +14,8 @@ namespace FoodWare.View.Forms
     /// </summary>
     public partial class LoginForm : Form
     {
+        private readonly LoginController _loginCtrl; // <-- Renombrado para claridad
+
         /// <summary>
         /// Inicializa el formulario de Login.
         /// </summary>
@@ -26,6 +23,11 @@ namespace FoodWare.View.Forms
         {
             InitializeComponent();
             AplicarEstilosDeLogin();
+
+            // 1. Creamos la instancia del repositorio real
+            IUsuarioRepository repositorio = new UsuarioSqlRepository();
+            // 2. Se lo "inyectamos" al controlador
+            _loginCtrl = new LoginController(repositorio);
         }
 
         /// <summary>
@@ -59,46 +61,49 @@ namespace FoodWare.View.Forms
         // --- LÓGICA DE VALIDACIÓN Y EVENTOS ---
 
         /// <summary>
-        /// Evento principal del botón Ingresar. Valida las credenciales.
+        /// Evento principal del botón Ingresar. Ahora es 'async void'
+        /// para permitir la validación asíncrona.
         /// </summary>
-        private void BtnIngresar_Click(object sender, EventArgs e)
+        private async void BtnIngresar_Click(object sender, EventArgs e)
         {
-
-            // 1. La Vista crea una instancia del Controlador.
-            LoginController loginCtrl = new();
-
-            // 2. La Vista recoge los datos de los campos de texto y se los pasa al Controlador.
-            LoginResult resultado = loginCtrl.ValidarLogin(this.txtUsuario.Text, this.txtPassword.Text);
-
-            // 3. La Vista reacciona a la respuesta del Controlador usando un 'switch'
-            // para manejar de forma clara y ordenada cada posible resultado.
-            switch (resultado)
+            try
             {
-                case LoginResult.Exitoso:
-                    // Caso de éxito: Cerramos el login y devolvemos 'OK' para que el programa principal continúe.
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
-                    break;
+                // 1. Cambiamos el cursor y deshabilitamos el botón
+                this.Cursor = Cursors.WaitCursor;
+                this.btnIngresar.Enabled = false;
 
-                case LoginResult.CredencialesInvalidas:
-                    MostrarError("Usuario o contraseña incorrectos.");
+                // 2. La Vista recoge los datos y llama al Controlador asíncronamente
+                LoginResult resultado = await _loginCtrl.ValidarLoginAsync(this.txtUsuario.Text, this.txtPassword.Text);
 
-                    // 1. Desactivamos temporalmente el evento para que no se dispare al limpiar el texto.
-                    this.txtPassword.TextChanged -= TxtPassword_TextChanged;
+                // 3. La Vista reacciona a la respuesta (ya estamos en el hilo UI)
+                switch (resultado)
+                {
+                    case LoginResult.Exitoso:
+                        this.DialogResult = DialogResult.OK;
+                        this.Close();
+                        break; // No es necesario, pero es buena práctica
 
-                    // 2. Ahora sí, borramos el texto sin el efecto secundario de ocultar el mensaje.
-                    txtPassword.Clear();
+                    case LoginResult.CredencialesInvalidas:
+                        MostrarError("Usuario o contraseña incorrectos.");
+                        txtPassword.Clear();
+                        txtPassword.Focus();
+                        break;
 
-                    // 3. Reactivamos el evento para que el mensaje se oculte si el usuario empieza a escribir de nuevo.
-                    this.txtPassword.TextChanged += TxtPassword_TextChanged;
-                    
-                    txtPassword.Focus();
-                    break;
-
-                case LoginResult.ErrorDeBaseDeDatos:
-                    // Caso de error de sistema: Informamos al usuario que hay un problema técnico, sin dar detalles.
-                    MostrarError("Error al conectar con el servidor. Intente más tarde.");
-                    break;
+                    case LoginResult.ErrorDeBaseDeDatos:
+                        MostrarError("Error al conectar con el servidor. Intente más tarde.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Captura genérica por si algo más falla
+                MostrarError("Error inesperado: " + ex.Message);
+            }
+            finally
+            {
+                // 4. Pase lo que pase, restauramos la UI
+                this.Cursor = Cursors.Default;
+                this.btnIngresar.Enabled = true;
             }
         }
 
