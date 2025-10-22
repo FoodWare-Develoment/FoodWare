@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 using FoodWare.Model.Entities;
 
@@ -18,5 +19,6 @@ namespace FoodWare.Model.Interfaces
         Task AgregarAsync(Producto producto);      // C - Create (Crear)
         Task ActualizarAsync(Producto producto);   // U - Update (Actualizar)
         Task EliminarAsync(int id);                // D - Delete (Eliminar)
+        Task ActualizarStockAsync(int idProducto, decimal cantidadADescontar, SqlConnection connection, SqlTransaction transaction);    // Actualiza el stock de un producto específico
     }
 }
