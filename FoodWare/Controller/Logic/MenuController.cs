@@ -68,5 +68,39 @@ namespace FoodWare.Controller.Logic
         {
             await _repositorio.EliminarAsync(id);
         }
+
+        /// <summary>
+        /// Actualiza un platillo existente en el repositorio de forma asíncrona.
+        /// </summary>
+        /// <param name="platillo">El platillo con los datos actualizados.</param>
+        // ... (encima del método pones el comentario del paso 1) ...
+        public async Task ActualizarPlatilloAsync(Platillo platillo)
+        {
+            // Validaciones
+            if (string.IsNullOrWhiteSpace(platillo.Nombre))
+            {
+                // El mensaje ahora menciona la propiedad, y el 2do argumento es 'nameof(platillo)'
+                throw new ArgumentException("La propiedad 'Nombre' del platillo no puede estar vacía.", nameof(platillo));
+            }
+
+            if (string.IsNullOrWhiteSpace(platillo.Categoria))
+            {
+                // Se repite el patrón
+                throw new ArgumentException("La propiedad 'Categoria' del platillo no puede estar vacía.", nameof(platillo));
+            }
+
+            if (platillo.PrecioVenta < 0)
+            {
+                throw new ArgumentException("La propiedad 'PrecioVenta' no puede ser un valor negativo.", nameof(platillo));
+            }
+
+            if (platillo.IdPlatillo <= 0)
+            {
+                throw new ArgumentException("La propiedad 'IdPlatillo' no es válida para actualizar.", nameof(platillo));
+            }
+
+            // Llamamos al método asíncrono
+            await _repositorio.ActualizarAsync(platillo);
+        }
     }
 }

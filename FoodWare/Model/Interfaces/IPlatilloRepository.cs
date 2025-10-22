@@ -14,7 +14,7 @@ namespace FoodWare.Model.Interfaces
     public interface IPlatilloRepository
     {
         Task<List<Platillo>> ObtenerTodosAsync();              // R - Read (Leer todos)
-        Task <Platillo> ObtenerPorIdAsync(int id);              // R - Read (Leer uno)
+        Task<Platillo> ObtenerPorIdAsync(int id);              // R - Read (Leer uno)
         Task AgregarAsync(Platillo platillo);            // C - Create (Crear)
         Task ActualizarAsync(Platillo platillo);         // U - Update (Actualizar)
         Task EliminarAsync(int id);                      // D - Delete (Eliminar)

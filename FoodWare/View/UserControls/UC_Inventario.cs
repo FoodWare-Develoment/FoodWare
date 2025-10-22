@@ -13,7 +13,10 @@ namespace FoodWare.View.UserControls
 {
     public partial class UC_Inventario : UserControl
     {
+        private const string TituloDatoInvalido = "Dato inválido";
         private readonly InventarioController _controller;
+        // Campo para guardar el producto que está seleccionado en el grid
+        private Producto? _productoSeleccionado;
 
         public UC_Inventario()
         {
@@ -83,7 +86,8 @@ namespace FoodWare.View.UserControls
             // Botones
             EstilosApp.EstiloBotonModulo(btnGuardar);
             EstilosApp.EstiloBotonModuloAlerta(btnEliminar);
-            EstilosApp. EstiloBotonModuloSecundario(btnActualizar);
+            // Aplicamos estilo al botón actualizar
+            EstilosApp.EstiloBotonModuloSecundario(btnActualizar);
             EstilosApp.EstiloBotonModuloSecundario(btnLimpiar);
 
             // Grid
@@ -118,21 +122,21 @@ namespace FoodWare.View.UserControls
 
                 if (!decimal.TryParse(txtStock.Text, out decimal stock))
                 {
-                    MessageBox.Show("El stock debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El stock debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtStock.Focus();
                     return;
                 }
 
                 if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo)) // <-- CAMPO CORREGIDO
                 {
-                    MessageBox.Show("El stockMinimo debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El stockMinimo debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtStockMinimo.Focus();
                     return;
                 }
 
                 if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
                 {
-                    MessageBox.Show("El precio debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("El precio debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtPrecio.Focus();
                     return;
                 }
@@ -164,6 +168,87 @@ namespace FoodWare.View.UserControls
                 this.Cursor = Cursors.Default;
             }
         }
+
+        /// <summary>
+        /// Manejador del clic en 'Actualizar'. Se convierte en 'async void'.
+        /// </summary>
+        private async void BtnActualizar_Click(object sender, EventArgs e)
+        {
+            // 1. Validar que haya un producto seleccionado
+            if (_productoSeleccionado == null)
+            {
+                MessageBox.Show("Por favor, selecciona un producto de la lista para actualizar.", "Ningún producto seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                // 2. La Vista RECOGE los datos de los campos.
+                string nombre = txtNombre.Text;
+                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
+                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? "";
+
+                if (!decimal.TryParse(txtStock.Text, out decimal stock))
+                {
+                    MessageBox.Show("El stock debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtStock.Focus();
+                    return;
+                }
+
+                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo))
+                {
+                    MessageBox.Show("El stock Mínimo debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtStockMinimo.Focus();
+                    return;
+                }
+
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
+                {
+                    MessageBox.Show("El precio debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtPrecio.Focus();
+                    return;
+                }
+
+                // 3. Creamos el objeto Producto con los datos actualizados Y el ID original
+                Producto productoActualizado = new()
+                {
+                    IdProducto = _productoSeleccionado.IdProducto, // <-- El ID original es clave
+                    Nombre = nombre,
+                    Categoria = categoria,
+                    UnidadMedida = unidad,
+                    StockActual = stock,
+                    StockMinimo = stockminimo,
+                    PrecioCosto = precio
+                };
+
+                // 4. Guardamos el ID antes de hacer nada
+                int idActualizado = productoActualizado.IdProducto;
+
+                this.Cursor = Cursors.WaitCursor;
+                await _controller.ActualizarProductoAsync(productoActualizado);
+
+                MessageBox.Show("¡Producto actualizado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                LimpiarCampos(); // Limpia campos de texto PERO NO la selección
+                await CargarGridInventarioAsync(); // Recarga el grid
+
+                // 5. Llamamos al método para re-seleccionar la fila
+                SeleccionarProductoEnGrid(idActualizado);
+            }
+            catch (ArgumentException aex) // Errores de validación
+            {
+                MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex) // Errores inesperados
+            {
+                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
 
         /// <summary>
         /// Manejador del clic en 'Eliminar'. Se convierte en 'async void'.
@@ -207,9 +292,6 @@ namespace FoodWare.View.UserControls
         // --- MÉTODOS DE AYUDA DE LA VISTA ---
 
         /// <summary>
-        /// Pide los productos al controlador y actualiza el DataGridView.
-        /// </summary>
-        /// <summary>
         /// Pide los productos al controlador y actualiza el DataGridView de forma asíncrona.
         /// </summary>
         private async Task CargarGridInventarioAsync()
@@ -236,6 +318,15 @@ namespace FoodWare.View.UserControls
                 if (columnas != null && columnas["StockActual"] is not null)
                 {
                     columnas["StockActual"]!.HeaderText = "Stock Actual";
+                }
+                // --- AJUSTE DE COLUMNAS ---
+                if (columnas != null && columnas["StockMinimo"] is not null)
+                {
+                    columnas["StockMinimo"]!.HeaderText = "Stock Mínimo";
+                }
+                if (columnas != null && columnas["UnidadMedida"] is not null)
+                {
+                    columnas["UnidadMedida"]!.HeaderText = "Unidad";
                 }
                 if (columnas != null && columnas["PrecioCosto"] is not null)
                 {
@@ -265,11 +356,52 @@ namespace FoodWare.View.UserControls
             txtStock.Text = "";
             txtStockMinimo.Text = "";
             txtPrecio.Text = "";
+
+            // Limpiamos la variable de estado
+            _productoSeleccionado = null;
         }
 
         private void BtnLimpiar_Click(object sender, EventArgs e)
         {
             LimpiarCampos();
+        }
+
+        private void ItemEditarProducto_Click(object sender, EventArgs e)
+        {
+            // Verificamos si hay una fila seleccionada y si podemos obtener el objeto Producto
+            if (dgvInventario.CurrentRow != null && dgvInventario.CurrentRow.DataBoundItem is Producto producto)
+            {
+                // 1. Guardamos el producto seleccionado en nuestra variable de estado
+                _productoSeleccionado = producto; // (Asegúrate de tener esta variable _productoSeleccionado a nivel de clase)
+
+                // 2. Rellenamos los campos del formulario
+                txtNombre.Text = producto.Nombre;
+                cmbCategoria.SelectedItem = producto.Categoria;
+                cmbUnidadMedida.SelectedItem = producto.UnidadMedida;
+                txtStock.Text = producto.StockActual.ToString("F2");
+                txtStockMinimo.Text = producto.StockMinimo.ToString("F2");
+                txtPrecio.Text = producto.PrecioCosto.ToString("F2");
+
+                // 3. Ponemos el foco en el primer campo
+                txtNombre.Focus();
+            }
+        }
+
+        private void SeleccionarProductoEnGrid(int idProducto)
+        {
+            foreach (DataGridViewRow row in dgvInventario.Rows)
+            {
+                // El 'if' se fusiona en una sola línea con &&
+                if (row.DataBoundItem is Producto producto && producto.IdProducto == idProducto)
+                {
+                    // Mueve el foco de la celda activa a esta fila.
+                    dgvInventario.CurrentCell = row.Cells[0];
+
+                    // Nos aseguramos de que sea visible
+                    dgvInventario.FirstDisplayedScrollingRowIndex = row.Index;
+                    break;
+                }
+            }
         }
     }
 }
