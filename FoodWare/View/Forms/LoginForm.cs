@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FoodWare.Controller;
-using FoodWare.Controller.Logic;
 using FoodWare.View.Helpers;
 
 namespace FoodWare.View.Forms

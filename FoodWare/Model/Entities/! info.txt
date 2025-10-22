@@ -1,0 +1,5 @@
+﻿Hola!
+
+Esta carpeta contiene los getters y setters de las entidades del modelo de datos de la aplicación.
+Cada archivo en esta carpeta representa una entidad específica, como Usuario, Producto, Pedido, etc., y
+proporciona métodos para acceder y modificar los atributos de esas entidades.

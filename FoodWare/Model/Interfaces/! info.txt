@@ -1,0 +1,7 @@
+﻿Hola!
+
+Interfaces de Conexión a la Base de Datos (Data Access Interfaces).
+
+Esta carpeta contiene información de como se enlazarán los datos de las entidades
+(Entities) que se mostrarán en la app con los datos de la base de datos.
+

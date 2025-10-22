@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FoodWare.Model.Entities
 {
-    /// <summary>
-    /// Representa un usuario del sistema (Empleado o Administrador).
-    /// </summary>
+    // 3. TABLA: USUARIOS
     public class Usuario
     {
         public int IdUsuario { get; set; }
-        public required string NombreUsuario { get; set; }
-        public required string Contraseña { get; set; } // En el futuro será un hash
-        public required string Rol { get; set; } // Ej. "Administrador", "Mesero"
+        public string Username { get; set; } // NOT NULL
+        public string PasswordHash { get; set; } // NOT NULL
+        public int? IdEmpleado { get; set; } // UNIQUE, NULLable (usamos int?)
+        public bool EsAdmin { get; set; } // NOT NULL, DEFAULT FALSE
     }
 }
