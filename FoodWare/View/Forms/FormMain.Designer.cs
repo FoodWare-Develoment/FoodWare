@@ -91,7 +91,6 @@
             btnConfig.Size = new Size(240, 23);
             btnConfig.TabIndex = 0;
             btnConfig.Text = "Configuracion";
-            btnConfig.Click += BtnConfig_Click;
             // 
             // panelAnalisisSubmenu
             // 
@@ -110,7 +109,6 @@
             btnReportes.Size = new Size(240, 23);
             btnReportes.TabIndex = 0;
             btnReportes.Text = "Reportes";
-            btnReportes.Click += BtnReportes_Click;
             // 
             // btnAnalisis
             // 
@@ -140,7 +138,6 @@
             btnFinanzas.Size = new Size(240, 23);
             btnFinanzas.TabIndex = 0;
             btnFinanzas.Text = "Finanzas";
-            btnFinanzas.Click += BtnFinanzas_Click;
             // 
             // btnEmpleados
             // 
@@ -182,7 +179,6 @@
             btnVentas.Size = new Size(240, 23);
             btnVentas.TabIndex = 0;
             btnVentas.Text = "Ventas";
-            btnVentas.Click += BtnVentas_Click;
             // 
             // btnMenu
             // 
@@ -192,7 +188,6 @@
             btnMenu.Size = new Size(240, 23);
             btnMenu.TabIndex = 1;
             btnMenu.Text = "Menu";
-            btnMenu.Click += BtnMenu_Click;
             // 
             // btnInventario
             // 
@@ -202,7 +197,6 @@
             btnInventario.Size = new Size(240, 23);
             btnInventario.TabIndex = 2;
             btnInventario.Text = "Inventario";
-            btnInventario.Click += BtnInventario_Click;
             // 
             // btnInicio
             // 

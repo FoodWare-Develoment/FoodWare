@@ -1,5 +1,4 @@
 ﻿using FoodWare.Model.Entities;
-using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -13,11 +12,7 @@ namespace FoodWare.Model.Interfaces
     public class ConexionEmpleado
     {
         // 1. Configura tu cadena de conexión usando el Endpoint de AWS RDS
-        // ¡IMPORTANTE! Reemplaza los placeholders con tus datos reales de AWS.
         private readonly string connectionString = "server=db-foodware-1.ch60qia0smb4.us-east-2.rds.amazonaws.com;database=db_foodware1;uid=admin;pwd=4+67.(=^fGw";
-        // MI SERVER
-        // "server=db-foodware-1.ch60qia0smb4.us-east-2.rds.amazonaws.com;database=db_foodware1;uid=admin;pwd=4+67.(=^fGw";
-
 
         // Método auxiliar para obtener la conexión
         private MySqlConnection GetConnection()
@@ -26,7 +21,7 @@ namespace FoodWare.Model.Interfaces
         }
 
         // =================================================================
-        // OPERACIÓN R (READ / LEER) - CORRECCIÓN DE NULOS
+        // OPERACIÓN R (READ / LEER) - Lógica de Nulos C->BD OK
         // =================================================================
         public List<Empleado> ObtenerTodosEmpleados()
         {
@@ -42,27 +37,21 @@ namespace FoodWare.Model.Interfaces
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
+                        // Captura las posiciones de las columnas nulas solo una vez
+                        int finalContractIndex = reader.GetOrdinal("fecha_contrato_final");
+                        int apellidoMatIndex = reader.GetOrdinal("apellido_mat");
+
                         while (reader.Read())
                         {
-                            // Lógica para manejar valores NULL en C#
-                            // Usamos el índice de la columna (GetOrdinal) para verificar si es nulo.
-
-                            // Captura las posiciones de las columnas nulas solo una vez
-                            int finalContractIndex = reader.GetOrdinal("fecha_contrato_final");
-                            int apellidoMatIndex = reader.GetOrdinal("apellido_mat");
-
                             listaEmpleados.Add(new Empleado
                             {
                                 IdEmpleado = reader.GetInt32("id_empleado"),
                                 Nombre = reader.GetString("nombre"),
-
-                                // Apellido Paterno: Asumiendo que es NOT NULL
                                 ApellidoPaterno = reader.GetString("apellido_pat"),
 
                                 // Apellido Materno: Verifica si es nulo (devuelve string.Empty si lo es)
                                 ApellidoMaterno = reader.IsDBNull(apellidoMatIndex) ? string.Empty : reader.GetString(apellidoMatIndex),
 
-                                // Sueldo: Asumiendo que es NOT NULL, pero si permitiera NULL, se haría la verificación similar.
                                 Sueldo = reader.GetDecimal("sueldo"),
 
                                 FechaContratoInicio = reader.GetDateTime("fecha_contrato_inicio"),
@@ -77,13 +66,11 @@ namespace FoodWare.Model.Interfaces
                 }
                 catch (MySqlException ex)
                 {
-                    // Esto captura errores de conexión o SQL
                     Console.WriteLine("Error de MySql al leer empleados: " + ex.Message);
                     return null;
                 }
                 catch (Exception ex)
                 {
-                    // Esto captura errores de lectura de datos (como el SqlNullValueException)
                     Console.WriteLine("Error de lectura de datos: " + ex.Message);
                     return null;
                 }
@@ -92,22 +79,28 @@ namespace FoodWare.Model.Interfaces
         }
 
         // =================================================================
-        // OPERACIÓN C (CREATE / CREAR)
+        // OPERACIÓN C (CREATE / CREAR) - CORRECCIÓN DE NULOS HACIA BD
         // =================================================================
         public bool CrearEmpleado(Empleado nuevoEmpleado)
         {
-            // Nota: Aquí también se incluye el esquema 'db_foodware1.' para asegurar la tabla correcta.
-            string query = "INSERT INTO db_foodware1.EMPLEADOS (nombre, apellido_pat, apellido_mat, sueldo, fecha_contrato_inicio, id_rol) VALUES (@Nombre, @APat, @AMat, @Sueldo, @FechaInicio, @IdRol)";
+            // Se incluye fecha_contrato_final en el insert si es que el empleado tiene un contrato final, sino, se usa un valor null.
+            string query = "INSERT INTO db_foodware1.EMPLEADOS (nombre, apellido_pat, apellido_mat, sueldo, fecha_contrato_inicio, fecha_contrato_final, id_rol) VALUES (@Nombre, @APat, @AMat, @Sueldo, @FechaInicio, @FechaFinal, @IdRol)";
 
             using (MySqlConnection connection = GetConnection())
             using (MySqlCommand command = new MySqlCommand(query, connection))
             {
-                // Uso de parámetros para prevenir inyección SQL
                 command.Parameters.AddWithValue("@Nombre", nuevoEmpleado.Nombre);
                 command.Parameters.AddWithValue("@APat", nuevoEmpleado.ApellidoPaterno);
-                command.Parameters.AddWithValue("@AMat", nuevoEmpleado.ApellidoMaterno);
+
+                // Manejo de ApellidoMaterno (string)
+                command.Parameters.AddWithValue("@AMat", string.IsNullOrEmpty(nuevoEmpleado.ApellidoMaterno) ? (object)DBNull.Value : nuevoEmpleado.ApellidoMaterno);
+
                 command.Parameters.AddWithValue("@Sueldo", nuevoEmpleado.Sueldo);
                 command.Parameters.AddWithValue("@FechaInicio", nuevoEmpleado.FechaContratoInicio);
+
+                // Manejo de FechaContratoFinal (DateTime?)
+                command.Parameters.AddWithValue("@FechaFinal", nuevoEmpleado.FechaContratoFinal.HasValue ? (object)nuevoEmpleado.FechaContratoFinal.Value : DBNull.Value);
+
                 command.Parameters.AddWithValue("@IdRol", nuevoEmpleado.IdRol);
 
                 try
@@ -124,18 +117,28 @@ namespace FoodWare.Model.Interfaces
         }
 
         // =================================================================
-        // OPERACIÓN U (UPDATE / ACTUALIZAR)
+        // OPERACIÓN U (UPDATE / ACTUALIZAR) - CORRECCIÓN DE NULOS HACIA BD
         // =================================================================
         public bool ActualizarEmpleado(Empleado empleadoAActualizar)
         {
-            string query = "UPDATE db_foodware1.EMPLEADOS SET nombre = @Nombre, sueldo = @Sueldo, id_rol = @IdRol WHERE id_empleado = @Id;";
+            // Incluye apellido_pat y las fechas para un update completo
+            string query = "UPDATE db_foodware1.EMPLEADOS SET nombre = @Nombre, apellido_pat = @APat, apellido_mat = @AMat, sueldo = @Sueldo, fecha_contrato_inicio = @FechaInicio, fecha_contrato_final = @FechaFinal, id_rol = @IdRol WHERE id_empleado = @Id;";
 
             using (MySqlConnection connection = GetConnection())
             using (MySqlCommand command = new MySqlCommand(query, connection))
             {
-                // Parámetros
                 command.Parameters.AddWithValue("@Nombre", empleadoAActualizar.Nombre);
+                command.Parameters.AddWithValue("@APat", empleadoAActualizar.ApellidoPaterno);
+
+                // Manejo de ApellidoMaterno (string)
+                command.Parameters.AddWithValue("@AMat", string.IsNullOrEmpty(empleadoAActualizar.ApellidoMaterno) ? (object)DBNull.Value : empleadoAActualizar.ApellidoMaterno);
+
                 command.Parameters.AddWithValue("@Sueldo", empleadoAActualizar.Sueldo);
+                command.Parameters.AddWithValue("@FechaInicio", empleadoAActualizar.FechaContratoInicio);
+
+                // Manejo de FechaContratoFinal (DateTime?)
+                command.Parameters.AddWithValue("@FechaFinal", empleadoAActualizar.FechaContratoFinal.HasValue ? (object)empleadoAActualizar.FechaContratoFinal.Value : DBNull.Value);
+
                 command.Parameters.AddWithValue("@IdRol", empleadoAActualizar.IdRol);
                 command.Parameters.AddWithValue("@Id", empleadoAActualizar.IdEmpleado);
 
@@ -179,5 +182,3 @@ namespace FoodWare.Model.Interfaces
         }
     }
 }
-
-
