@@ -68,6 +68,19 @@ namespace FoodWare.Model.DataAccess
             await connection.ExecuteAsync(sql, producto);
         }
 
+        public async Task ActualizarStockAsync(int idProducto, decimal cantidadADescontar, SqlConnection connection, SqlTransaction transaction)
+        {
+            // Resta la cantidad del stock actual
+            string sql = @"UPDATE Productos 
+                   SET StockActual = StockActual - @Cantidad 
+                   WHERE IdProducto = @IdProducto;";
+
+            // Dapper usará la conexión y transacción existentes
+            await connection.ExecuteAsync(sql,
+                new { Cantidad = cantidadADescontar, IdProducto = idProducto },
+                transaction);
+        }
+
         // --- Métodos Pendientes de Implementación ---
         public Task<Producto> ObtenerPorIdAsync(int id) 
             => throw new NotImplementedException("La funcionalidad de obtener por ID aún no está implementada.");

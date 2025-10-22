@@ -97,9 +97,9 @@
             // 
             panelAnalisisSubmenu.Controls.Add(btnReportes);
             panelAnalisisSubmenu.Dock = DockStyle.Top;
-            panelAnalisisSubmenu.Location = new Point(0, 269);
+            panelAnalisisSubmenu.Location = new Point(0, 294);
             panelAnalisisSubmenu.Name = "panelAnalisisSubmenu";
-            panelAnalisisSubmenu.Size = new Size(240, 100);
+            panelAnalisisSubmenu.Size = new Size(240, 50);
             panelAnalisisSubmenu.TabIndex = 1;
             // 
             // btnReportes
@@ -115,7 +115,7 @@
             // btnAnalisis
             // 
             btnAnalisis.Dock = DockStyle.Top;
-            btnAnalisis.Location = new Point(0, 246);
+            btnAnalisis.Location = new Point(0, 271);
             btnAnalisis.Name = "btnAnalisis";
             btnAnalisis.Size = new Size(240, 23);
             btnAnalisis.TabIndex = 2;
@@ -127,9 +127,9 @@
             panelAdminSubmenu.Controls.Add(btnFinanzas);
             panelAdminSubmenu.Controls.Add(btnEmpleados);
             panelAdminSubmenu.Dock = DockStyle.Top;
-            panelAdminSubmenu.Location = new Point(0, 146);
+            panelAdminSubmenu.Location = new Point(0, 191);
             panelAdminSubmenu.Name = "panelAdminSubmenu";
-            panelAdminSubmenu.Size = new Size(240, 100);
+            panelAdminSubmenu.Size = new Size(240, 80);
             panelAdminSubmenu.TabIndex = 3;
             // 
             // btnFinanzas
@@ -155,7 +155,7 @@
             // btnAdmin
             // 
             btnAdmin.Dock = DockStyle.Top;
-            btnAdmin.Location = new Point(0, 123);
+            btnAdmin.Location = new Point(0, 168);
             btnAdmin.Name = "btnAdmin";
             btnAdmin.Size = new Size(240, 23);
             btnAdmin.TabIndex = 4;
@@ -171,7 +171,7 @@
             panelGPSubmenu.Dock = DockStyle.Top;
             panelGPSubmenu.Location = new Point(0, 23);
             panelGPSubmenu.Name = "panelGPSubmenu";
-            panelGPSubmenu.Size = new Size(240, 100);
+            panelGPSubmenu.Size = new Size(240, 145);
             panelGPSubmenu.TabIndex = 5;
             // 
             // btnVentas

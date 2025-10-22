@@ -51,7 +51,29 @@ namespace FoodWare.Model.DataAccess
                                R.IdPlatillo = @IdPlatillo;";
 
             var detalles = await connection.QueryAsync<RecetaDetalle>(sql, new { IdPlatillo = idPlatillo });
-            return [.. detalles]; // Sigue el estilo de C# 12 que ya usas. Perfecto.
+            return [.. detalles];
+        }
+        public async Task<List<RecetaDetalle>> ObtenerPorPlatilloAsync(int idPlatillo, SqlConnection connection, SqlTransaction transaction)
+        {
+            // La consulta es la misma, solo cambian los parámetros
+            string sql = @"SELECT 
+                       R.IdReceta, 
+                       R.IdProducto, 
+                       P.Nombre AS NombreProducto, 
+                       R.Cantidad, 
+                       P.UnidadMedida
+                   FROM 
+                       Recetas R 
+                   INNER JOIN 
+                       Productos P ON R.IdProducto = P.IdProducto
+                   WHERE 
+                       R.IdPlatillo = @IdPlatillo;";
+
+            var detalles = await connection.QueryAsync<RecetaDetalle>(sql,
+                new { IdPlatillo = idPlatillo },
+                transaction);
+
+            return [.. detalles];
         }
     }
 }
