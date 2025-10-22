@@ -76,7 +76,7 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloPanel(panelEdicionReceta, EstilosApp.ColorFondo);
 
             // Etiquetas del Panel de Edición de Receta
-            EstilosApp.EstiloLabelModulo(lblTituloReceta);
+            EstilosApp.EstiloLabelTitulo(lblTituloReceta);
             EstilosApp.EstiloLabelModulo(lblProducto);
             EstilosApp.EstiloLabelModulo(lblCantidadReceta);
 
@@ -90,8 +90,7 @@ namespace FoodWare.View.UserControls
             // Botones del Panel de Edición de Receta
             EstilosApp.EstiloBotonModulo(btnAgregarIngrediente);
             EstilosApp.EstiloBotonModuloAlerta(btnEliminarIngrediente);
-            EstilosApp.EstiloBotonModuloSecundario(btnActualizarIngrediente);
-            EstilosApp.EstiloBotonModuloAlerta(btnVolverAlMenu);
+            EstilosApp.EstiloBotonModuloSecundario(btnVolverAlMenu);
         }
 
         /// <summary>
@@ -146,12 +145,18 @@ namespace FoodWare.View.UserControls
         /// <summary>
         /// Limpia las cajas de texto del formulario.
         /// </summary>
+        /// <summary>
+        /// Limpia las cajas de texto del formulario.
+        /// </summary>
         private void LimpiarCampos()
         {
             txtNombre.Text = "";
             cmbCategoria.SelectedIndex = -1;
             txtPrecio.Text = "";
             txtNombre.Focus(); // Pone el cursor de vuelta en el primer campo
+
+            // Limpiamos la variable de estado
+            _platilloSeleccionado = null;
         }
 
         /// <summary>
@@ -183,7 +188,6 @@ namespace FoodWare.View.UserControls
         {
             try
             {
-                this.Cursor = Cursors.WaitCursor;
                 dgvReceta.DataSource = null;
                 var receta = await _recetaController.CargarRecetaDePlatilloAsync(idPlatillo);
                 dgvReceta.DataSource = receta;
@@ -202,10 +206,6 @@ namespace FoodWare.View.UserControls
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar la receta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
             }
         }
 
@@ -297,11 +297,66 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        private void BtnActualizar_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Manejador del clic en 'Actualizar'. Se convierte en 'async void'.
+        /// </summary>
+        private async void BtnActualizar_Click(object sender, EventArgs e)
         {
-            // La lógica para actualizar un producto irá aquí más adelante.
-            // Por ahora, podemos poner un mensaje temporal.
-            MessageBox.Show("La función de actualizar se implementará pronto.", "Función no disponible", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // 1. Validar que haya un platillo seleccionado
+            if (_platilloSeleccionado == null)
+            {
+                MessageBox.Show("Por favor, selecciona un platillo de la lista para actualizar.", "Ningún platillo seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                // 2. La Vista RECOGE los datos de los campos.
+                string nombre = txtNombre.Text;
+                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
+
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
+                {
+                    MessageBox.Show("El precio debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtPrecio.Focus();
+                    return;
+                }
+
+                // 3. Creamos el objeto Platillo con los datos actualizados Y el ID original
+                Platillo platilloActualizado = new()
+                {
+                    IdPlatillo = _platilloSeleccionado.IdPlatillo, // <-- El ID original es clave
+                    Nombre = nombre,
+                    Categoria = categoria,
+                    PrecioVenta = precio
+                };
+
+                // 4. Guardamos el ID antes de hacer nada
+                int idActualizado = platilloActualizado.IdPlatillo;
+
+                this.Cursor = Cursors.WaitCursor;
+                await _controller.ActualizarPlatilloAsync(platilloActualizado);
+                
+                MessageBox.Show("¡Platillo actualizado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                LimpiarCampos();
+                await CargarGridPlatillosAsync(); // El grid se recarga
+
+                // 5. Llamamos a nuestro nuevo método para re-seleccionar la fila
+                SeleccionarPlatilloEnGrid(idActualizado);
+            }
+            catch (ArgumentException aex) // Errores de validación
+            {
+                MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex) // Errores inesperados
+            {
+                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
         }
 
         /// <summary>
@@ -326,19 +381,43 @@ namespace FoodWare.View.UserControls
             if (dgvMenu.CurrentRow == null || dgvMenu.CurrentRow.DataBoundItem is not Platillo platilloSeleccionado)
                 return;
 
-            // 1. Guardamos el platillo que estamos editando
-            _platilloEnEdicion = platilloSeleccionado;
+            // --- CAMBIO INICIA ---
+            try
+            {
+                // 1. Ponemos el cursor de espera AHORA
+                this.Cursor = Cursors.WaitCursor;
 
-            // 2. Configuramos el panel de edición
-            lblTituloReceta.Text = $"Gestionando Receta de: {_platilloEnEdicion.Nombre}";
+                // 2. Guardamos el platillo que estamos editando
+                _platilloEnEdicion = platilloSeleccionado;
 
-            // 3. Cargamos los datos
-            await CargarGridRecetaAsync(_platilloEnEdicion.IdPlatillo);
-            await CargarProductosComboBoxAsync();
+                // 3. Configuramos el panel de edición (Título)
+                lblTituloReceta.Text = $"Gestionando Receta de: {_platilloEnEdicion.Nombre}";
 
-            // 4. Intercambiamos los paneles (El "Switch")
-            dgvMenu.Visible = false;
-            panelEdicionReceta.Visible = true;
+                // 4. Limpiamos los controles antes de mostrar el panel
+                dgvReceta.DataSource = null;
+                cmbProductos.DataSource = null;
+
+                // 5. Intercambiamos los paneles AHORA. 
+                // El usuario verá el panel vacío con el cursor girando.
+                dgvMenu.Visible = false;
+                panelEdicionReceta.Visible = true;
+
+                // 6. Cargamos los datos (ahora rellenarán el panel ya visible)
+                await CargarGridRecetaAsync(_platilloEnEdicion.IdPlatillo);
+                await CargarProductosComboBoxAsync();
+            }
+            catch (Exception ex)
+            {
+                // Si algo falla, lo notificamos y volvemos al menú
+                MessageBox.Show($"Error al preparar la gestión de receta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                BtnVolverAlMenu_Click(sender, e); // Reutilizamos el botón de volver
+            }
+            finally
+            {
+                // 7. Pase lo que pase, restauramos el cursor
+                this.Cursor = Cursors.Default;
+            }
+            // --- CAMBIO TERMINA ---
         }
 
         /// <summary>
@@ -426,6 +505,64 @@ namespace FoodWare.View.UserControls
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error al eliminar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Guarda el platillo que está seleccionado en el grid para su edición
+        /// </summary>
+        private Platillo? _platilloSeleccionado;
+
+        private void ItemEditarPlatillo_Click(object? sender, EventArgs e)
+        {
+            // Verificamos si hay una fila seleccionada y si podemos obtener el objeto Platillo
+            if (dgvMenu.CurrentRow != null && dgvMenu.CurrentRow.DataBoundItem is Platillo platillo)
+            {
+                // 1. Guardamos el platillo seleccionado en nuestra variable de estado
+                _platilloSeleccionado = platillo;
+
+                // 2. Rellenamos los campos del formulario
+                txtNombre.Text = platillo.Nombre;
+                cmbCategoria.SelectedItem = platillo.Categoria;
+                txtPrecio.Text = platillo.PrecioVenta.ToString("F2");
+
+                // 3. (Opcional pero recomendado) Ponemos el foco en el primer campo
+                txtNombre.Focus();
+            }
+            else
+            {
+                // Si algo sale mal (ej. clic derecho en el encabezado), limpiamos
+                LimpiarCampos();
+            }
+        }
+
+        /// <summary>
+        /// Evento del clic derecho "Editar Platillo".
+        /// Carga los datos del platillo seleccionado en los campos del formulario.
+        /// </summary>
+
+        /// <summary>
+        /// Busca un platillo por su ID en el DataGridView y lo selecciona.
+        /// </summary>
+        /// <param name="idPlatillo">El ID del platillo a buscar y seleccionar.</param>
+        private void SeleccionarPlatilloEnGrid(int idPlatillo)
+        {
+            // Recorremos cada fila del grid
+            foreach (DataGridViewRow row in dgvMenu.Rows)
+            {
+                // El 'if' se fusiona en una sola línea con &&
+                if (row.DataBoundItem is Platillo platillo && platillo.IdPlatillo == idPlatillo)
+                {
+                    // ¡La seleccionamos!
+                    row.Selected = true;
+
+                    // (Opcional) Nos aseguramos de que el grid se desplace
+                    // (scroll) hasta esta fila si estaba oculta.
+                    dgvMenu.FirstDisplayedScrollingRowIndex = row.Index;
+
+                    // Detenemos el bucle porque ya encontramos la fila
+                    break;
                 }
             }
         }

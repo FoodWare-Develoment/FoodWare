@@ -29,7 +29,6 @@
             itemGestionarReceta = new ToolStripMenuItem();
             panelEdicionReceta = new Panel();
             btnVolverAlMenu = new Button();
-            btnActualizarIngrediente = new Button();
             btnEliminarIngrediente = new Button();
             btnAgregarIngrediente = new Button();
             txtCantidadReceta = new TextBox();
@@ -38,6 +37,7 @@
             cmbProductos = new ComboBox();
             dgvReceta = new DataGridView();
             lblTituloReceta = new Label();
+            itemEditarPlatillo = new ToolStripMenuItem();
             panelInputs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvMenu).BeginInit();
             contextMenuPlatillo.SuspendLayout();
@@ -166,21 +166,20 @@
             // contextMenuPlatillo
             // 
             contextMenuPlatillo.ImageScalingSize = new Size(20, 20);
-            contextMenuPlatillo.Items.AddRange(new ToolStripItem[] { itemGestionarReceta });
+            contextMenuPlatillo.Items.AddRange(new ToolStripItem[] { itemGestionarReceta, itemEditarPlatillo });
             contextMenuPlatillo.Name = "contextMenuPlatillo";
-            contextMenuPlatillo.Size = new Size(191, 28);
+            contextMenuPlatillo.Size = new Size(211, 80);
             // 
             // itemGestionarReceta
             // 
             itemGestionarReceta.Name = "itemGestionarReceta";
-            itemGestionarReceta.Size = new Size(190, 24);
+            itemGestionarReceta.Size = new Size(211, 24);
             itemGestionarReceta.Text = "Gestionar Receta";
             itemGestionarReceta.Click += ItemGestionarReceta_Click;
             // 
             // panelEdicionReceta
             // 
             panelEdicionReceta.Controls.Add(btnVolverAlMenu);
-            panelEdicionReceta.Controls.Add(btnActualizarIngrediente);
             panelEdicionReceta.Controls.Add(btnEliminarIngrediente);
             panelEdicionReceta.Controls.Add(btnAgregarIngrediente);
             panelEdicionReceta.Controls.Add(txtCantidadReceta);
@@ -197,28 +196,19 @@
             // 
             // btnVolverAlMenu
             // 
-            btnVolverAlMenu.Location = new Point(802, 160);
+            btnVolverAlMenu.Location = new Point(802, 141);
             btnVolverAlMenu.Name = "btnVolverAlMenu";
-            btnVolverAlMenu.Size = new Size(104, 45);
+            btnVolverAlMenu.Size = new Size(104, 55);
             btnVolverAlMenu.TabIndex = 9;
             btnVolverAlMenu.Text = "Volver";
             btnVolverAlMenu.UseVisualStyleBackColor = true;
             btnVolverAlMenu.Click += BtnVolverAlMenu_Click;
             // 
-            // btnActualizarIngrediente
-            // 
-            btnActualizarIngrediente.Location = new Point(802, 111);
-            btnActualizarIngrediente.Name = "btnActualizarIngrediente";
-            btnActualizarIngrediente.Size = new Size(104, 45);
-            btnActualizarIngrediente.TabIndex = 8;
-            btnActualizarIngrediente.Text = "Actualizar";
-            btnActualizarIngrediente.UseVisualStyleBackColor = true;
-            // 
             // btnEliminarIngrediente
             // 
-            btnEliminarIngrediente.Location = new Point(802, 62);
+            btnEliminarIngrediente.Location = new Point(802, 79);
             btnEliminarIngrediente.Name = "btnEliminarIngrediente";
-            btnEliminarIngrediente.Size = new Size(104, 45);
+            btnEliminarIngrediente.Size = new Size(104, 55);
             btnEliminarIngrediente.TabIndex = 7;
             btnEliminarIngrediente.Text = "Eliminar";
             btnEliminarIngrediente.UseVisualStyleBackColor = true;
@@ -226,9 +216,9 @@
             // 
             // btnAgregarIngrediente
             // 
-            btnAgregarIngrediente.Location = new Point(802, 12);
+            btnAgregarIngrediente.Location = new Point(802, 15);
             btnAgregarIngrediente.Name = "btnAgregarIngrediente";
-            btnAgregarIngrediente.Size = new Size(104, 45);
+            btnAgregarIngrediente.Size = new Size(104, 55);
             btnAgregarIngrediente.TabIndex = 6;
             btnAgregarIngrediente.Text = "Agregar";
             btnAgregarIngrediente.UseVisualStyleBackColor = true;
@@ -279,14 +269,21 @@
             // 
             // lblTituloReceta
             // 
-            lblTituloReceta.AutoSize = true;
+            lblTituloReceta.Dock = DockStyle.Top;
             lblTituloReceta.Font = new Font("Segoe UI", 13F);
-            lblTituloReceta.Location = new Point(450, 12);
+            lblTituloReceta.Location = new Point(0, 0);
             lblTituloReceta.Name = "lblTituloReceta";
-            lblTituloReceta.Size = new Size(71, 30);
+            lblTituloReceta.Size = new Size(960, 40);
             lblTituloReceta.TabIndex = 0;
             lblTituloReceta.Text = "label1";
             lblTituloReceta.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // itemEditarPlatillo
+            // 
+            itemEditarPlatillo.Name = "itemEditarPlatillo";
+            itemEditarPlatillo.Size = new Size(210, 24);
+            itemEditarPlatillo.Text = "Editar Platillo";
+            itemEditarPlatillo.Click += ItemEditarPlatillo_Click;
             // 
             // UC_Menu
             // 
@@ -327,8 +324,8 @@
         private Label lblCantidadReceta;
         private TextBox txtCantidadReceta;
         private Button btnVolverAlMenu;
-        private Button btnActualizarIngrediente;
         private Button btnEliminarIngrediente;
         private Button btnAgregarIngrediente;
+        private ToolStripMenuItem itemEditarPlatillo;
     }
 }

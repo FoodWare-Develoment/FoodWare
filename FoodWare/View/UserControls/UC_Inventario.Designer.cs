@@ -13,7 +13,9 @@
 
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             panelInputs = new Panel();
+            cmbCategoria = new ComboBox();
             cmbUnidadMedida = new ComboBox();
             btnActualizar = new Button();
             lblUnidad = new Label();
@@ -30,9 +32,11 @@
             txtStock = new TextBox();
             txtNombre = new TextBox();
             dgvInventario = new DataGridView();
-            cmbCategoria = new ComboBox();
+            contextMenuInventario = new ContextMenuStrip(components);
+            itemEditarProducto = new ToolStripMenuItem();
             panelInputs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvInventario).BeginInit();
+            contextMenuInventario.SuspendLayout();
             SuspendLayout();
             // 
             // panelInputs
@@ -59,6 +63,15 @@
             panelInputs.Size = new Size(960, 269);
             panelInputs.TabIndex = 0;
             // 
+            // cmbCategoria
+            // 
+            cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCategoria.FormattingEnabled = true;
+            cmbCategoria.Location = new Point(164, 56);
+            cmbCategoria.Name = "cmbCategoria";
+            cmbCategoria.Size = new Size(590, 28);
+            cmbCategoria.TabIndex = 20;
+            // 
             // cmbUnidadMedida
             // 
             cmbUnidadMedida.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -77,6 +90,7 @@
             btnActualizar.TabIndex = 18;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
+            btnActualizar.Click += BtnActualizar_Click;
             // 
             // lblUnidad
             // 
@@ -208,20 +222,26 @@
             // 
             dgvInventario.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvInventario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvInventario.ContextMenuStrip = contextMenuInventario;
             dgvInventario.Location = new Point(0, 269);
             dgvInventario.Name = "dgvInventario";
             dgvInventario.RowHeadersWidth = 51;
             dgvInventario.Size = new Size(960, 399);
             dgvInventario.TabIndex = 1;
             // 
-            // cmbCategoria
+            // contextMenuInventario
             // 
-            cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbCategoria.FormattingEnabled = true;
-            cmbCategoria.Location = new Point(164, 56);
-            cmbCategoria.Name = "cmbCategoria";
-            cmbCategoria.Size = new Size(590, 28);
-            cmbCategoria.TabIndex = 20;
+            contextMenuInventario.ImageScalingSize = new Size(20, 20);
+            contextMenuInventario.Items.AddRange(new ToolStripItem[] { itemEditarProducto });
+            contextMenuInventario.Name = "contextMenuInventario";
+            contextMenuInventario.Size = new Size(211, 56);
+            // 
+            // itemEditarProducto
+            // 
+            itemEditarProducto.Name = "itemEditarProducto";
+            itemEditarProducto.Size = new Size(210, 24);
+            itemEditarProducto.Text = "Editar Producto";
+            itemEditarProducto.Click += ItemEditarProducto_Click;
             // 
             // UC_Inventario
             // 
@@ -234,6 +254,7 @@
             panelInputs.ResumeLayout(false);
             panelInputs.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvInventario).EndInit();
+            contextMenuInventario.ResumeLayout(false);
             ResumeLayout(false);
         }
         private Panel panelInputs;
@@ -254,5 +275,7 @@
         private Button btnActualizar;
         private ComboBox cmbUnidadMedida;
         private ComboBox cmbCategoria;
+        private ContextMenuStrip contextMenuInventario;
+        private ToolStripMenuItem itemEditarProducto;
     }
 }

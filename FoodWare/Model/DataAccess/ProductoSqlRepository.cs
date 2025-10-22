@@ -49,15 +49,27 @@ namespace FoodWare.Model.DataAccess
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
+        /// <summary>
+        /// Actualiza un producto existente en la base de datos.
+        /// </summary>
+        public async Task ActualizarAsync(Producto producto)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            string sql = @"UPDATE Productos 
+                           SET Nombre = @Nombre, 
+                               Categoria = @Categoria, 
+                               UnidadMedida = @UnidadMedida, 
+                               StockActual = @StockActual, 
+                               StockMinimo = @StockMinimo, 
+                               PrecioCosto = @PrecioCosto 
+                           WHERE IdProducto = @IdProducto;";
+
+            // Usamos ExecuteAsync para la operación de actualización
+            await connection.ExecuteAsync(sql, producto);
+        }
+
         // --- Métodos Pendientes de Implementación ---
-
-        public Task ActualizarAsync(Producto producto) 
-            => throw new NotImplementedException("La funcionalidad de actualizar aún no está implementada.");
-
-
         public Task<Producto> ObtenerPorIdAsync(int id) 
             => throw new NotImplementedException("La funcionalidad de obtener por ID aún no está implementada.");
-        
-        
     }
 }

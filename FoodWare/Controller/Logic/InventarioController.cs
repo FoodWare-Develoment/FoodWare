@@ -81,6 +81,42 @@ namespace FoodWare.Controller.Logic
             await _repositorio.EliminarAsync(id);
         }
 
-        // Aquí iran métodos para Actualizar...
+        /// <summary>
+        /// Actualiza un producto existente en el repositorio de forma asíncrona.
+        /// </summary>
+        /// <param name="producto">El producto con los datos actualizados.</param>
+        public async Task ActualizarProductoAsync(Producto producto)
+        {
+            // Reutilizamos las mismas validaciones que al guardar
+            if (string.IsNullOrWhiteSpace(producto.Nombre))
+            {
+                // Mensaje mejorado y 'nameof(producto)'
+                throw new ArgumentException("La propiedad 'Nombre' del producto no puede estar vacía.", nameof(producto));
+            }
+
+            if (string.IsNullOrWhiteSpace(producto.Categoria))
+            {
+                throw new ArgumentException("La propiedad 'Categoria' del producto no puede estar vacía.", nameof(producto));
+            }
+
+            if (string.IsNullOrWhiteSpace(producto.UnidadMedida))
+            {
+                throw new ArgumentException("La propiedad 'UnidadMedida' del producto no puede estar vacía.", nameof(producto));
+            }
+
+            if (producto.StockActual < 0 || producto.StockMinimo < 0 || producto.PrecioCosto < 0)
+            {
+                // Esta excepción también necesita el 'nameof'
+                throw new ArgumentException("Los valores numéricos (Stock, Stock Mínimo, Precio) no pueden ser negativos.", nameof(producto));
+            }
+
+            if (producto.IdProducto <= 0)
+            {
+                throw new ArgumentException("La propiedad 'IdProducto' no es válida para actualizar.", nameof(producto));
+            }
+
+            // Llamamos al método asíncrono del repositorio
+            await _repositorio.ActualizarAsync(producto);
+        }
     }
 }

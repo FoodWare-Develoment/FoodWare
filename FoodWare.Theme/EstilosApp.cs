@@ -174,6 +174,16 @@ namespace FoodWare.View.Helpers
         /// <summary>
         /// Aplica un estilo estándar a una etiqueta de formulario.
         /// </summary>
+        public static void EstiloLabelTitulo(Label lbl)
+        {
+            lbl.ForeColor = ColorTextoOscuro;
+            lbl.BackColor = Color.Transparent;
+            lbl.Font = new Font(FuentePrincipal, 13, FontStyle.Bold);
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a una etiqueta de formulario.
+        /// </summary>
         public static void EstiloLabelModulo(Label lbl)
         {
             lbl.ForeColor = ColorTextoOscuro;
