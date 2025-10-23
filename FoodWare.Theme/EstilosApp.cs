@@ -174,6 +174,16 @@ namespace FoodWare.View.Helpers
         /// <summary>
         /// Aplica un estilo estándar a una etiqueta de formulario.
         /// </summary>
+        public static void EstiloLabelTitulo(Label lbl)
+        {
+            lbl.ForeColor = ColorTextoOscuro;
+            lbl.BackColor = Color.Transparent;
+            lbl.Font = new Font(FuentePrincipal, 13, FontStyle.Bold);
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a una etiqueta de formulario.
+        /// </summary>
         public static void EstiloLabelModulo(Label lbl)
         {
             lbl.ForeColor = ColorTextoOscuro;
@@ -190,6 +200,17 @@ namespace FoodWare.View.Helpers
             txt.ForeColor = ColorTextoOscuro;
             txt.BorderStyle = BorderStyle.FixedSingle;
             txt.Font = new Font(FuentePrincipal, 9);
+        }
+
+        /// <summary>
+        /// Aplica un estilo estándar a un ComboBox de formulario.
+        /// </summary>
+        public static void EstiloComboBoxModulo(ComboBox cmb)
+        {
+            cmb.BackColor = Color.White;
+            cmb.ForeColor = ColorTextoOscuro;
+            cmb.FlatStyle = FlatStyle.Flat; // Un borde más moderno
+            cmb.Font = new Font(FuentePrincipal, 9);
         }
     }
 }
