@@ -3,85 +3,72 @@ using System.Windows.Forms;
 using FoodWare.Controller;
 using FoodWare.Controller.Logic;
 using FoodWare.View.Helpers;
-using FoodWare.Model.Interfaces; 
+using FoodWare.Model.Interfaces;
 using FoodWare.Model.DataAccess;
 
 namespace FoodWare.View.Forms
 {
-    /// <summary>
-    /// Formulario de Inicio de Sesión. Valida al usuario y, si tiene éxito,
-    /// devuelve DialogResult.OK para que Program.cs inicie el FormMain.
-    /// </summary>
     public partial class LoginForm : Form
     {
-        private readonly LoginController _loginCtrl; // <-- Renombrado para claridad
+        private readonly LoginController _loginCtrl;
 
+        // --- AÑADIR ESTA PROPIEDAD ---
         /// <summary>
-        /// Inicializa el formulario de Login.
+        /// Almacena el Rol del usuario que inició sesión.
+        /// Program.cs leerá esto después de que el formulario se cierre.
         /// </summary>
+        public string RolUsuarioLogueado { get; private set; } = string.Empty;
+        // --- FIN ---
+
         public LoginForm()
         {
             InitializeComponent();
             AplicarEstilosDeLogin();
 
-            // 1. Creamos la instancia del repositorio real
             IUsuarioRepository repositorio = new UsuarioSqlRepository();
-            // 2. Se lo "inyectamos" al controlador
             _loginCtrl = new LoginController(repositorio);
         }
 
-        /// <summary>
-        /// Método de ayuda para aplicar los estilos de EstilosApp a este formulario.
-        /// </summary>
         private void AplicarEstilosDeLogin()
         {
-            // 1. Estilo de la Ventana
             this.BackColor = EstilosApp.ColorMenu;
-
-            // 2. Campos de Entrada (TextBox)
             EstilosApp.EstiloTextBoxLogin(this.txtUsuario);
             EstilosApp.EstiloTextBoxLogin(this.txtPassword);
-
-            // 3. Botón Principal (INGRESAR)
             EstilosApp.EstiloBotonAccionPrincipal(this.btnIngresar);
-
-            // 4. Label de Mensajes de Error
             EstilosApp.EstiloLabelError(this.lblMensajeError);
         }
 
-        /// <summary>
-        /// Método de ayuda para mostrar mensajes de error usando la etiqueta estilizada.
-        /// </summary>
         private void MostrarError(string mensaje)
         {
-            lblMensajeError.Text = "     * " + mensaje; // Muestra el mensaje de error (con prefijo)
+            lblMensajeError.Text = "     * " + mensaje;
             lblMensajeError.Visible = true;
         }
 
-        // --- LÓGICA DE VALIDACIÓN Y EVENTOS ---
+        // --- EVENT HANDLERS (MODIFICADOS) ---
 
-        /// <summary>
-        /// Evento principal del botón Ingresar. Ahora es 'async void'
-        /// para permitir la validación asíncrona.
-        /// </summary>
         private async void BtnIngresar_Click(object sender, EventArgs e)
         {
             try
             {
-                // 1. Cambiamos el cursor y deshabilitamos el botón
                 this.Cursor = Cursors.WaitCursor;
                 this.btnIngresar.Enabled = false;
 
-                // 2. La Vista recoge los datos y llama al Controlador asíncronamente
-                LoginResult resultado = await _loginCtrl.ValidarLoginAsync(this.txtUsuario.Text, this.txtPassword.Text);
+                // --- MODIFICACIÓN AQUÍ ---
+                // 2. Llamamos al controlador, que ahora devuelve una tupla
+                var (resultado, rol) = await _loginCtrl.ValidarLoginAsync(this.txtUsuario.Text, this.txtPassword.Text);
+                // --- FIN DE MODIFICACIÓN ---
 
-                // 3. La Vista reacciona a la respuesta (ya estamos en el hilo UI)
+                // 3. Reaccionamos
                 switch (resultado)
                 {
                     case LoginResult.Exitoso:
+                        // --- MODIFICACIÓN AQUÍ ---
+                        // Guardamos el rol antes de cerrar
+                        this.RolUsuarioLogueado = rol ?? "Default"; // Asigna "Default" si el rol es nulo
+                        // --- FIN DE MODIFICACIÓN ---
                         this.DialogResult = DialogResult.OK;
                         this.Close();
-                        break; // No es necesario, pero es buena práctica
+                        break;
 
                     case LoginResult.CredencialesInvalidas:
                         MostrarError("Usuario o contraseña incorrectos.");
@@ -96,30 +83,20 @@ namespace FoodWare.View.Forms
             }
             catch (Exception ex)
             {
-                // Captura genérica por si algo más falla
                 MostrarError("Error inesperado: " + ex.Message);
             }
             finally
             {
-                // 4. Pase lo que pase, restauramos la UI
                 this.Cursor = Cursors.Default;
                 this.btnIngresar.Enabled = true;
             }
         }
 
-        /// <summary>
-        /// (Buena práctica UX): Oculta el mensaje de error tan pronto como el usuario 
-        /// intenta corregir el nombre de usuario.
-        /// </summary>
         private void TxtUsuario_TextChanged(object? sender, EventArgs e)
         {
             lblMensajeError.Visible = false;
         }
 
-        /// <summary>
-        /// (Buena práctica UX): Oculta el mensaje de error tan pronto como el usuario
-        /// intenta corregir la contraseña.
-        /// </summary>
         private void TxtPassword_TextChanged(object? sender, EventArgs e)
         {
             lblMensajeError.Visible = false;
