@@ -63,9 +63,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_analyze_32 {
+        internal static System.Drawing.Bitmap icons_administracion_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-analyze-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-administracion-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_banknotes_32 {
+        internal static System.Drawing.Bitmap icons_agregar_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-banknotes-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-agregar-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_box_32 {
+        internal static System.Drawing.Bitmap icons_analisis_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-box-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-analisis-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_cash_register_32 {
+        internal static System.Drawing.Bitmap icons_configuracion_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-cash-register-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-configuracion-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_delete_32 {
+        internal static System.Drawing.Bitmap icons_editar_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-delete-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-editar-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_edit_32 {
+        internal static System.Drawing.Bitmap icons_eliminar_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-edit-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-eliminar-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -123,9 +123,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_health_graph_32 {
+        internal static System.Drawing.Bitmap icons_empleados_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-health-graph-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-empleados-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -133,9 +133,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_home_32 {
+        internal static System.Drawing.Bitmap icons_finanzas_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-home-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-finanzas-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -143,9 +143,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_management_32 {
+        internal static System.Drawing.Bitmap icons_gestion_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-management-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-gestion-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -153,9 +153,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_people_32 {
+        internal static System.Drawing.Bitmap icons_guardar_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-people-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-guardar-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -163,9 +163,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_restaurant_32 {
+        internal static System.Drawing.Bitmap icons_inicio_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-restaurant-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-inicio-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -173,9 +173,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_restaurant_menu_32 {
+        internal static System.Drawing.Bitmap icons_inventario_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-restaurant-menu-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-inventario-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -183,9 +183,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_save_32 {
+        internal static System.Drawing.Bitmap icons_limpiar_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-save-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-limpiar-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -193,9 +193,9 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_settings_32 {
+        internal static System.Drawing.Bitmap icons_logo_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-settings-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-logo-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -203,9 +203,39 @@ namespace FoodWare.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_test_results_32 {
+        internal static System.Drawing.Bitmap icons_menu_24 {
             get {
-                object obj = ResourceManager.GetObject("icons8-test-results-32", resourceCulture);
+                object obj = ResourceManager.GetObject("icons-menu-24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons_regresar_24 {
+            get {
+                object obj = ResourceManager.GetObject("icons-regresar-24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons_reportes_24 {
+            get {
+                object obj = ResourceManager.GetObject("icons-reportes-24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons_ventas_24 {
+            get {
+                object obj = ResourceManager.GetObject("icons-ventas-24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
