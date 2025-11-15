@@ -401,24 +401,22 @@ namespace FoodWare.View.UserControls
             // 2. Confirmación
             var confirm = MessageBox.Show($"¿Desea registrar esta venta por un total de {lblTotal.Text}?", "Confirmar Venta", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            // --- ESTA ES LA LÍNEA CORREGIDA ---
             if (confirm == DialogResult.No)
             {
                 return;
             }
-            // --- FIN DE LA CORRECCIÓN ---
 
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                btnRegistrarVenta.Enabled = false; // Deshabilitar botón
+                btnRegistrarVenta.Enabled = false;
 
                 // 3. Crear el objeto Venta principal
                 Venta nuevaVenta = new()
                 {
                     // TODO: Cuando el Login esté listo, aquí irá el ID del usuario real.
-                    IdUsuario = 2, // Usamos el 'admin' (IdUsuario=2) como placeholder
-                    FormaDePago = "Efectivo", // Puedes cambiar esto
+                    IdUsuario = UserSession.IdUsuario,
+                    FormaDePago = "Efectivo",
                     TotalVenta = _comandaActual.Sum(d => d.Cantidad * d.PrecioUnitario)
                 };
 

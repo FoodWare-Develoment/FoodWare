@@ -12,12 +12,6 @@ namespace FoodWare.View.Forms
     {
         private readonly LoginController _loginCtrl;
 
-        /// <summary>
-        /// Almacena el Rol del usuario que inició sesión.
-        /// Program.cs leerá esto después de que el formulario se cierre.
-        /// </summary>
-        public string RolUsuarioLogueado { get; private set; } = string.Empty;
-
         public LoginForm()
         {
             InitializeComponent();
@@ -51,15 +45,13 @@ namespace FoodWare.View.Forms
                 this.Cursor = Cursors.WaitCursor;
                 this.btnIngresar.Enabled = false;
 
-                // 2. Llamamos al controlador, que ahora devuelve una tupla
-                var (resultado, rol) = await _loginCtrl.ValidarLoginAsync(this.txtUsuario.Text, this.txtPassword.Text);
+                // 2. Llamamos al controlador, que ahora devuelve solo el resultado
+                var resultado = await _loginCtrl.ValidarLoginAsync(this.txtUsuario.Text, this.txtPassword.Text);
 
                 // 3. Reaccionamos
                 switch (resultado)
                 {
                     case LoginResult.Exitoso:
-                        // Guardamos el rol antes de cerrar
-                        this.RolUsuarioLogueado = rol ?? "Default";
                         this.DialogResult = DialogResult.OK;
                         this.Close();
                         break;

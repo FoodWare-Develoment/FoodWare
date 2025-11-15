@@ -2,6 +2,7 @@ using System;
 using System.Windows.Forms;
 using FoodWare.View.UserControls;
 using FoodWare.View.Helpers;
+using FoodWare.Controller.Logic;
 
 namespace FoodWare.View.Forms
 {
@@ -13,14 +14,15 @@ namespace FoodWare.View.Forms
         /// <summary>
         /// Constructor modificado para aceptar el rol del usuario.
         /// </summary>
-        public FormMain(string rolUsuario)
+        public FormMain()
         {
             InitializeComponent();
-            _rolUsuario = rolUsuario; // Guardamos el rol
+            // Leemos el rol desde la sesión estática
+            _rolUsuario = UserSession.NombreRol;
 
             PersonalizarDiseno();
             AplicarEstilos();
-            AplicarSeguridadPorRol(); // <-- Llamamos al nuevo método
+            AplicarSeguridadPorRol(); // Aplica seguridad basada en el rol
             CargarInicio();
         }
 

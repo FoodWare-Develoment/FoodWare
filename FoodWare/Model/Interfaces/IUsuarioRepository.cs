@@ -19,6 +19,11 @@ namespace FoodWare.Model.Interfaces
         /// </summary>
         Task<string?> ObtenerRolPorNombreUsuarioAsync(string username);
 
+        /// <summary>
+        /// Obtiene la información esencial para el login (Id, Rol, Hash).
+        /// </summary>
+        Task<LoginInfo?> ObtenerLoginInfoPorUsuarioAsync(string username);
+
         // --- MÉTODOS CRUD ---
 
         /// <summary>

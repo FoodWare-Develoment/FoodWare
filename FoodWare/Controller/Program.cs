@@ -24,11 +24,7 @@ namespace FoodWare.Controller
 
             if (loginForm.DialogResult == DialogResult.OK)
             {
-                // 1. Capturamos el rol que el LoginForm obtuvo
-                string rolUsuario = loginForm.RolUsuarioLogueado;
-
-                // 2. Inyectamos el rol en el FormMain
-                Application.Run(new FormMain(rolUsuario));
+                Application.Run(new FormMain());
             }
         }
     }

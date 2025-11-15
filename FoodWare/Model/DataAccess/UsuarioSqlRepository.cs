@@ -46,6 +46,25 @@ namespace FoodWare.Model.DataAccess
             return await connection.QuerySingleOrDefaultAsync<string>(sql, new { username });
         }
 
+        public async Task<LoginInfo?> ObtenerLoginInfoPorUsuarioAsync(string username)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            // Consulta con JOIN para obtener todos los datos del DTO
+            string sql = @"
+                SELECT 
+                    U.IdUsuario,
+                    U.NombreCompleto,
+                    U.ContraseñaHash,
+                    R.NombreRol 
+                FROM 
+                    Usuarios U
+                INNER JOIN 
+                    Roles R ON U.IdRol = R.IdRol
+                WHERE 
+                    U.NombreUsuario = @username AND U.Activo = 1;";
+
+            return await connection.QuerySingleOrDefaultAsync<LoginInfo>(sql, new { username });
+        }
 
         // --- Métodos CRUD ---
         public async Task<List<UsuarioDto>> ObtenerTodosDtoAsync()
