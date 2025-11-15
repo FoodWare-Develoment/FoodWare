@@ -36,22 +36,27 @@ namespace FoodWare.View.Helpers
         /// Aplica un estilo visual estandarizado a un botón de Menú Principal (Nivel 1).
         /// </summary>
 
+        /// <summary>
+        /// Aplica un estilo visual estandarizado a un botón de Menú Principal (Nivel 1).
+        /// </summary>
         public static void EstiloBotonMenu(Button btn)
         {
             btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderSize = 0; // Requerido para FlatStyle para quitar el borde
+            btn.FlatAppearance.BorderSize = 0;
             btn.ForeColor = Color.White;
             btn.BackColor = ColorMenu;
             btn.TextAlign = ContentAlignment.MiddleLeft;
             btn.Padding = new Padding(10, 0, 0, 0);
             btn.Height = 40;
             btn.Dock = DockStyle.Top;
+
+            btn.ImageAlign = ContentAlignment.MiddleLeft;
+            btn.TextImageRelation = TextImageRelation.ImageBeforeText;
         }
 
         /// <summary>
         /// Aplica un estilo visual estandarizado a un botón de Submenú (Nivel 2).
         /// </summary>
-
         public static void EstiloBotonSubmenu(Button btn)
         {
             btn.FlatStyle = FlatStyle.Flat;
@@ -59,9 +64,12 @@ namespace FoodWare.View.Helpers
             btn.ForeColor = Color.White;
             btn.BackColor = ColorSubmenuBG;
             btn.TextAlign = ContentAlignment.MiddleLeft;
-            btn.Padding = new Padding(30, 0, 0, 0); // Mayor indentación para Nivel 2
+            btn.Padding = new Padding(30, 0, 0, 0);
             btn.Height = 35;
             btn.Dock = DockStyle.Top;
+
+            btn.ImageAlign = ContentAlignment.MiddleLeft;
+            btn.TextImageRelation = TextImageRelation.ImageBeforeText;
         }
 
         // --- NUEVOS MÉTODOS DE ESTILO (LOGIN FORM) ---

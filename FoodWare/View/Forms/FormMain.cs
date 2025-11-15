@@ -13,7 +13,7 @@ namespace FoodWare.View.Forms
         /// <summary>
         /// Constructor modificado para aceptar el rol del usuario.
         /// </summary>
-        public FormMain(string rolUsuario) // <-- MODIFICADO
+        public FormMain(string rolUsuario)
         {
             InitializeComponent();
             _rolUsuario = rolUsuario; // Guardamos el rol
@@ -34,20 +34,61 @@ namespace FoodWare.View.Forms
 
         private void AplicarEstilos()
         {
+            // Asegúrate de que 'EstilosApp.' esté presente aquí
             EstilosApp.EstiloPanel(panelMenu, EstilosApp.ColorMenu);
             EstilosApp.EstiloPanel(panelBarra, EstilosApp.ColorBarra);
             EstilosApp.EstiloPanel(panelContenido, EstilosApp.ColorFondo);
+
+            // Botón Gestión Principal
             EstilosApp.EstiloBotonMenu(btnGP);
+            btnGP.Image = Properties.Resources.icons_gestion_24;
+            btnGP.Text = " Gestion Principal";
+
+            // Botón Administración
             EstilosApp.EstiloBotonMenu(btnAdmin);
+            btnAdmin.Image = Properties.Resources.icons_administracion_24;
+            btnAdmin.Text = " Administracion";
+
+            // Botón Análisis
             EstilosApp.EstiloBotonMenu(btnAnalisis);
+            btnAnalisis.Image = Properties.Resources.icons_analisis_24;
+            btnAnalisis.Text = " Analisis";
+
+            // Botón Configuración
             EstilosApp.EstiloBotonMenu(btnConfig);
+            btnConfig.Image = Properties.Resources.icons_configuracion_24;
+            btnConfig.Text = " Configuracion";
+
+            // --- Submenú Gestión Principal ---
             EstilosApp.EstiloBotonSubmenu(btnInicio);
+            btnInicio.Image = Properties.Resources.icons_inicio_24;
+            btnInicio.Text = " Inicio";
+
             EstilosApp.EstiloBotonSubmenu(btnInventario);
+            btnInventario.Image = Properties.Resources.icons_inventario_24;
+            btnInventario.Text = " Inventario";
+
             EstilosApp.EstiloBotonSubmenu(btnMenu);
+            btnMenu.Image = Properties.Resources.icons_menu_24;
+            btnMenu.Text = " Menu";
+
             EstilosApp.EstiloBotonSubmenu(btnVentas);
+            btnVentas.Image = Properties.Resources.icons_ventas_24;
+            btnVentas.Text = " Ventas";
+
+            // --- Submenú Administración ---
             EstilosApp.EstiloBotonSubmenu(btnEmpleados);
+            btnEmpleados.Image = Properties.Resources.icons_empleados_24;
+            btnEmpleados.Text = " Empleados";
+
             EstilosApp.EstiloBotonSubmenu(btnFinanzas);
+            btnFinanzas.Image = Properties.Resources.icons_finanzas_24;
+            btnFinanzas.Text = " Finanzas";
+
+            // --- Submenú Análisis ---
             EstilosApp.EstiloBotonSubmenu(btnReportes);
+            btnReportes.Image = Properties.Resources.icons_reportes_24;
+            btnReportes.Text = " Reportes";
         }
 
         /// <summary>
@@ -55,7 +96,6 @@ namespace FoodWare.View.Forms
         /// </summary>
         private void AplicarSeguridadPorRol()
         {
-            // Basado en la matriz de permisos del documento del proyecto
 
             // Primero, ocultamos todo lo sensible por defecto (permisos de Mesero)
             btnInventario.Visible = false;
@@ -133,7 +173,7 @@ namespace FoodWare.View.Forms
             modulo.BringToFront();
         }
 
-        // --- Event Handlers (Sin cambios) ---
+        // --- Event Handlers ---
         private void BtnGP_Click(object sender, EventArgs e) => MostrarSubmenu(panelGPSubmenu);
         private void BtnAdmin_Click(object sender, EventArgs e) => MostrarSubmenu(panelAdminSubmenu);
         private void BtnAnalisis_Click(object sender, EventArgs e) => MostrarSubmenu(panelAnalisisSubmenu);

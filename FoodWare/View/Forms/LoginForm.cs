@@ -12,13 +12,11 @@ namespace FoodWare.View.Forms
     {
         private readonly LoginController _loginCtrl;
 
-        // --- AÑADIR ESTA PROPIEDAD ---
         /// <summary>
         /// Almacena el Rol del usuario que inició sesión.
         /// Program.cs leerá esto después de que el formulario se cierre.
         /// </summary>
         public string RolUsuarioLogueado { get; private set; } = string.Empty;
-        // --- FIN ---
 
         public LoginForm()
         {
@@ -44,7 +42,7 @@ namespace FoodWare.View.Forms
             lblMensajeError.Visible = true;
         }
 
-        // --- EVENT HANDLERS (MODIFICADOS) ---
+        // --- EVENT HANDLERS ---
 
         private async void BtnIngresar_Click(object sender, EventArgs e)
         {
@@ -53,26 +51,29 @@ namespace FoodWare.View.Forms
                 this.Cursor = Cursors.WaitCursor;
                 this.btnIngresar.Enabled = false;
 
-                // --- MODIFICACIÓN AQUÍ ---
                 // 2. Llamamos al controlador, que ahora devuelve una tupla
                 var (resultado, rol) = await _loginCtrl.ValidarLoginAsync(this.txtUsuario.Text, this.txtPassword.Text);
-                // --- FIN DE MODIFICACIÓN ---
 
                 // 3. Reaccionamos
                 switch (resultado)
                 {
                     case LoginResult.Exitoso:
-                        // --- MODIFICACIÓN AQUÍ ---
                         // Guardamos el rol antes de cerrar
-                        this.RolUsuarioLogueado = rol ?? "Default"; // Asigna "Default" si el rol es nulo
-                        // --- FIN DE MODIFICACIÓN ---
+                        this.RolUsuarioLogueado = rol ?? "Default";
                         this.DialogResult = DialogResult.OK;
                         this.Close();
                         break;
 
                     case LoginResult.CredencialesInvalidas:
                         MostrarError("Usuario o contraseña incorrectos.");
+                        // 1. Desconectamos el evento temporalmente
+                        this.txtPassword.TextChanged -= TxtPassword_TextChanged;
+
+                        // 2. Limpiamos el campo (ahora no disparará el evento)
                         txtPassword.Clear();
+
+                        // 3. Reconectamos el evento
+                        this.txtPassword.TextChanged += TxtPassword_TextChanged;
                         txtPassword.Focus();
                         break;
 

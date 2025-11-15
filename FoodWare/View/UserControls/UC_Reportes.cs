@@ -9,7 +9,6 @@ using FoodWare.View.Helpers;
 
 namespace FoodWare.View.UserControls
 {
-    // Modificar: quitar 'partial' si no tienes diseñador aún, o dejarlo si sí.
     public partial class UC_Reportes : UserControl
     {
         private readonly ReportesController _controller;
