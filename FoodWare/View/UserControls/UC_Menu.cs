@@ -134,7 +134,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar el menú: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar menú: {ex.Message}");
+                MessageBox.Show("Error al cargar el menú. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -177,7 +178,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar productos combo: {ex.Message}");
+                MessageBox.Show("Error al cargar productos. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -205,7 +207,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar la receta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar receta: {ex.Message}");
+                MessageBox.Show("Error al cargar la receta. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -245,7 +248,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex) // Errores inesperados
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al guardar platillo: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al guardar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -283,7 +287,8 @@ namespace FoodWare.View.UserControls
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error: " + ex.Message, "Error al eliminar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        System.Diagnostics.Debug.WriteLine($"Error al eliminar platillo: {ex.Message}");
+                        MessageBox.Show("Ocurrió un error inesperado al eliminar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {
@@ -351,7 +356,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex) // Errores inesperados
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al actualizar platillo: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al actualizar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -409,7 +415,8 @@ namespace FoodWare.View.UserControls
             catch (Exception ex)
             {
                 // Si algo falla, lo notificamos y volvemos al menú
-                MessageBox.Show($"Error al preparar la gestión de receta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al gestionar receta: {ex.Message}");
+                MessageBox.Show("Error al preparar la gestión de receta. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 BtnVolverAlMenu_Click(sender, e); // Reutilizamos el botón de volver
             }
             finally
@@ -466,7 +473,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al agregar ingrediente: {ex.Message}");
+                MessageBox.Show("Error al guardar el ingrediente. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -482,7 +490,6 @@ namespace FoodWare.View.UserControls
 
             if (confirm == DialogResult.Yes)
             {
-                // --- AÑADIR ESTA VALIDACIÓN ---
                 // 1. Asignamos el campo a una variable local.
                 Platillo? platillo = _platilloEnEdicion;
 
@@ -492,7 +499,6 @@ namespace FoodWare.View.UserControls
                     MessageBox.Show("Error de lógica: No hay ningún platillo en modo de edición.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                // --- FIN DE LA VALIDACIÓN ---
 
                 try
                 {
@@ -504,7 +510,8 @@ namespace FoodWare.View.UserControls
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error al eliminar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    System.Diagnostics.Debug.WriteLine($"Error al eliminar ingrediente: {ex.Message}");
+                    MessageBox.Show("Error al eliminar el ingrediente. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

@@ -120,7 +120,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar el menú: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar menú de ventas: {ex.Message}");
+                MessageBox.Show("Error al cargar el menú. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -433,7 +434,8 @@ namespace FoodWare.View.UserControls
             catch (Exception ex)
             {
                 // 7. Manejo de errores
-                MessageBox.Show($"Ocurrió un error al registrar la venta:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al registrar venta: {ex.Message}");
+                MessageBox.Show("Ocurrió un error al registrar la venta. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

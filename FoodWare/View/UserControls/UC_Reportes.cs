@@ -50,7 +50,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar reportes: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar reportes: {ex.Message}");
+                MessageBox.Show("Error al cargar reportes. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

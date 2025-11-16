@@ -81,7 +81,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar roles: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar roles: {ex.Message}");
+                MessageBox.Show("Error al cargar roles. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -125,7 +126,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar empleados: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar empleados: {ex.Message}");
+                MessageBox.Show("Error al cargar empleados. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -178,7 +180,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex) // Errores inesperados
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al guardar empleado: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al guardar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -209,7 +212,6 @@ namespace FoodWare.View.UserControls
 
                 // 3. Actualizar UI
                 MessageBox.Show("¡Empleado actualizado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                int idActualizado = idUsuario; // Guardamos el ID
                 LimpiarCampos();
                 await CargarGridEmpleadosAsync();
                 // (Opcional) Re-seleccionar la fila
@@ -220,7 +222,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex) // Errores inesperados
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al actualizar empleado: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al actualizar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -250,7 +253,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al desactivar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al desactivar empleado: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al desactivar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

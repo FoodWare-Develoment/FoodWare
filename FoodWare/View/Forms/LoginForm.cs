@@ -76,7 +76,10 @@ namespace FoodWare.View.Forms
             }
             catch (Exception ex)
             {
-                MostrarError("Error inesperado: " + ex.Message);
+                // 1. Registra el error detallado para el desarrollador
+                System.Diagnostics.Debug.WriteLine($"Error inesperado en Login: {ex.Message}");
+                // 2. Muestra un error genérico al usuario
+                MostrarError("Error inesperado. Contacte al administrador.");
             }
             finally
             {
