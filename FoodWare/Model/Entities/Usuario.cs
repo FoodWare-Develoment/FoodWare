@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 namespace FoodWare.Model.Entities
 {
     /// <summary>
-    /// Representa un usuario del sistema (Empleado o Administrador).
+    /// Representa la tabla [dbo].[Usuarios] en la base de datos.
     /// </summary>
     public class Usuario
     {
         public int IdUsuario { get; set; }
+        public required string NombreCompleto { get; set; }
         public required string NombreUsuario { get; set; }
-        public required string Contraseña { get; set; } // En el futuro será un hash
-        public required string Rol { get; set; } // Ej. "Administrador", "Mesero"
+        public required string ContraseñaHash { get; set; }
+        public int IdRol { get; set; }
+        public bool Activo { get; set; }
     }
 }

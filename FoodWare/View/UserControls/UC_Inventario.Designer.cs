@@ -127,7 +127,7 @@
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(104, 49);
             btnGuardar.TabIndex = 13;
-            btnGuardar.Text = "Guardar";
+            btnGuardar.Text = "Agregar";
             btnGuardar.UseVisualStyleBackColor = true;
             btnGuardar.Click += BtnGuardar_Click;
             // 
@@ -234,12 +234,12 @@
             contextMenuInventario.ImageScalingSize = new Size(20, 20);
             contextMenuInventario.Items.AddRange(new ToolStripItem[] { itemEditarProducto });
             contextMenuInventario.Name = "contextMenuInventario";
-            contextMenuInventario.Size = new Size(211, 56);
+            contextMenuInventario.Size = new Size(182, 28);
             // 
             // itemEditarProducto
             // 
             itemEditarProducto.Name = "itemEditarProducto";
-            itemEditarProducto.Size = new Size(210, 24);
+            itemEditarProducto.Size = new Size(181, 24);
             itemEditarProducto.Text = "Editar Producto";
             itemEditarProducto.Click += ItemEditarProducto_Click;
             // 

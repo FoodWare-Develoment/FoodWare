@@ -2,82 +2,151 @@ using System;
 using System.Windows.Forms;
 using FoodWare.View.UserControls;
 using FoodWare.View.Helpers;
+using FoodWare.Controller.Logic;
 
 namespace FoodWare.View.Forms
 {
-    /// <summary>
-    /// Formulario principal y contenedor (Shell) de la aplicación FoodWare.
-    /// Gestiona la navegación del menú lateral y la carga dinámica de módulos (UserControls) 
-    /// en el panel de contenido principal.
-    /// </summary>
     public partial class FormMain : Form
     {
+        // Almacena el rol del usuario que inició sesión
+        private readonly string _rolUsuario;
+
         /// <summary>
-        /// Inicializa el formulario principal.
+        /// Constructor modificado para aceptar el rol del usuario.
         /// </summary>
         public FormMain()
         {
             InitializeComponent();
-            PersonalizarDiseno(); // Configura el estado visual inicial de los controles.
-            AplicarEstilos();     // Aplica la paleta de colores centralizada desde EstilosApp.
-            CargarInicio();       // Carga el UserControl por defecto (Dashboard/Inicio).
+            // Leemos el rol desde la sesión estática
+            _rolUsuario = UserSession.NombreRol;
+
+            PersonalizarDiseno();
+            AplicarEstilos();
+            AplicarSeguridadPorRol(); // Aplica seguridad basada en el rol
+            CargarInicio();
         }
 
-        /// <summary>
-        /// Establece el estado visual inicial de la UI al arrancar la aplicación.
-        /// (Oculta submenús, define placeholders, etc.)
-        /// </summary>
         private void PersonalizarDiseno()
         {
-            // Ocultar submenús al inicio
             panelGPSubmenu.Visible = false;
             panelAdminSubmenu.Visible = false;
             panelAnalisisSubmenu.Visible = false;
-
-            // Placeholder de búsqueda
             txtBusqueda.PlaceholderText = "Buscar en FoodWare";
         }
 
-        /// <summary>
-        /// Aplica los estilos visuales centralizados desde la clase EstilosApp
-        /// a los componentes de este formulario (paneles y botones).
-        /// </summary>
         private void AplicarEstilos()
         {
-            // Paneles
+            // Asegúrate de que 'EstilosApp.' esté presente aquí
             EstilosApp.EstiloPanel(panelMenu, EstilosApp.ColorMenu);
             EstilosApp.EstiloPanel(panelBarra, EstilosApp.ColorBarra);
             EstilosApp.EstiloPanel(panelContenido, EstilosApp.ColorFondo);
 
-            // Botones principales (Nivel 1)
+            // Botón Gestión Principal
             EstilosApp.EstiloBotonMenu(btnGP);
-            EstilosApp.EstiloBotonMenu(btnAdmin);
-            EstilosApp.EstiloBotonMenu(btnAnalisis);
-            EstilosApp.EstiloBotonMenu(btnConfig);
+            btnGP.Image = Properties.Resources.icons_gestion_24;
+            btnGP.Text = " Gestion Principal";
 
-            // Botones secundarios (Nivel 2 - Submenús)
+            // Botón Administración
+            EstilosApp.EstiloBotonMenu(btnAdmin);
+            btnAdmin.Image = Properties.Resources.icons_administracion_24;
+            btnAdmin.Text = " Administracion";
+
+            // Botón Análisis
+            EstilosApp.EstiloBotonMenu(btnAnalisis);
+            btnAnalisis.Image = Properties.Resources.icons_analisis_24;
+            btnAnalisis.Text = " Analisis";
+
+            // Botón Configuración
+            EstilosApp.EstiloBotonMenu(btnConfig);
+            btnConfig.Image = Properties.Resources.icons_configuracion_24;
+            btnConfig.Text = " Configuracion";
+
+            // --- Submenú Gestión Principal ---
             EstilosApp.EstiloBotonSubmenu(btnInicio);
+            btnInicio.Image = Properties.Resources.icons_inicio_24;
+            btnInicio.Text = " Inicio";
+
             EstilosApp.EstiloBotonSubmenu(btnInventario);
+            btnInventario.Image = Properties.Resources.icons_inventario_24;
+            btnInventario.Text = " Inventario";
+
             EstilosApp.EstiloBotonSubmenu(btnMenu);
+            btnMenu.Image = Properties.Resources.icons_menu_24;
+            btnMenu.Text = " Menu";
+
             EstilosApp.EstiloBotonSubmenu(btnVentas);
+            btnVentas.Image = Properties.Resources.icons_ventas_24;
+            btnVentas.Text = " Ventas";
+
+            // --- Submenú Administración ---
             EstilosApp.EstiloBotonSubmenu(btnEmpleados);
+            btnEmpleados.Image = Properties.Resources.icons_empleados_24;
+            btnEmpleados.Text = " Empleados";
+
             EstilosApp.EstiloBotonSubmenu(btnFinanzas);
+            btnFinanzas.Image = Properties.Resources.icons_finanzas_24;
+            btnFinanzas.Text = " Finanzas";
+
+            // --- Submenú Análisis ---
             EstilosApp.EstiloBotonSubmenu(btnReportes);
+            btnReportes.Image = Properties.Resources.icons_reportes_24;
+            btnReportes.Text = " Reportes";
         }
 
         /// <summary>
-        /// Carga el módulo (UserControl) de Inicio por defecto en el panel de contenido.
+        /// Oculta o muestra botones del menú según el rol del usuario.
         /// </summary>
+        private void AplicarSeguridadPorRol()
+        {
+
+            // Primero, ocultamos todo lo sensible por defecto (permisos de Mesero)
+            btnInventario.Visible = false;
+            btnAdmin.Visible = false;
+            btnAnalisis.Visible = false;
+            btnConfig.Visible = false;
+
+            // Los meseros SÍ ven esto
+            btnGP.Visible = true;
+            btnVentas.Visible = true;
+            btnMenu.Visible = true;
+
+            // Usamos un switch para añadir permisos
+            switch (_rolUsuario)
+            {
+                case "Administrador":
+                case "Gerente":
+                    // Admin y Gerente ven todo
+                    btnInventario.Visible = true;
+                    btnAdmin.Visible = true;
+                    btnAnalisis.Visible = true;
+                    btnConfig.Visible = true;
+                    break;
+
+                case "Chef":
+                    // Chef ve Inventario y Menú
+                    btnInventario.Visible = true;
+                    btnMenu.Visible = true;
+                    break;
+
+                case "Mesero":
+                    // Ya está configurado por defecto
+                    break;
+
+                default:
+                    // Si el rol es desconocido, ocultamos todo por seguridad
+                    btnGP.Visible = false;
+                    btnAdmin.Visible = false;
+                    btnAnalisis.Visible = false;
+                    btnConfig.Visible = false;
+                    break;
+            }
+        }
+
         private void CargarInicio()
         {
             AbrirModulo(new UC_Inicio());
         }
 
-        // --- LÓGICA DE NAVEGACIÓN DEL MENÚ ---
-
-        /// <summary>
-        /// Método de ayuda para cerrar todos los submenús abiertos.
-        /// </summary>
         private void OcultarSubmenu()
         {
             if (panelGPSubmenu.Visible) panelGPSubmenu.Visible = false;
@@ -85,46 +154,31 @@ namespace FoodWare.View.Forms
             if (panelAnalisisSubmenu.Visible) panelAnalisisSubmenu.Visible = false;
         }
 
-        /// <summary>
-        /// Gestiona la lógica de acordeón para mostrar/ocultar un submenú específico.
-        /// </summary>
-        /// <param name="submenu">El Panel (que actúa como submenú) que se debe mostrar u ocultar.</param>
         private void MostrarSubmenu(Panel submenu)
         {
             if (!submenu.Visible)
             {
-                // Si está cerrado: cerramos cualquier otro abierto y abrimos este.
                 OcultarSubmenu();
                 submenu.Visible = true;
             }
             else
             {
-                // Si ya estaba abierto: lo cerramos.
                 submenu.Visible = false;
             }
         }
 
-        /// <summary>
-        /// Método principal para cargar dinámicamente un módulo (UserControl) en el área de contenido.
-        /// </summary>
-        /// <param name="modulo">La instancia del UserControl que se va a cargar.</param>
         private void AbrirModulo(UserControl modulo)
         {
-            panelContenido.Controls.Clear(); // Limpia el módulo anterior
-            modulo.Dock = DockStyle.Fill; // Asegura que el control llene el panel
-            panelContenido.Controls.Add(modulo); // Añade el nuevo control
-            modulo.BringToFront(); // Lo trae al frente
+            panelContenido.Controls.Clear();
+            modulo.Dock = DockStyle.Fill;
+            panelContenido.Controls.Add(modulo);
+            modulo.BringToFront();
         }
 
-
-        // --- EVENT HANDLERS (EVENTOS DE CLICK) ---
-
-        // Botones padres (Categorías)
+        // --- Event Handlers ---
         private void BtnGP_Click(object sender, EventArgs e) => MostrarSubmenu(panelGPSubmenu);
         private void BtnAdmin_Click(object sender, EventArgs e) => MostrarSubmenu(panelAdminSubmenu);
         private void BtnAnalisis_Click(object sender, EventArgs e) => MostrarSubmenu(panelAnalisisSubmenu);
-
-        // Botones hijos (Módulos)
         private void BtnInicio_Click(object sender, EventArgs e) { AbrirModulo(new UC_Inicio()); OcultarSubmenu(); }
         private void BtnInventario_Click(object sender, EventArgs e) { AbrirModulo(new UC_Inventario()); OcultarSubmenu(); }
         private void BtnMenu_Click(object sender, EventArgs e) { AbrirModulo(new UC_Menu()); OcultarSubmenu(); }
@@ -134,18 +188,12 @@ namespace FoodWare.View.Forms
         private void BtnReportes_Click(object sender, EventArgs e) { AbrirModulo(new UC_Reportes()); OcultarSubmenu(); }
         private void BtnConfig_Click(object sender, EventArgs e) { AbrirModulo(new UC_Configuracion()); OcultarSubmenu(); }
 
-
-        // --- EVENTOS DE BÚSQUEDA ---
-
         private void TxtBusqueda_KeyDown(object sender, KeyEventArgs e)
         {
-            // Detecta la tecla "Enter" en el cuadro de búsqueda
             if (e.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true; // Evita el sonido "ding" de Windows
-
-                // Implementar la lógica de búsqueda global aquí.
-                MessageBox.Show("Buscando: " + txtBusqueda.Text); // Acción placeholder
+                e.SuppressKeyPress = true;
+                MessageBox.Show("Buscando: " + txtBusqueda.Text);
             }
         }
     }

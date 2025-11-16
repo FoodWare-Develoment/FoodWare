@@ -120,7 +120,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar el menú: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar menú de ventas: {ex.Message}");
+                MessageBox.Show("Error al cargar el menú. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -401,24 +402,22 @@ namespace FoodWare.View.UserControls
             // 2. Confirmación
             var confirm = MessageBox.Show($"¿Desea registrar esta venta por un total de {lblTotal.Text}?", "Confirmar Venta", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            // --- ESTA ES LA LÍNEA CORREGIDA ---
             if (confirm == DialogResult.No)
             {
                 return;
             }
-            // --- FIN DE LA CORRECCIÓN ---
 
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                btnRegistrarVenta.Enabled = false; // Deshabilitar botón
+                btnRegistrarVenta.Enabled = false;
 
                 // 3. Crear el objeto Venta principal
                 Venta nuevaVenta = new()
                 {
                     // TODO: Cuando el Login esté listo, aquí irá el ID del usuario real.
-                    IdUsuario = 2, // Usamos el 'admin' (IdUsuario=2) como placeholder
-                    FormaDePago = "Efectivo", // Puedes cambiar esto
+                    IdUsuario = UserSession.IdUsuario,
+                    FormaDePago = "Efectivo",
                     TotalVenta = _comandaActual.Sum(d => d.Cantidad * d.PrecioUnitario)
                 };
 
@@ -435,7 +434,8 @@ namespace FoodWare.View.UserControls
             catch (Exception ex)
             {
                 // 7. Manejo de errores
-                MessageBox.Show($"Ocurrió un error al registrar la venta:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al registrar venta: {ex.Message}");
+                MessageBox.Show("Ocurrió un error al registrar la venta. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

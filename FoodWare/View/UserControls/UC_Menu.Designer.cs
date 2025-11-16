@@ -27,6 +27,7 @@
             dgvMenu = new DataGridView();
             contextMenuPlatillo = new ContextMenuStrip(components);
             itemGestionarReceta = new ToolStripMenuItem();
+            itemEditarPlatillo = new ToolStripMenuItem();
             panelEdicionReceta = new Panel();
             btnVolverAlMenu = new Button();
             btnEliminarIngrediente = new Button();
@@ -37,7 +38,6 @@
             cmbProductos = new ComboBox();
             dgvReceta = new DataGridView();
             lblTituloReceta = new Label();
-            itemEditarPlatillo = new ToolStripMenuItem();
             panelInputs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvMenu).BeginInit();
             contextMenuPlatillo.SuspendLayout();
@@ -168,14 +168,21 @@
             contextMenuPlatillo.ImageScalingSize = new Size(20, 20);
             contextMenuPlatillo.Items.AddRange(new ToolStripItem[] { itemGestionarReceta, itemEditarPlatillo });
             contextMenuPlatillo.Name = "contextMenuPlatillo";
-            contextMenuPlatillo.Size = new Size(211, 80);
+            contextMenuPlatillo.Size = new Size(191, 52);
             // 
             // itemGestionarReceta
             // 
             itemGestionarReceta.Name = "itemGestionarReceta";
-            itemGestionarReceta.Size = new Size(211, 24);
+            itemGestionarReceta.Size = new Size(190, 24);
             itemGestionarReceta.Text = "Gestionar Receta";
             itemGestionarReceta.Click += ItemGestionarReceta_Click;
+            // 
+            // itemEditarPlatillo
+            // 
+            itemEditarPlatillo.Name = "itemEditarPlatillo";
+            itemEditarPlatillo.Size = new Size(190, 24);
+            itemEditarPlatillo.Text = "Editar Platillo";
+            itemEditarPlatillo.Click += ItemEditarPlatillo_Click;
             // 
             // panelEdicionReceta
             // 
@@ -277,13 +284,6 @@
             lblTituloReceta.TabIndex = 0;
             lblTituloReceta.Text = "label1";
             lblTituloReceta.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // itemEditarPlatillo
-            // 
-            itemEditarPlatillo.Name = "itemEditarPlatillo";
-            itemEditarPlatillo.Size = new Size(210, 24);
-            itemEditarPlatillo.Text = "Editar Platillo";
-            itemEditarPlatillo.Click += ItemEditarPlatillo_Click;
             // 
             // UC_Menu
             // 

@@ -161,7 +161,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex) // Errores inesperados (BD, etc.)
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al guardar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al guardar producto: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al guardar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -241,7 +242,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex) // Errores inesperados
             {
-                MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al actualizar producto: {ex.Message}");
+                MessageBox.Show("Ocurrió un error inesperado al actualizar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -275,7 +277,8 @@ namespace FoodWare.View.UserControls
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Ocurrió un error inesperado: " + ex.Message, "Error al eliminar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        System.Diagnostics.Debug.WriteLine($"Error al eliminar producto: {ex.Message}");
+                        MessageBox.Show("Ocurrió un error inesperado al eliminar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {
@@ -336,7 +339,8 @@ namespace FoodWare.View.UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar el inventario: {ex.Message}", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al cargar inventario: {ex.Message}");
+                MessageBox.Show("Error al cargar el inventario. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
