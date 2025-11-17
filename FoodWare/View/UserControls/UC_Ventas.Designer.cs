@@ -20,15 +20,20 @@
             btnQtyAumentar = new Button();
             btnQtyDisminuir = new Button();
             btnEliminarPlatillo = new Button();
+            flpFormaPago = new FlowLayoutPanel();
+            btnEfectivo = new Button();
+            btnTarjeta = new Button();
             lblTotal = new Label();
             btnRegistrarVenta = new Button();
             panelMenuSeleccion = new Panel();
             flpCategorias = new FlowLayoutPanel();
             flpPlatillos = new FlowLayoutPanel();
+            txtBusquedaTPV = new TextBox();
             tlpPrincipal.SuspendLayout();
             panelComanda.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvComanda).BeginInit();
             flpGestionTicket.SuspendLayout();
+            flpFormaPago.SuspendLayout();
             panelMenuSeleccion.SuspendLayout();
             SuspendLayout();
             // 
@@ -44,7 +49,6 @@
             tlpPrincipal.Name = "tlpPrincipal";
             tlpPrincipal.RowCount = 1;
             tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpPrincipal.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tlpPrincipal.Size = new Size(960, 664);
             tlpPrincipal.TabIndex = 0;
             // 
@@ -53,6 +57,7 @@
             panelComanda.AutoScroll = true;
             panelComanda.Controls.Add(dgvComanda);
             panelComanda.Controls.Add(flpGestionTicket);
+            panelComanda.Controls.Add(flpFormaPago);
             panelComanda.Controls.Add(lblTotal);
             panelComanda.Controls.Add(btnRegistrarVenta);
             panelComanda.Dock = DockStyle.Fill;
@@ -68,7 +73,7 @@
             dgvComanda.Location = new Point(0, 0);
             dgvComanda.Name = "dgvComanda";
             dgvComanda.RowHeadersWidth = 51;
-            dgvComanda.Size = new Size(331, 518);
+            dgvComanda.Size = new Size(331, 458);
             dgvComanda.TabIndex = 3;
             // 
             // flpGestionTicket
@@ -78,7 +83,7 @@
             flpGestionTicket.Controls.Add(btnEliminarPlatillo);
             flpGestionTicket.Dock = DockStyle.Bottom;
             flpGestionTicket.FlowDirection = FlowDirection.RightToLeft;
-            flpGestionTicket.Location = new Point(0, 518);
+            flpGestionTicket.Location = new Point(0, 458);
             flpGestionTicket.Name = "flpGestionTicket";
             flpGestionTicket.Padding = new Padding(5);
             flpGestionTicket.Size = new Size(331, 60);
@@ -111,6 +116,35 @@
             btnEliminarPlatillo.Text = "Eliminar";
             btnEliminarPlatillo.UseVisualStyleBackColor = true;
             // 
+            // flpFormaPago
+            // 
+            flpFormaPago.Controls.Add(btnEfectivo);
+            flpFormaPago.Controls.Add(btnTarjeta);
+            flpFormaPago.Dock = DockStyle.Bottom;
+            flpFormaPago.Location = new Point(0, 518);
+            flpFormaPago.Name = "flpFormaPago";
+            flpFormaPago.Padding = new Padding(5);
+            flpFormaPago.Size = new Size(331, 60);
+            flpFormaPago.TabIndex = 4;
+            // 
+            // btnEfectivo
+            // 
+            btnEfectivo.Location = new Point(8, 8);
+            btnEfectivo.Name = "btnEfectivo";
+            btnEfectivo.Size = new Size(150, 40);
+            btnEfectivo.TabIndex = 0;
+            btnEfectivo.Text = "Efectivo";
+            btnEfectivo.UseVisualStyleBackColor = true;
+            // 
+            // btnTarjeta
+            // 
+            btnTarjeta.Location = new Point(164, 8);
+            btnTarjeta.Name = "btnTarjeta";
+            btnTarjeta.Size = new Size(150, 40);
+            btnTarjeta.TabIndex = 1;
+            btnTarjeta.Text = "Tarjeta";
+            btnTarjeta.UseVisualStyleBackColor = true;
+            // 
             // lblTotal
             // 
             lblTotal.AutoSize = true;
@@ -135,8 +169,9 @@
             // 
             // panelMenuSeleccion
             // 
-            panelMenuSeleccion.Controls.Add(flpCategorias);
             panelMenuSeleccion.Controls.Add(flpPlatillos);
+            panelMenuSeleccion.Controls.Add(txtBusquedaTPV);
+            panelMenuSeleccion.Controls.Add(flpCategorias);
             panelMenuSeleccion.Dock = DockStyle.Fill;
             panelMenuSeleccion.Location = new Point(3, 3);
             panelMenuSeleccion.Name = "panelMenuSeleccion";
@@ -155,10 +190,20 @@
             // flpPlatillos
             // 
             flpPlatillos.AutoScroll = true;
-            flpPlatillos.Location = new Point(0, 61);
+            flpPlatillos.Dock = DockStyle.Fill;
+            flpPlatillos.Location = new Point(0, 95);
             flpPlatillos.Name = "flpPlatillos";
-            flpPlatillos.Size = new Size(617, 598);
+            flpPlatillos.Size = new Size(617, 563);
             flpPlatillos.TabIndex = 0;
+            // 
+            // txtBusquedaTPV
+            // 
+            txtBusquedaTPV.Dock = DockStyle.Top;
+            txtBusquedaTPV.Location = new Point(0, 60);
+            txtBusquedaTPV.Name = "txtBusquedaTPV";
+            txtBusquedaTPV.PlaceholderText = "Buscar platillo por nombre...";
+            txtBusquedaTPV.Size = new Size(617, 35);
+            txtBusquedaTPV.TabIndex = 2;
             // 
             // UC_Ventas
             // 
@@ -171,10 +216,12 @@
             panelComanda.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvComanda).EndInit();
             flpGestionTicket.ResumeLayout(false);
+            flpFormaPago.ResumeLayout(false);
             panelMenuSeleccion.ResumeLayout(false);
+            panelMenuSeleccion.PerformLayout();
             ResumeLayout(false);
-
         }
+
         private TableLayoutPanel tlpPrincipal;
         private Panel panelComanda;
         private Button btnRegistrarVenta;
@@ -187,5 +234,9 @@
         private Panel panelMenuSeleccion;
         private FlowLayoutPanel flpPlatillos;
         private FlowLayoutPanel flpCategorias;
+        private TextBox txtBusquedaTPV;
+        private FlowLayoutPanel flpFormaPago;
+        private Button btnEfectivo;
+        private Button btnTarjeta;
     }
 }
