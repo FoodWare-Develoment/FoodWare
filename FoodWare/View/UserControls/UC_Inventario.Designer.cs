@@ -87,7 +87,7 @@
             btnAnadirStock.Name = "btnAnadirStock";
             btnAnadirStock.Size = new Size(104, 39);
             btnAnadirStock.TabIndex = 21;
-            btnAnadirStock.Text = "Añadir Stock";
+            btnAnadirStock.Text = "Añadir";
             btnAnadirStock.UseVisualStyleBackColor = true;
             btnAnadirStock.Click += BtnAnadirStock_Click;
             // 

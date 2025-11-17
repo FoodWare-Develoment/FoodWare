@@ -35,7 +35,6 @@ namespace FoodWare.Controller.Logic
                 throw new ArgumentException("Debe seleccionar un rol válido.");
 
             // 2. Lógica de negocio (Hashing de contraseña)
-            // Esta es una excelente práctica de SonarQube.
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
             // 3. Crear la entidad
@@ -52,9 +51,22 @@ namespace FoodWare.Controller.Logic
             await _usuarioRepo.AgregarAsync(nuevo);
         }
 
-        public async Task ActualizarEmpleadoAsync(int idUsuario, string nombreCompleto, string nombreUsuario, int idRol, bool activo)
+        public async Task ActualizarEmpleadoAsync(int idUsuario, string nombreCompleto, string nombreUsuario, int idRol, bool activo, string rolDelEditado)
         {
-            // 1. Validaciones (similares, pero sin contraseña)
+
+            // 1. Jerarquía
+            if (UserSession.NombreRol == "Gerente" && rolDelEditado == "Administrador")
+            {
+                throw new InvalidOperationException("Un Gerente no tiene permisos para modificar una cuenta de Administrador.");
+            }
+
+            // 2. Auto-Desactivación
+            if (idUsuario == UserSession.IdUsuario && !activo)
+            {
+                throw new InvalidOperationException("No puede desactivar su propia cuenta mientras tiene la sesión activa.");
+            }
+
+            // 3. Validaciones
             if (idUsuario <= 0)
                 throw new ArgumentException("ID de usuario no válido.");
             if (string.IsNullOrWhiteSpace(nombreCompleto))
@@ -64,7 +76,7 @@ namespace FoodWare.Controller.Logic
             if (idRol <= 0)
                 throw new ArgumentException("Debe seleccionar un rol válido.");
 
-            // 2. Crear la entidad (Nota: NO incluimos el hash)
+            // 4. Crear la entidad
             Usuario actualizado = new()
             {
                 IdUsuario = idUsuario,
@@ -75,16 +87,23 @@ namespace FoodWare.Controller.Logic
                 ContraseñaHash = "" // El repo no usará esto
             };
 
-            // 3. Llamar al repositorio
+            // 5. Llamar al repositorio
             await _usuarioRepo.ActualizarAsync(actualizado);
         }
 
-        public async Task DesactivarEmpleadoAsync(int idUsuario)
+        public async Task ResetearPasswordAsync(int idUsuario, string nuevaPassword)
         {
+            // 1. Validaciones
             if (idUsuario <= 0)
                 throw new ArgumentException("ID de usuario no válido.");
+            if (string.IsNullOrWhiteSpace(nuevaPassword) || nuevaPassword.Length < 6)
+                throw new ArgumentException("La nueva contraseña no puede estar vacía y debe tener al menos 6 caracteres.");
 
-            await _usuarioRepo.DesactivarAsync(idUsuario);
+            // 2. Hashear la nueva contraseña
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(nuevaPassword);
+
+            // 3. Llamar al nuevo método del repositorio
+            await _usuarioRepo.ActualizarPasswordAsync(idUsuario, passwordHash);
         }
     }
 }

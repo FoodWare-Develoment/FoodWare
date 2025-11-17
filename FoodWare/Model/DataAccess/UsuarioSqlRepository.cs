@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 
 namespace FoodWare.Model.DataAccess
 {
-    /// <summary>
-    /// Implementación SQL de IUsuarioRepository que utiliza Dapper.
-    /// </summary>
     public class UsuarioSqlRepository : IUsuarioRepository
     {
         private readonly string _connectionString;
@@ -32,7 +29,6 @@ namespace FoodWare.Model.DataAccess
         public async Task<string?> ObtenerRolPorNombreUsuarioAsync(string username)
         {
             using var connection = new SqlConnection(_connectionString);
-            // Consulta con JOIN para obtener el NombreRol
             string sql = @"
                 SELECT 
                     R.NombreRol 
@@ -49,7 +45,6 @@ namespace FoodWare.Model.DataAccess
         public async Task<LoginInfo?> ObtenerLoginInfoPorUsuarioAsync(string username)
         {
             using var connection = new SqlConnection(_connectionString);
-            // Consulta con JOIN para obtener todos los datos del DTO
             string sql = @"
                 SELECT 
                     U.IdUsuario,
@@ -114,11 +109,11 @@ namespace FoodWare.Model.DataAccess
             await connection.ExecuteAsync(sql, usuario);
         }
 
-        public async Task DesactivarAsync(int idUsuario)
+        public async Task ActualizarPasswordAsync(int idUsuario, string passwordHash)
         {
             using var connection = new SqlConnection(_connectionString);
-            string sql = "UPDATE Usuarios SET Activo = 0 WHERE IdUsuario = @IdUsuario;";
-            await connection.ExecuteAsync(sql, new { IdUsuario = idUsuario });
+            string sql = "UPDATE Usuarios SET ContraseñaHash = @passwordHash WHERE IdUsuario = @IdUsuario;";
+            await connection.ExecuteAsync(sql, new { passwordHash, idUsuario });
         }
     }
 }
