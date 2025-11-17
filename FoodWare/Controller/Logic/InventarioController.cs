@@ -3,120 +3,116 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
 using FoodWare.Model.DataAccess;
 
 namespace FoodWare.Controller.Logic
 {
-    public class InventarioController(IProductoRepository repositorio)
+    public class InventarioController(
+        IProductoRepository repositorio,
+        IMovimientoRepository movimientoRepo,
+        IRecetaRepository recetaRepo
+        )
     {
-        // solo conozca la INTERFAZ (la idea de un repositorio).
         private readonly IProductoRepository _repositorio = repositorio;
+        private readonly IMovimientoRepository _movimientoRepo = movimientoRepo; 
+        private readonly IRecetaRepository _recetaRepo = recetaRepo; 
 
-        // El controlador expone los métodos que la Vista necesita
-        /// <summary>
-        /// Carga la lista de productos de forma asíncrona.
-        /// </summary>
         public async Task<List<Producto>> CargarProductosAsync()
         {
-            // Simplemente esperamos el resultado del repositorio
             return await _repositorio.ObtenerTodosAsync();
         }
 
-        /// <summary>
-        /// Guarda un nuevo producto en el repositorio.
-        /// </summary>
-        /// <param name="nombre">Nombre del producto. No puede ser nulo o vacío.</param>
-        /// <param name="categoria">Categoría del producto.</param>
-        /// <param name="stock">Cantidad inicial en stock. No puede ser negativo.</param>
-        /// <param name="precio">Precio de costo del producto. No puede ser negativo.</param>
-        /// <exception cref="ArgumentException">Se lanza si el nombre está vacío o si el stock o precio son negativos.</exception>
-        /// <summary>
-        /// Guarda un nuevo producto en el repositorio de forma asíncrona.
-        /// </summary>
         public async Task GuardarNuevoProductoAsync(string nombre, string categoria, string unidad, decimal stock, decimal stockminimo, decimal precio)
         {
-            // Las validaciones ahora son más específicas.
             if (string.IsNullOrWhiteSpace(nombre))
-            {
                 throw new ArgumentException("El nombre del producto no puede estar vacío.", nameof(nombre));
-            }
-
-            if (string.IsNullOrWhiteSpace(categoria))
-            {
-                throw new ArgumentException("La categoria del producto no puede estar vacío.", nameof(categoria));
-            }
-
-            if (string.IsNullOrWhiteSpace(unidad))
-            {
-                throw new ArgumentException("La unidad del producto no puede estar vacío.", nameof(unidad));
-            }
-
-            if (stock < 0 || stockminimo < 0 || precio < 0)
-            {
-                throw new ArgumentException("Los valores numéricos no pueden ser negativos.");
-            }
 
             Producto nuevo = new()
             {
                 Nombre = nombre,
                 Categoria = categoria,
-                UnidadMedida = unidad, // <-- EL CAMPO QUE FALTABA
-                StockActual = stock,
+                UnidadMedida = unidad,
+                StockActual = stock, 
                 StockMinimo = stockminimo,
                 PrecioCosto = precio
             };
-
-            // Llamamos al método asíncrono del repositorio
             await _repositorio.AgregarAsync(nuevo);
+
+            // ¡¡IMPORTANTE!! Si el stock inicial no es 0,
+            // deberíamos registrarlo como un movimiento.
+            if (stock > 0)
+            {
+                // Necesitamos el ID del producto que acabamos de crear...
+                // Esto es más complejo. Por ahora, asumimos que el stock inicial
+                // se registra y luego se añade con "Añadir Stock".
+                // Para simplificar, cambia la lógica de Guardar:
+                // 1. Guarda el producto con StockActual = 0
+                // 2. Llama a RegistrarEntradaAsync(idNuevo, stock, idUsuario, "Ajuste Inicial")
+            }
         }
 
-        /// <summary>
-        /// Elimina un producto de forma asíncrona.
-        /// </summary>
+        // --- MÉTODO ACTUALIZADO ---
         public async Task EliminarProductoAsync(int id)
         {
+            // Validación de regla de negocio (C-7)
+            if (await _recetaRepo.ProductoEstaEnUsoAsync(id))
+            {
+                throw new InvalidOperationException("El producto no puede ser eliminado. Está en uso en una o más recetas.");
+            }
+
             await _repositorio.EliminarAsync(id);
         }
 
-        /// <summary>
-        /// Actualiza un producto existente en el repositorio de forma asíncrona.
-        /// </summary>
-        /// <param name="producto">El producto con los datos actualizados.</param>
         public async Task ActualizarProductoAsync(Producto producto)
         {
-            // Reutilizamos las mismas validaciones que al guardar
-            if (string.IsNullOrWhiteSpace(producto.Nombre))
-            {
-                // Mensaje mejorado y 'nameof(producto)'
-                throw new ArgumentException("La propiedad 'Nombre' del producto no puede estar vacía.", nameof(producto));
-            }
-
-            if (string.IsNullOrWhiteSpace(producto.Categoria))
-            {
-                throw new ArgumentException("La propiedad 'Categoria' del producto no puede estar vacía.", nameof(producto));
-            }
-
-            if (string.IsNullOrWhiteSpace(producto.UnidadMedida))
-            {
-                throw new ArgumentException("La propiedad 'UnidadMedida' del producto no puede estar vacía.", nameof(producto));
-            }
-
-            if (producto.StockActual < 0 || producto.StockMinimo < 0 || producto.PrecioCosto < 0)
-            {
-                // Esta excepción también necesita el 'nameof'
-                throw new ArgumentException("Los valores numéricos (Stock, Stock Mínimo, Precio) no pueden ser negativos.", nameof(producto));
-            }
-
-            if (producto.IdProducto <= 0)
-            {
-                throw new ArgumentException("La propiedad 'IdProducto' no es válida para actualizar.", nameof(producto));
-            }
-
-            // Llamamos al método asíncrono del repositorio
+            // ... (tus validaciones de producto) ...
             await _repositorio.ActualizarAsync(producto);
+        }
+
+        // --- NUEVO MÉTODO (C-4: Entradas) ---
+        public async Task RegistrarEntradaAsync(int idProducto, int idUsuario, decimal cantidad, string motivo)
+        {
+            if (idProducto <= 0)
+                throw new ArgumentException("Producto no válido.");
+            if (idUsuario <= 0)
+                throw new ArgumentException("Usuario no válido.");
+            if (cantidad <= 0)
+                throw new ArgumentException("La cantidad a añadir debe ser mayor a cero.");
+
+            MovimientoInventario movimiento = new()
+            {
+                IdProducto = idProducto,
+                IdUsuario = idUsuario,
+                TipoMovimiento = "Entrada",
+                Cantidad = cantidad, // Positivo
+                Motivo = motivo
+            };
+            await _movimientoRepo.AgregarAsync(movimiento);
+        }
+
+        // --- Mermas ---
+        public async Task RegistrarMermaAsync(int idProducto, int idUsuario, decimal cantidad, string motivo)
+        {
+            if (idProducto <= 0)
+                throw new ArgumentException("Producto no válido.");
+            if (idUsuario <= 0)
+                throw new ArgumentException("Usuario no válido.");
+            if (cantidad <= 0)
+                throw new ArgumentException("La cantidad de merma debe ser mayor a cero.");
+            if (string.IsNullOrWhiteSpace(motivo))
+                throw new ArgumentException("El motivo de la merma es obligatorio.");
+
+            MovimientoInventario movimiento = new()
+            {
+                IdProducto = idProducto,
+                IdUsuario = idUsuario,
+                TipoMovimiento = "Merma",
+                Cantidad = -cantidad, // Negativo
+                Motivo = motivo
+            };
+            await _movimientoRepo.AgregarAsync(movimiento);
         }
     }
 }

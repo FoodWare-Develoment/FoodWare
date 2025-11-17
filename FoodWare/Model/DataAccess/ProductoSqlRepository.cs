@@ -11,9 +11,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace FoodWare.Model.DataAccess
 {
-    /// <summary>
-    /// Implementación de IProductoRepository que utiliza SQL Server y Dapper para el acceso a datos.
-    /// </summary>
     public class ProductoSqlRepository : IProductoRepository
     {
         private readonly string _connectionString;
@@ -26,7 +23,6 @@ namespace FoodWare.Model.DataAccess
         public async Task<List<Producto>> ObtenerTodosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            // Usamos QueryAsync
             var productos = await connection.QueryAsync<Producto>("SELECT IdProducto, Nombre, Categoria, UnidadMedida, StockActual, StockMinimo, PrecioCosto FROM Productos;");
             return [.. productos];
         }
@@ -34,9 +30,7 @@ namespace FoodWare.Model.DataAccess
         public async Task AgregarAsync(Producto producto)
         {
             using var connection = new SqlConnection(_connectionString);
-            // Esta es tu consulta SQL original, que es la correcta.
             string sql = "INSERT INTO Productos (Nombre, Categoria, UnidadMedida, StockActual, StockMinimo, PrecioCosto) VALUES (@Nombre, @Categoria, @UnidadMedida, @StockActual, @StockMinimo, @PrecioCosto);";
-            // Usamos ExecuteAsync
             await connection.ExecuteAsync(sql, producto);
         }
 
@@ -44,14 +38,9 @@ namespace FoodWare.Model.DataAccess
         {
             using var connection = new SqlConnection(_connectionString);
             string sql = "DELETE FROM Productos WHERE IdProducto = @Id;";
-
-            // Usamos ExecuteAsync en lugar de Execute
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        /// <summary>
-        /// Actualiza un producto existente en la base de datos.
-        /// </summary>
         public async Task ActualizarAsync(Producto producto)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -63,26 +52,23 @@ namespace FoodWare.Model.DataAccess
                                StockMinimo = @StockMinimo, 
                                PrecioCosto = @PrecioCosto 
                            WHERE IdProducto = @IdProducto;";
-
-            // Usamos ExecuteAsync para la operación de actualización
             await connection.ExecuteAsync(sql, producto);
         }
 
-        public async Task ActualizarStockAsync(int idProducto, decimal cantidadADescontar, SqlConnection connection, SqlTransaction transaction)
+        public async Task<Producto?> ObtenerPorIdAsync(int id)
         {
-            // Resta la cantidad del stock actual
-            string sql = @"UPDATE Productos 
-                   SET StockActual = StockActual - @Cantidad 
-                   WHERE IdProducto = @IdProducto;";
-
-            // Dapper usará la conexión y transacción existentes
-            await connection.ExecuteAsync(sql,
-                new { Cantidad = cantidadADescontar, IdProducto = idProducto },
-                transaction);
+            using var connection = new SqlConnection(_connectionString);
+            string sql = "SELECT * FROM Productos WHERE IdProducto = @Id;";
+            // Usamos QuerySingleOrDefaultAsync para obtener un solo producto o null
+            return await connection.QuerySingleOrDefaultAsync<Producto>(sql, new { Id = id });
         }
 
-        // --- Métodos Pendientes de Implementación ---
-        public Task<Producto> ObtenerPorIdAsync(int id) 
-            => throw new NotImplementedException("La funcionalidad de obtener por ID aún no está implementada.");
+        public async Task<Dictionary<int, decimal>> ObtenerMapaStockAsync()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            string sql = "SELECT IdProducto, StockActual FROM Productos;";
+            var stocks = await connection.QueryAsync<(int IdProducto, decimal StockActual)>(sql);
+            return stocks.ToDictionary(item => item.IdProducto, item => item.StockActual);
+        }
     }
 }

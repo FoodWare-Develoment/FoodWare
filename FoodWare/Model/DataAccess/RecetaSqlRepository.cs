@@ -42,7 +42,8 @@ namespace FoodWare.Model.DataAccess
                                R.IdProducto, 
                                P.Nombre AS NombreProducto, 
                                R.Cantidad, 
-                               P.UnidadMedida
+                               P.UnidadMedida,
+                               P.PrecioCosto -- <-- AÑADIDO PARA C-6 (Costo Receta)
                            FROM 
                                Recetas R 
                            INNER JOIN 
@@ -61,7 +62,8 @@ namespace FoodWare.Model.DataAccess
                        R.IdProducto, 
                        P.Nombre AS NombreProducto, 
                        R.Cantidad, 
-                       P.UnidadMedida
+                       P.UnidadMedida,
+                       P.PrecioCosto -- <-- AÑADIDO PARA C-6 (Costo Receta)
                    FROM 
                        Recetas R 
                    INNER JOIN 
@@ -74,6 +76,15 @@ namespace FoodWare.Model.DataAccess
                 transaction);
 
             return [.. detalles];
+        }
+
+        public async Task<bool> ProductoEstaEnUsoAsync(int idProducto)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            string sql = "SELECT 1 FROM Recetas WHERE IdProducto = @IdProducto;";
+            // QueryFirstOrDefaultAsync devuelve 0 (default) o 1
+            var result = await connection.QueryFirstOrDefaultAsync<int>(sql, new { IdProducto = idProducto });
+            return result > 0;
         }
     }
 }

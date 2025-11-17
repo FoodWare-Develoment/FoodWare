@@ -13,5 +13,6 @@ namespace FoodWare.Model.Entities
         public string NombreProducto { get; set; } = string.Empty;
         public decimal Cantidad { get; set; }
         public string UnidadMedida { get; set; } = string.Empty;
+        public decimal PrecioCosto { get; set; }
     }
 }

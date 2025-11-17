@@ -11,6 +11,8 @@
             base.Dispose(disposing);
         }
 
+        #region Component Designer generated code
+
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
@@ -29,6 +31,7 @@
             itemGestionarReceta = new ToolStripMenuItem();
             itemEditarPlatillo = new ToolStripMenuItem();
             panelEdicionReceta = new Panel();
+            lblCostoReceta = new Label(); // <-- NUEVO LABEL
             btnVolverAlMenu = new Button();
             btnEliminarIngrediente = new Button();
             btnAgregarIngrediente = new Button();
@@ -186,6 +189,7 @@
             // 
             // panelEdicionReceta
             // 
+            panelEdicionReceta.Controls.Add(lblCostoReceta); // <-- AÑADIDO
             panelEdicionReceta.Controls.Add(btnVolverAlMenu);
             panelEdicionReceta.Controls.Add(btnEliminarIngrediente);
             panelEdicionReceta.Controls.Add(btnAgregarIngrediente);
@@ -200,6 +204,16 @@
             panelEdicionReceta.Size = new Size(960, 664);
             panelEdicionReceta.TabIndex = 3;
             panelEdicionReceta.Visible = false;
+            // 
+            // lblCostoReceta
+            // 
+            lblCostoReceta.Font = new Font("Segoe UI", 13F);
+            lblCostoReceta.Location = new Point(44, 168);
+            lblCostoReceta.Name = "lblCostoReceta";
+            lblCostoReceta.Size = new Size(710, 40);
+            lblCostoReceta.TabIndex = 10;
+            lblCostoReceta.Text = "Costo: $0.00";
+            lblCostoReceta.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // btnVolverAlMenu
             // 
@@ -303,6 +317,9 @@
             ((System.ComponentModel.ISupportInitialize)dgvReceta).EndInit();
             ResumeLayout(false);
         }
+
+        #endregion
+
         private Panel panelInputs;
         private TextBox txtNombre;
         private Label lblCategoria;
@@ -327,5 +344,6 @@
         private Button btnEliminarIngrediente;
         private Button btnAgregarIngrediente;
         private ToolStripMenuItem itemEditarPlatillo;
+        private Label lblCostoReceta; // <-- NUEVO LABEL
     }
 }

@@ -11,10 +11,14 @@
             base.Dispose(disposing);
         }
 
+        #region Component Designer generated code
+
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
             panelInputs = new Panel();
+            btnRegistrarMerma = new Button();
+            btnAnadirStock = new Button();
             cmbCategoria = new ComboBox();
             cmbUnidadMedida = new ComboBox();
             btnActualizar = new Button();
@@ -41,6 +45,8 @@
             // 
             // panelInputs
             // 
+            panelInputs.Controls.Add(btnRegistrarMerma);
+            panelInputs.Controls.Add(btnAnadirStock);
             panelInputs.Controls.Add(cmbCategoria);
             panelInputs.Controls.Add(cmbUnidadMedida);
             panelInputs.Controls.Add(btnActualizar);
@@ -63,6 +69,28 @@
             panelInputs.Size = new Size(960, 269);
             panelInputs.TabIndex = 0;
             // 
+            // btnRegistrarMerma
+            // 
+            btnRegistrarMerma.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnRegistrarMerma.Location = new Point(800, 207);
+            btnRegistrarMerma.Name = "btnRegistrarMerma";
+            btnRegistrarMerma.Size = new Size(104, 39);
+            btnRegistrarMerma.TabIndex = 22;
+            btnRegistrarMerma.Text = "Reg. Merma";
+            btnRegistrarMerma.UseVisualStyleBackColor = true;
+            btnRegistrarMerma.Click += BtnRegistrarMerma_Click;
+            // 
+            // btnAnadirStock
+            // 
+            btnAnadirStock.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnAnadirStock.Location = new Point(800, 159);
+            btnAnadirStock.Name = "btnAnadirStock";
+            btnAnadirStock.Size = new Size(104, 39);
+            btnAnadirStock.TabIndex = 21;
+            btnAnadirStock.Text = "Añadir Stock";
+            btnAnadirStock.UseVisualStyleBackColor = true;
+            btnAnadirStock.Click += BtnAnadirStock_Click;
+            // 
             // cmbCategoria
             // 
             cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -84,9 +112,9 @@
             // btnActualizar
             // 
             btnActualizar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnActualizar.Location = new Point(800, 140);
+            btnActualizar.Location = new Point(800, 110);
             btnActualizar.Name = "btnActualizar";
-            btnActualizar.Size = new Size(104, 49);
+            btnActualizar.Size = new Size(104, 39);
             btnActualizar.TabIndex = 18;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
@@ -123,9 +151,9 @@
             // btnGuardar
             // 
             btnGuardar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnGuardar.Location = new Point(800, 17);
+            btnGuardar.Location = new Point(800, 16);
             btnGuardar.Name = "btnGuardar";
-            btnGuardar.Size = new Size(104, 49);
+            btnGuardar.Size = new Size(104, 39);
             btnGuardar.TabIndex = 13;
             btnGuardar.Text = "Agregar";
             btnGuardar.UseVisualStyleBackColor = true;
@@ -134,9 +162,9 @@
             // btnEliminar
             // 
             btnEliminar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnEliminar.Location = new Point(800, 79);
+            btnEliminar.Location = new Point(800, 63);
             btnEliminar.Name = "btnEliminar";
-            btnEliminar.Size = new Size(104, 49);
+            btnEliminar.Size = new Size(104, 39);
             btnEliminar.TabIndex = 12;
             btnEliminar.Text = "Eliminar";
             btnEliminar.UseVisualStyleBackColor = true;
@@ -145,9 +173,9 @@
             // btnLimpiar
             // 
             btnLimpiar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnLimpiar.Location = new Point(800, 202);
+            btnLimpiar.Location = new Point(650, 224);
             btnLimpiar.Name = "btnLimpiar";
-            btnLimpiar.Size = new Size(104, 49);
+            btnLimpiar.Size = new Size(104, 29);
             btnLimpiar.TabIndex = 10;
             btnLimpiar.Text = "Limpiar";
             btnLimpiar.UseVisualStyleBackColor = true;
@@ -158,7 +186,7 @@
             txtPrecio.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtPrecio.Location = new Point(164, 224);
             txtPrecio.Name = "txtPrecio";
-            txtPrecio.Size = new Size(590, 27);
+            txtPrecio.Size = new Size(480, 27);
             txtPrecio.TabIndex = 7;
             // 
             // lblPrecio
@@ -257,6 +285,9 @@
             contextMenuInventario.ResumeLayout(false);
             ResumeLayout(false);
         }
+
+        #endregion
+
         private Panel panelInputs;
         private TextBox txtStock;
         private TextBox txtNombre;
@@ -277,5 +308,7 @@
         private ComboBox cmbCategoria;
         private ContextMenuStrip contextMenuInventario;
         private ToolStripMenuItem itemEditarProducto;
+        private Button btnRegistrarMerma; 
+        private Button btnAnadirStock;
     }
 }

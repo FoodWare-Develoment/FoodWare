@@ -1,32 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading.Tasks;    // Para tareas asíncronas
-using System.Linq;               // Para LINQ (filtros y selecciones)
-using System.ComponentModel;     // Para BindingList
-using System.Collections.Generic;
+using FoodWare.Controller.Exceptionss;
+using FoodWare.Controller.Logic;
+using FoodWare.Model.DataAccess;
 using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
-using FoodWare.Model.DataAccess;
-using FoodWare.Controller.Logic;
 using FoodWare.View.Helpers;
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Ventas : UserControl
     {
-        // --- Controladores y Listas de Estado ---
-
-        // Controlador para traer los platillos del menú
         private readonly MenuController _menuController;
         private readonly VentasController _ventasController;
-
-        // Lista con TODOS los platillos de la BD. La usamos para filtrar.
         private List<Platillo> _listaPlatillosCompleta;
-
-        // Lista para la comanda (ticket) actual.
-        // Usamos BindingList para que el DataGridView se actualice solo.
         private readonly BindingList<DetalleVenta> _comandaActual;
 
         public UC_Ventas()
@@ -34,7 +27,7 @@ namespace FoodWare.View.UserControls
             InitializeComponent();
             AplicarEstilos();
 
-            // 1. Inicializar el controlador
+            // 1. Inicializar el controlador de Menu
             IPlatilloRepository platilloRepo = new PlatilloSqlRepository();
             _menuController = new MenuController(platilloRepo);
 
@@ -42,7 +35,8 @@ namespace FoodWare.View.UserControls
             _ventasController = new VentasController(
                 new VentaSqlRepository(),
                 new RecetaSqlRepository(),
-                new ProductoSqlRepository()
+                new ProductoSqlRepository(),
+                new MovimientoSqlRepository()
             );
 
             // 3. Inicializar nuestras listas de estado
@@ -52,8 +46,7 @@ namespace FoodWare.View.UserControls
             // 4. Conectar la comanda (BindingList) al DataGridView
             dgvComanda.DataSource = _comandaActual;
 
-            // 5. Conectar los eventos de los botones del panel de comanda
-            // (Los botones de platillos/categorías se conectan al crearse)
+            // 5. Conectar los eventos
             this.btnRegistrarVenta.Click += BtnRegistrarVenta_Click;
             this.btnEliminarPlatillo.Click += BtnEliminarPlatillo_Click;
             this.btnQtyDisminuir.Click += BtnQtyDisminuir_Click;
@@ -200,9 +193,6 @@ namespace FoodWare.View.UserControls
         {
             dgvComanda.DataSource = _comandaActual;
 
-            // Ocultamos las columnas de IDs que el usuario no necesita ver
-            // Esta sintaxis ("is DataGridViewColumn col") comprueba si no es nulo
-            // y lo asigna a la variable "col" en un solo paso.
             if (dgvComanda.Columns["IdDetalleVenta"] is DataGridViewColumn colDetalle)
             {
                 colDetalle.Visible = false;
@@ -218,11 +208,9 @@ namespace FoodWare.View.UserControls
                 colPlatillo.Visible = false;
             }
 
-            // Cambiamos los nombres de los encabezados
             if (dgvComanda.Columns["NombrePlatillo"] is DataGridViewColumn colNombre)
             {
                 colNombre.HeaderText = "Platillo";
-                // Hacemos que la columna de nombre ocupe el espacio sobrante
                 colNombre.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
 
@@ -243,38 +231,21 @@ namespace FoodWare.View.UserControls
 
         // --- EVENT HANDLERS (CLICS DE BOTONES) ---
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en un botón de Categoría (ej. "Bebidas").
-        /// Filtra la lista de botones de platillos.
-        /// </summary>
         private void BotonCategoria_Click(object? sender, EventArgs e)
         {
-            // 1. Verificamos si el 'sender' es un Button y lo asignamos a 'btn'
-            if (sender is not Button btn)
-            {
-                return; // Si no es un botón, no hacemos nada.
-            }
-
-            // 2. Verificamos si el 'Tag' de ese botón es un 'string'
-            //    y lo asignamos a 'categoria'
-            if (btn.Tag is not string categoria)
-            {
-                return; // Si el Tag no es un string (o es nulo), no hacemos nada.
-            }
+            if (sender is not Button btn) return;
+            if (btn.Tag is not string categoria) return;
 
             try
             {
                 this.Cursor = Cursors.WaitCursor;
 
-                // 3. A partir de aquí, 'categoria' es un 'string' válido y no nulo.
                 if (categoria == "Todos")
                 {
-                    // Si es "Todos", pasamos la lista completa
                     PoblarBotonesPlatillos(_listaPlatillosCompleta);
                 }
                 else
                 {
-                    // Si es otra categoría, filtramos la lista usando LINQ
                     var platillosFiltrados = _listaPlatillosCompleta
                                                 .Where(p => p.Categoria == categoria)
                                                 .ToList();
@@ -288,10 +259,6 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en un botón de Platillo (ej. "Hamburguesa").
-        /// Añade el platillo a la comanda (ticket).
-        /// </summary>
         private void BotonPlatillo_Click(object? sender, EventArgs e)
         {
             Button btn = (Button)sender!;
@@ -302,7 +269,6 @@ namespace FoodWare.View.UserControls
             if (detalleExistente != null)
             {
                 detalleExistente.Cantidad++;
-                // Forzamos al BindingList a notificar al grid que un item cambió
                 _comandaActual.ResetBindings();
             }
             else
@@ -320,9 +286,6 @@ namespace FoodWare.View.UserControls
             ActualizarTotal();
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Añadir (+)"
-        /// </summary>
         private void BtnQtyAumentar_Click(object? sender, EventArgs e)
         {
             if (dgvComanda.CurrentRow != null && dgvComanda.CurrentRow.DataBoundItem is DetalleVenta detalle)
@@ -337,21 +300,16 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Quitar (-)"
-        /// </summary>
         private void BtnQtyDisminuir_Click(object? sender, EventArgs e)
         {
             if (dgvComanda.CurrentRow != null && dgvComanda.CurrentRow.DataBoundItem is DetalleVenta detalle)
             {
                 if (detalle.Cantidad > 1)
                 {
-                    // Si hay más de 1, solo restamos
                     detalle.Cantidad--;
                 }
                 else
                 {
-                    // Si la cantidad es 1, preguntamos si quiere eliminarlo
                     var confirm = MessageBox.Show($"¿Quitar '{detalle.NombrePlatillo}' de la comanda?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (confirm == DialogResult.Yes)
                     {
@@ -367,9 +325,6 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Eliminar"
-        /// </summary>
         private void BtnEliminarPlatillo_Click(object? sender, EventArgs e)
         {
             if (dgvComanda.CurrentRow != null && dgvComanda.CurrentRow.DataBoundItem is DetalleVenta detalle)
@@ -387,19 +342,14 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Registrar Venta"
-        /// </summary>
         private async void BtnRegistrarVenta_Click(object? sender, EventArgs e)
         {
-            // 1. Validar que hay items en la comanda
             if (_comandaActual.Count == 0)
             {
                 MessageBox.Show("No hay platillos en la comanda para registrar.", "Comanda Vacía", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. Confirmación
             var confirm = MessageBox.Show($"¿Desea registrar esta venta por un total de {lblTotal.Text}?", "Confirmar Venta", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (confirm == DialogResult.No)
@@ -412,34 +362,35 @@ namespace FoodWare.View.UserControls
                 this.Cursor = Cursors.WaitCursor;
                 btnRegistrarVenta.Enabled = false;
 
-                // 3. Crear el objeto Venta principal
                 Venta nuevaVenta = new()
                 {
-                    // TODO: Cuando el Login esté listo, aquí irá el ID del usuario real.
                     IdUsuario = UserSession.IdUsuario,
-                    FormaDePago = "Efectivo",
+                    FormaDePago = "Efectivo", // <-- Tarea C-2 pendiente aquí
                     TotalVenta = _comandaActual.Sum(d => d.Cantidad * d.PrecioUnitario)
                 };
 
-                // 4. Enviar la venta y los detalles al controlador
                 await _ventasController.RegistrarVentaAsync(nuevaVenta, [.. _comandaActual]);
 
-                // 5. Éxito
                 MessageBox.Show("¡Venta registrada exitosamente!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // 6. Limpiar la UI para la siguiente venta
                 _comandaActual.Clear();
                 ActualizarTotal();
             }
+            catch (StockInsuficienteException stockEx)
+            {
+                string mensaje = $"{stockEx.Message}\n\n" +
+                                 $"Para el platillo: '{stockEx.PlatilloConProblema}'\n" +
+                                 $"Solo puede vender un máximo de {stockEx.MaximaCantidadVendible} unidades.";
+
+                MessageBox.Show(mensaje, "Stock Insuficiente", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
-                // 7. Manejo de errores
                 System.Diagnostics.Debug.WriteLine($"Error al registrar venta: {ex.Message}");
                 MessageBox.Show("Ocurrió un error al registrar la venta. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                // 8. Reactivar la UI
                 this.Cursor = Cursors.Default;
                 btnRegistrarVenta.Enabled = true;
             }
