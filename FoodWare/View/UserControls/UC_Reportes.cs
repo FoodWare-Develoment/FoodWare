@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Threading.Tasks;    
-using FoodWare.Controller.Logic; 
-using FoodWare.Model.DataAccess; 
-using FoodWare.Model.Interfaces; 
-using FoodWare.View.Helpers;     
+using System.Threading.Tasks;
+using FoodWare.Controller.Logic;
+using FoodWare.Model.DataAccess;
+using FoodWare.Model.Interfaces;
+using FoodWare.View.Helpers;
+using System.Collections.Generic; // Para List<>
+using FoodWare.Model.Entities;    // Para DTOs
 
 namespace FoodWare.View.UserControls
 {
@@ -13,45 +15,114 @@ namespace FoodWare.View.UserControls
     {
         private readonly ReportesController _controller;
 
+        // Constantes para los tipos de reporte (S1192)
+        private const string RPT_VENTAS_DIARIAS = "Reporte de Ventas Diarias";
+        private const string RPT_TOP_PLATILLOS = "Top Platillos Vendidos";
+        private const string RPT_STOCK_BAJO = "Reporte de Stock Bajo";
+        private const string RPT_MERMAS = "Reporte de Mermas (Pérdidas)";
+
+        // Constantes para mensajes
+        private const string TituloError = "Error";
+        private const string TituloInfo = "Información";
+        private const string MsgErrorInesperado = "Ocurrió un error inesperado al generar el reporte.";
+
         public UC_Reportes()
         {
             InitializeComponent();
-
-            // 1. Inicializar el controlador
             IReporteRepository repo = new ReporteSqlRepository();
             _controller = new ReportesController(repo);
-
-            // 2. Aplicar estilos
             AplicarEstilos();
         }
 
         private void AplicarEstilos()
         {
-            EstilosApp.EstiloLabelTitulo(lblTituloPlatillos);
-            EstilosApp.EstiloDataGridView(dgvTopPlatillos);     
-
-            EstilosApp.EstiloLabelTitulo(lblTituloStock);
-            EstilosApp.EstiloDataGridView(dgvStockBajo);
+            this.BackColor = EstilosApp.ColorFondo;
+            EstilosApp.EstiloPanel(panelFiltros, EstilosApp.ColorFondo);
+            EstilosApp.EstiloLabelModulo(lblTipoReporte);
+            EstilosApp.EstiloLabelModulo(lblDesde);
+            EstilosApp.EstiloLabelModulo(lblHasta);
+            EstilosApp.EstiloComboBoxModulo(cmbTipoReporte);
+            EstilosApp.EstiloBotonAccionPrincipal(btnGenerarReporte);
+            EstilosApp.EstiloPanel(panelContenido, EstilosApp.ColorFondo);
+            EstilosApp.EstiloDataGridView(dgvReporte);
         }
 
-        // 3. Añadir el evento Load
-        private async void UC_Reportes_Load(object sender, EventArgs e)
+        private void UC_Reportes_Load(object sender, EventArgs e)
         {
             if (DesignMode) return;
 
-            // Usamos Task.WhenAll para cargar ambos reportes en paralelo
+            // Llenar el ComboBox con los reportes disponibles
+            cmbTipoReporte.Items.Add(RPT_VENTAS_DIARIAS);
+            cmbTipoReporte.Items.Add(RPT_TOP_PLATILLOS);
+            cmbTipoReporte.Items.Add(RPT_STOCK_BAJO);
+            cmbTipoReporte.Items.Add(RPT_MERMAS);
+            cmbTipoReporte.SelectedIndex = 0;
+
+            // Configurar fechas por defecto (ej. el mes actual)
+            dtpFechaInicio.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            dtpFechaFin.Value = DateTime.Now;
+        }
+
+        private void CmbTipoReporte_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            // Habilitar/deshabilitar filtros de fecha
+            bool habilitarFechas = cmbTipoReporte.SelectedItem?.ToString() != RPT_STOCK_BAJO;
+            dtpFechaInicio.Enabled = habilitarFechas;
+            dtpFechaFin.Enabled = habilitarFechas;
+            lblDesde.Enabled = habilitarFechas;
+            lblHasta.Enabled = habilitarFechas;
+        }
+
+        private async void BtnGenerarReporte_Click(object sender, EventArgs e)
+        {
+            string reporteSeleccionado = cmbTipoReporte.SelectedItem?.ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(reporteSeleccionado))
+            {
+                MessageBox.Show("Por favor, seleccione un tipo de reporte.", TituloInfo, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Ocultar todo por defecto
+            dgvReporte.Visible = false;
+            chartReporte.Visible = false;
+            dgvReporte.DataSource = null;
+            chartReporte.Series.Clear();
+
             this.Cursor = Cursors.WaitCursor;
             try
             {
-                await Task.WhenAll(
-                    CargarGridTopPlatillosAsync(),
-                    CargarGridStockBajoAsync()
-                );
+                // Obtener fechas (asegurando que Fin sea al final del día)
+                DateTime fechaInicio = dtpFechaInicio.Value.Date;
+                DateTime fechaFin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+
+                // Ejecutar el reporte seleccionado
+                switch (reporteSeleccionado)
+                {
+                    case RPT_VENTAS_DIARIAS:
+                        var ventas = await _controller.CargarReporteVentasAsync(fechaInicio, fechaFin);
+                        ConfigurarGridVentas(ventas);
+                        break;
+
+                    case RPT_TOP_PLATILLOS:
+                        var platillos = await _controller.CargarTopPlatillosVendidosAsync(fechaInicio, fechaFin);
+                        ConfigurarGridTopPlatillos(platillos);
+                        break;
+
+                    case RPT_STOCK_BAJO:
+                        var stock = await _controller.CargarReporteStockBajoAsync();
+                        ConfigurarGridStockBajo(stock);
+                        break;
+
+                    case RPT_MERMAS:
+                        var mermas = await _controller.CargarReporteMermasAsync(fechaInicio, fechaFin);
+                        ConfigurarGridMermas(mermas);
+                        break;
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar reportes: {ex.Message}");
-                MessageBox.Show("Error al cargar reportes. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error al generar reporte: {ex.Message}");
+                MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -59,53 +130,79 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        // 4. Añadir métodos de carga para cada grid
-        private async Task CargarGridTopPlatillosAsync()
-        {
-            var data = await _controller.CargarTopPlatillosVendidosAsync();
-            dgvTopPlatillos.DataSource = data;
+        // --- MÉTODOS HELPER PARA CONFIGURAR CADA GRID ---
 
-            // Configurar columnas
-            if (dgvTopPlatillos.Columns["Nombre"] is DataGridViewColumn colNombre)
+        private void ConfigurarGridVentas(List<ReporteVentasDto> datos)
+        {
+            dgvReporte.DataSource = datos;
+            dgvReporte.Visible = true;
+
+            if (dgvReporte.Columns["Dia"] is DataGridViewColumn colDia)
             {
-                colNombre.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                colDia.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
-            if (dgvTopPlatillos.Columns["TotalVendido"] is DataGridViewColumn colTotal)
+            if (dgvReporte.Columns["TotalDiario"] is DataGridViewColumn colTotal)
             {
-                colTotal.HeaderText = "Unidades Vendidas";
-                colTotal.Width = 150;
+                colTotal.HeaderText = "Total Vendido";
+                colTotal.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                colTotal.DefaultCellStyle.Format = "C2"; // Formato de Moneda
             }
         }
 
-        private async Task CargarGridStockBajoAsync()
+        private void ConfigurarGridTopPlatillos(List<PlatilloVendidoDto> datos)
         {
-            var data = await _controller.CargarReporteStockBajoAsync();
-            dgvStockBajo.DataSource = data;
+            dgvReporte.DataSource = datos;
+            dgvReporte.Visible = true;
 
-            // Configurar columnas
-            if (dgvStockBajo.Columns["Nombre"] is DataGridViewColumn colNombre)
+            if (dgvReporte.Columns["Nombre"] is DataGridViewColumn colNombre)
             {
                 colNombre.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
-            if (dgvStockBajo.Columns["StockActual"] is DataGridViewColumn colActual)
+            if (dgvReporte.Columns["TotalVendido"] is DataGridViewColumn colTotal)
             {
-                colActual.HeaderText = "Stock Actual";
-                colActual.Width = 120;
+                colTotal.HeaderText = "Unidades Vendidas";
+                colTotal.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
-            if (dgvStockBajo.Columns["StockMinimo"] is DataGridViewColumn colMin)
+        }
+
+        private void ConfigurarGridStockBajo(List<ProductoBajoStockDto> datos)
+        {
+            dgvReporte.DataSource = datos;
+            dgvReporte.Visible = true;
+
+            if (dgvReporte.Columns["Nombre"] is DataGridViewColumn colNombre)
             {
-                colMin.HeaderText = "Stock Mínimo";
-                colMin.Width = 120;
+                colNombre.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
-            if (dgvStockBajo.Columns["CantidadAReordenar"] is DataGridViewColumn colReorden)
+            if (dgvReporte.Columns["StockActual"] is DataGridViewColumn colActual) colActual.HeaderText = "Stock Actual";
+            if (dgvReporte.Columns["StockMinimo"] is DataGridViewColumn colMin) colMin.HeaderText = "Stock Mínimo";
+            if (dgvReporte.Columns["CantidadAReordenar"] is DataGridViewColumn colReorden) colReorden.HeaderText = "Faltante";
+            if (dgvReporte.Columns["Prioridad"] is DataGridViewColumn colPrio) colPrio.HeaderText = "Prioridad";
+        }
+
+        private void ConfigurarGridMermas(List<ReporteMermasDto> datos)
+        {
+            dgvReporte.DataSource = datos;
+            dgvReporte.Visible = true;
+
+            if (dgvReporte.Columns["Producto"] is DataGridViewColumn colProd)
             {
-                colReorden.HeaderText = "Faltante";
-                colReorden.Width = 100;
+                colProd.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
-            if (dgvStockBajo.Columns["Prioridad"] is DataGridViewColumn colPrio)
+            if (dgvReporte.Columns["Motivo"] is DataGridViewColumn colMot)
             {
-                colPrio.HeaderText = "Prioridad";
-                colPrio.Width = 80;
+                colMot.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            }
+            if (dgvReporte.Columns["CantidadPerdida"] is DataGridViewColumn colCant)
+            {
+                colCant.HeaderText = "Cantidad Perdida";
+                colCant.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            }
+            if (dgvReporte.Columns["CostoPerdida"] is DataGridViewColumn colCosto)
+            {
+                colCosto.HeaderText = "Costo Perdido";
+                colCosto.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                colCosto.DefaultCellStyle.Format = "C2"; // Formato de Moneda
             }
         }
     }

@@ -4,6 +4,7 @@ using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -18,17 +19,9 @@ namespace FoodWare.Model.DataAccess
             _connectionString = Program.Configuration.GetConnectionString("FoodWareDB")!;
         }
 
-        /// <summary>
-        /// (Funcionalidad 1: Agregación y Agrupación)
-        /// Obtiene un ranking de platillos ordenados por el total de unidades vendidas.
-        /// </summary>
-        public async Task<List<PlatilloVendidoDto>> ObtenerTopPlatillosVendidosAsync()
+        public async Task<List<PlatilloVendidoDto>> ObtenerTopPlatillosVendidosAsync(DateTime inicio, DateTime fin)
         {
-            // Esta consulta usa:
-            // 1. JOIN: Para conectar DetallesVenta con Platillos.
-            // 2. SUM(): Función de agregación para sumar las cantidades.
-            // 3. GROUP BY: Para agrupar los resultados por nombre de platillo.
-            // 4. ORDER BY: Ordena automáticamente de mayor a menor.
+            // Añadimos JOIN a Ventas y filtro de fecha
             string sql = @"
                 SELECT 
                     P.Nombre, 
@@ -37,28 +30,22 @@ namespace FoodWare.Model.DataAccess
                     DetallesVenta DV
                 INNER JOIN 
                     Platillos P ON DV.IdPlatillo = P.IdPlatillo
+                INNER JOIN
+                    Ventas V ON DV.IdVenta = V.IdVenta
+                WHERE
+                    V.FechaVenta BETWEEN @Inicio AND @Fin
                 GROUP BY 
                     P.Nombre
                 ORDER BY 
                     TotalVendido DESC;";
 
             using var connection = new SqlConnection(_connectionString);
-            var reporte = await connection.QueryAsync<PlatilloVendidoDto>(sql);
+            var reporte = await connection.QueryAsync<PlatilloVendidoDto>(sql, new { Inicio = inicio, Fin = fin });
             return [.. reporte];
         }
 
-        /// <summary>
-        /// (Funcionalidad 2: Función de Ventana)
-        /// Obtiene productos que necesitan reabastecimiento, ordenados por prioridad.
-        /// </summary>
         public async Task<List<ProductoBajoStockDto>> ObtenerProductosBajoStockAsync()
         {
-            // Esta consulta usa:
-            // 1. WHERE: Para filtrar solo productos bajo el mínimo.
-            // 2. Cálculo: (StockMinimo - StockActual) para la necesidad.
-            // 3. NULLIF: Para prevenir división por cero si StockMinimo es 0.
-            // 4. RANK() OVER(): Función de ventana avanzada para asignar un ranking.
-            // 5. ORDER BY: Ordena automáticamente por la prioridad (ranking).
             string sql = @"
                 SELECT 
                     Nombre,
@@ -78,6 +65,52 @@ namespace FoodWare.Model.DataAccess
 
             using var connection = new SqlConnection(_connectionString);
             var reporte = await connection.QueryAsync<ProductoBajoStockDto>(sql);
+            return [.. reporte];
+        }
+
+        public async Task<List<ReporteVentasDto>> ObtenerReporteVentasAsync(DateTime inicio, DateTime fin)
+        {
+            string sql = @"
+                SELECT 
+                    CAST(FechaVenta AS DATE) AS Dia, 
+                    SUM(TotalVenta) AS TotalDiario
+                FROM 
+                    Ventas
+                WHERE 
+                    FechaVenta BETWEEN @Inicio AND @Fin
+                GROUP BY 
+                    CAST(FechaVenta AS DATE)
+                ORDER BY
+                    Dia DESC;";
+
+            using var connection = new SqlConnection(_connectionString);
+            var reporte = await connection.QueryAsync<ReporteVentasDto>(sql, new { Inicio = inicio, Fin = fin });
+            return [.. reporte];
+        }
+
+        public async Task<List<ReporteMermasDto>> ObtenerReporteMermasAsync(DateTime inicio, DateTime fin)
+        {
+            // Usamos la tabla MovimientosInventario
+            string sql = @"
+                SELECT 
+                    P.Nombre AS Producto, 
+                    M.Motivo, 
+                    SUM(M.Cantidad * -1) AS CantidadPerdida,
+                    SUM((M.Cantidad * -1) * P.PrecioCosto) AS CostoPerdida
+                FROM 
+                    MovimientosInventario M
+                INNER JOIN 
+                    Productos P ON M.IdProducto = P.IdProducto
+                WHERE 
+                    M.TipoMovimiento = 'Merma' 
+                    AND M.Fecha BETWEEN @Inicio AND @Fin
+                GROUP BY 
+                    P.Nombre, M.Motivo
+                ORDER BY
+                    CostoPerdida DESC;";
+
+            using var connection = new SqlConnection(_connectionString);
+            var reporte = await connection.QueryAsync<ReporteMermasDto>(sql, new { Inicio = inicio, Fin = fin });
             return [.. reporte];
         }
     }
