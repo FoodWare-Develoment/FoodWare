@@ -19,6 +19,10 @@ namespace FoodWare.View.UserControls
             ChartArea chartArea1 = new ChartArea();
             Legend legend1 = new Legend();
             panelFiltros = new Panel();
+            panelVistaToggle = new Panel();
+            lblTipoVista = new Label();
+            btnVerTabla = new Button();
+            btnVerGrafico = new Button();
             btnGenerarReporte = new Button();
             dtpFechaFin = new DateTimePicker();
             lblHasta = new Label();
@@ -30,6 +34,7 @@ namespace FoodWare.View.UserControls
             dgvReporte = new DataGridView();
             chartReporte = new Chart();
             panelFiltros.SuspendLayout();
+            panelVistaToggle.SuspendLayout();
             panelContenido.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvReporte).BeginInit();
             ((System.ComponentModel.ISupportInitialize)chartReporte).BeginInit();
@@ -37,6 +42,7 @@ namespace FoodWare.View.UserControls
             // 
             // panelFiltros
             // 
+            panelFiltros.Controls.Add(panelVistaToggle);
             panelFiltros.Controls.Add(btnGenerarReporte);
             panelFiltros.Controls.Add(dtpFechaFin);
             panelFiltros.Controls.Add(lblHasta);
@@ -49,6 +55,47 @@ namespace FoodWare.View.UserControls
             panelFiltros.Name = "panelFiltros";
             panelFiltros.Size = new Size(960, 100);
             panelFiltros.TabIndex = 0;
+            // 
+            // panelVistaToggle
+            // 
+            panelVistaToggle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            panelVistaToggle.Controls.Add(lblTipoVista);
+            panelVistaToggle.Controls.Add(btnVerTabla);
+            panelVistaToggle.Controls.Add(btnVerGrafico);
+            panelVistaToggle.Location = new Point(603, 3);
+            panelVistaToggle.Name = "panelVistaToggle";
+            panelVistaToggle.Size = new Size(201, 94);
+            panelVistaToggle.TabIndex = 7;
+            panelVistaToggle.Visible = false;
+            // 
+            // lblTipoVista
+            // 
+            lblTipoVista.AutoSize = true;
+            lblTipoVista.Location = new Point(14, 9);
+            lblTipoVista.Name = "lblTipoVista";
+            lblTipoVista.Size = new Size(101, 20);
+            lblTipoVista.TabIndex = 2;
+            lblTipoVista.Text = "Tipo de Vista:";
+            // 
+            // btnVerTabla
+            // 
+            btnVerTabla.Location = new Point(104, 39);
+            btnVerTabla.Name = "btnVerTabla";
+            btnVerTabla.Size = new Size(85, 35);
+            btnVerTabla.TabIndex = 1;
+            btnVerTabla.Text = "Tabla";
+            btnVerTabla.UseVisualStyleBackColor = true;
+            btnVerTabla.Click += BtnVerTabla_Click;
+            // 
+            // btnVerGrafico
+            // 
+            btnVerGrafico.Location = new Point(14, 39);
+            btnVerGrafico.Name = "btnVerGrafico";
+            btnVerGrafico.Size = new Size(85, 35);
+            btnVerGrafico.TabIndex = 0;
+            btnVerGrafico.Text = "Gráfico";
+            btnVerGrafico.UseVisualStyleBackColor = true;
+            btnVerGrafico.Click += BtnVerGrafico_Click;
             // 
             // btnGenerarReporte
             // 
@@ -64,7 +111,7 @@ namespace FoodWare.View.UserControls
             // dtpFechaFin
             // 
             dtpFechaFin.Format = DateTimePickerFormat.Short;
-            dtpFechaFin.Location = new Point(594, 57);
+            dtpFechaFin.Location = new Point(370, 57);
             dtpFechaFin.Name = "dtpFechaFin";
             dtpFechaFin.Size = new Size(160, 27);
             dtpFechaFin.TabIndex = 5;
@@ -72,7 +119,7 @@ namespace FoodWare.View.UserControls
             // lblHasta
             // 
             lblHasta.AutoSize = true;
-            lblHasta.Location = new Point(540, 60);
+            lblHasta.Location = new Point(313, 60);
             lblHasta.Name = "lblHasta";
             lblHasta.Size = new Size(47, 20);
             lblHasta.TabIndex = 4;
@@ -81,7 +128,7 @@ namespace FoodWare.View.UserControls
             // dtpFechaInicio
             // 
             dtpFechaInicio.Format = DateTimePickerFormat.Short;
-            dtpFechaInicio.Location = new Point(370, 57);
+            dtpFechaInicio.Location = new Point(370, 15);
             dtpFechaInicio.Name = "dtpFechaInicio";
             dtpFechaInicio.Size = new Size(160, 27);
             dtpFechaInicio.TabIndex = 3;
@@ -89,7 +136,7 @@ namespace FoodWare.View.UserControls
             // lblDesde
             // 
             lblDesde.AutoSize = true;
-            lblDesde.Location = new Point(313, 60);
+            lblDesde.Location = new Point(313, 18);
             lblDesde.Name = "lblDesde";
             lblDesde.Size = new Size(51, 20);
             lblDesde.TabIndex = 2;
@@ -159,6 +206,8 @@ namespace FoodWare.View.UserControls
             Load += UC_Reportes_Load;
             panelFiltros.ResumeLayout(false);
             panelFiltros.PerformLayout();
+            panelVistaToggle.ResumeLayout(false); 
+            panelVistaToggle.PerformLayout();
             panelContenido.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvReporte).EndInit();
             ((System.ComponentModel.ISupportInitialize)chartReporte).EndInit();
@@ -176,5 +225,9 @@ namespace FoodWare.View.UserControls
         private Panel panelContenido;
         private DataGridView dgvReporte;
         private Chart chartReporte;
+        private Panel panelVistaToggle;
+        private Label lblTipoVista;
+        private Button btnVerTabla;
+        private Button btnVerGrafico;
     }
 }
