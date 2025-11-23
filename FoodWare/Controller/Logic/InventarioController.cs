@@ -40,8 +40,6 @@ namespace FoodWare.Controller.Logic
             };
             await _repositorio.AgregarAsync(nuevo);
 
-            // ¡¡IMPORTANTE!! Si el stock inicial no es 0,
-            // deberíamos registrarlo como un movimiento.
             if (stock > 0)
             {
                 // Necesitamos el ID del producto que acabamos de crear...
@@ -53,10 +51,8 @@ namespace FoodWare.Controller.Logic
             }
         }
 
-        // --- MÉTODO ACTUALIZADO ---
         public async Task EliminarProductoAsync(int id)
         {
-            // Validación de regla de negocio (C-7)
             if (await _recetaRepo.ProductoEstaEnUsoAsync(id))
             {
                 throw new InvalidOperationException("El producto no puede ser eliminado. Está en uso en una o más recetas.");
@@ -67,11 +63,9 @@ namespace FoodWare.Controller.Logic
 
         public async Task ActualizarProductoAsync(Producto producto)
         {
-            // ... (tus validaciones de producto) ...
             await _repositorio.ActualizarAsync(producto);
         }
 
-        // --- NUEVO MÉTODO (C-4: Entradas) ---
         public async Task RegistrarEntradaAsync(int idProducto, int idUsuario, decimal cantidad, string motivo)
         {
             if (idProducto <= 0)

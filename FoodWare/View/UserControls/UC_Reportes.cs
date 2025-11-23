@@ -22,6 +22,8 @@ namespace FoodWare.View.UserControls
         private const string RPT_TOP_PLATILLOS = "Top Platillos Vendidos";
         private const string RPT_STOCK_BAJO = "Reporte de Stock Bajo";
         private const string RPT_MERMAS = "Reporte de Mermas (Pérdidas)";
+        private const string RPT_RENTABILIDAD = "Análisis de Rentabilidad";
+        private const string RPT_VENTAS_HORA = "Reporte de Ventas por Hora";
 
         private const string TituloError = "Error";
         private const string TituloInfo = "Información";
@@ -30,7 +32,6 @@ namespace FoodWare.View.UserControls
         private const string VISTA_GRAFICO = "Grafico";
         private const string VISTA_TABLA = "Tabla";
 
-        // --- Variable de estado ---
         private string _vistaActual = VISTA_GRAFICO;
 
         public UC_Reportes()
@@ -64,17 +65,17 @@ namespace FoodWare.View.UserControls
         {
             if (DesignMode) return;
 
-            cmbTipoReporte.Items.Add(RPT_VENTAS_DIARIAS);
-            cmbTipoReporte.Items.Add(RPT_TOP_PLATILLOS);
-            cmbTipoReporte.Items.Add(RPT_STOCK_BAJO);
-            cmbTipoReporte.Items.Add(RPT_MERMAS);
+            cmbTipoReporte.Items.Add(RPT_VENTAS_DIARIAS); // Gráfico + Tabla
+            cmbTipoReporte.Items.Add(RPT_TOP_PLATILLOS); // Gráfico + Tabla
+            cmbTipoReporte.Items.Add(RPT_VENTAS_HORA);   // Gráfico + Tabla 
+            cmbTipoReporte.Items.Add(RPT_RENTABILIDAD);  // Gráfico + Tabla 
+            cmbTipoReporte.Items.Add(RPT_MERMAS);       // Solo tabla
+            cmbTipoReporte.Items.Add(RPT_STOCK_BAJO);   // Solo tabla
             cmbTipoReporte.SelectedIndex = 0;
 
-            // Usamos DateTime.Today que ya tiene Kind = Local
-            // y calculamos el primer día del mes.
             var hoy = DateTime.Today;
             dtpFechaInicio.Value = hoy.AddDays(1 - hoy.Day);
-            dtpFechaFin.Value = hoy; // Hoy al final del día se calcula en el click
+            dtpFechaFin.Value = hoy;
 
             CmbTipoReporte_SelectedIndexChanged(null, EventArgs.Empty);
         }
@@ -89,8 +90,19 @@ namespace FoodWare.View.UserControls
             lblDesde.Enabled = habilitarFechas;
             lblHasta.Enabled = habilitarFechas;
 
-            bool tieneGrafico = reporteSeleccionado == RPT_VENTAS_DIARIAS || reporteSeleccionado == RPT_TOP_PLATILLOS;
+            // Mostrar conmutador si el reporte tiene gráfico
+            bool tieneGrafico = reporteSeleccionado == RPT_VENTAS_DIARIAS ||
+                                reporteSeleccionado == RPT_TOP_PLATILLOS ||
+                                reporteSeleccionado == RPT_VENTAS_HORA ||
+                                reporteSeleccionado == RPT_RENTABILIDAD;
+
             panelVistaToggle.Visible = tieneGrafico;
+
+            // Si no tiene gráfico, forzamos la vista de tabla
+            if (!tieneGrafico)
+            {
+                _vistaActual = VISTA_TABLA;
+            }
         }
 
         private async void BtnGenerarReporte_Click(object sender, EventArgs e)
@@ -134,6 +146,18 @@ namespace FoodWare.View.UserControls
                         var mermas = await _controller.CargarReporteMermasAsync(fechaInicio, fechaFin);
                         ConfigurarGridMermas(mermas);
                         break;
+
+                    case RPT_RENTABILIDAD:
+                        var rentabilidad = await _controller.CargarReporteRentabilidadAsync(fechaInicio, fechaFin);
+                        ConfigurarGridRentabilidad(rentabilidad);
+                        ConfigurarGraficoRentabilidad(rentabilidad);
+                        break;
+
+                    case RPT_VENTAS_HORA:
+                        var ventasHora = await _controller.CargarReporteVentasPorHoraAsync(fechaInicio, fechaFin);
+                        ConfigurarGridVentasHora(ventasHora);
+                        ConfigurarGraficoVentasHora(ventasHora);
+                        break;
                 }
 
                 ActualizarVisibilidadContenido();
@@ -154,7 +178,11 @@ namespace FoodWare.View.UserControls
             string reporteSeleccionado = cmbTipoReporte.SelectedItem?.ToString() ?? string.Empty;
             bool mostrarGrafico = false;
 
-            if (reporteSeleccionado == RPT_VENTAS_DIARIAS || reporteSeleccionado == RPT_TOP_PLATILLOS)
+            // Verificamos si el reporte seleccionado soporta gráficos
+            if (reporteSeleccionado == RPT_VENTAS_DIARIAS ||
+                reporteSeleccionado == RPT_TOP_PLATILLOS ||
+                reporteSeleccionado == RPT_VENTAS_HORA ||
+                reporteSeleccionado == RPT_RENTABILIDAD)
             {
                 mostrarGrafico = (_vistaActual == VISTA_GRAFICO);
             }
@@ -181,15 +209,17 @@ namespace FoodWare.View.UserControls
 
         private void BtnVerGrafico_Click(object? sender, EventArgs e)
         {
-            _vistaActual = VISTA_GRAFICO; 
+            _vistaActual = VISTA_GRAFICO;
             ActualizarVisibilidadContenido();
         }
 
         private void BtnVerTabla_Click(object? sender, EventArgs e)
         {
-            _vistaActual = VISTA_TABLA; 
+            _vistaActual = VISTA_TABLA;
             ActualizarVisibilidadContenido();
         }
+
+        // --- CONFIGURACIÓN DE GRÁFICOS ---
 
         private void ConfigurarGraficoVentas(List<ReporteVentasDto> datos)
         {
@@ -199,20 +229,19 @@ namespace FoodWare.View.UserControls
             var series = chartReporte.Series.Add("Ventas Diarias");
             series.ChartType = SeriesChartType.Column;
 
-            datos = [.. datos.OrderBy(d => d.Dia)];
+            // Estilo visual
+            series.Color = EstilosApp.ColorActivo;
+            series.IsValueShownAsLabel = true;
+            series.LabelFormat = "C2";
+            series.Font = new Font("Segoe UI", 8, FontStyle.Bold);
 
-            foreach (var dato in datos)
+            foreach (var dato in datos.OrderBy(d => d.Dia))
             {
                 series.Points.AddXY(dato.Dia.ToString("dd/MMM"), dato.TotalDiario);
             }
 
-            series.IsValueShownAsLabel = true;
-            series.LabelFormat = "C2";
-            series.Font = new Font("Segoe UI", 8, FontStyle.Bold);
-            series.Color = EstilosApp.ColorActivo;
-
             chartReporte.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
-            chartReporte.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.LightGray;
+            chartReporte.ChartAreas[0].AxisY.LabelStyle.Format = "C0"; // Eje Y en moneda
             chartReporte.Legends[0].Enabled = false;
         }
 
@@ -225,12 +254,11 @@ namespace FoodWare.View.UserControls
             series.ChartType = SeriesChartType.Pie;
 
             var topDatos = datos.Take(5).ToList();
-
             foreach (var dato in topDatos)
             {
                 DataPoint dp = new(0, dato.TotalVendido)
                 {
-                    LegendText = $"{dato.Nombre} ({dato.TotalVendido})",
+                    LegendText = $"{dato.Nombre}",
                     Label = $"{dato.TotalVendido}"
                 };
                 series.Points.Add(dp);
@@ -244,6 +272,66 @@ namespace FoodWare.View.UserControls
             chartReporte.Legends[0].Enabled = true;
             chartReporte.Legends[0].Docking = Docking.Right;
         }
+
+        // --- VENTAS POR HORA ---
+        private void ConfigurarGraficoVentasHora(List<ReporteVentasHoraDto> datos)
+        {
+            chartReporte.Series.Clear();
+            if (datos.Count == 0) return;
+
+            var series = chartReporte.Series.Add("Flujo de Ventas");
+            series.ChartType = SeriesChartType.Spline; // Línea curva suave
+            series.BorderWidth = 3;
+            series.Color = EstilosApp.ColorAccion;
+            series.MarkerStyle = MarkerStyle.Circle;
+            series.MarkerSize = 8;
+
+            // Aseguramos que cubra las horas aunque no haya ventas (rellenar huecos)
+            for (int i = 0; i <= 23; i++)
+            {
+                var datoHora = datos.FirstOrDefault(d => d.Hora == i);
+                decimal valor = datoHora?.TotalVendido ?? 0;
+                series.Points.AddXY($"{i:00}:00", valor);
+            }
+
+            chartReporte.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
+            chartReporte.ChartAreas[0].AxisX.Interval = 2; // Mostrar cada 2 horas
+            chartReporte.ChartAreas[0].AxisY.LabelStyle.Format = "C0";
+            chartReporte.Legends[0].Enabled = false;
+        }
+
+        // --- RENTABILIDAD ---
+        private void ConfigurarGraficoRentabilidad(List<ReporteRentabilidadDto> datos)
+        {
+            chartReporte.Series.Clear();
+            // Filtramos primero: Si no hay datos con ganancia > 0, no mostramos nada
+            if (datos == null || !datos.Any(d => d.GananciaTotal > 0)) return;
+
+            var series = chartReporte.Series.Add("Ganancia Total");
+            series.ChartType = SeriesChartType.Bar; // Barras horizontales
+            series.Color = Color.Teal;
+            series.IsValueShownAsLabel = true;
+            series.LabelFormat = "C2"; // Muestra decimales
+
+            var topRentables = datos
+                .Where(d => d.GananciaTotal > 0)
+                .OrderByDescending(d => d.GananciaTotal)
+                .Take(10)
+                .Reverse()
+                .ToList();
+
+            foreach (var dato in topRentables)
+            {
+                series.Points.AddXY(dato.Platillo, dato.GananciaTotal);
+            }
+
+            // Mejoras visuales en los ejes
+            chartReporte.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
+            chartReporte.ChartAreas[0].AxisX.Interval = 1;
+            chartReporte.Legends[0].Enabled = false;
+        }
+
+        // --- CONFIGURACIÓN DE GRIDS ---
 
         private void ConfigurarGridVentas(List<ReporteVentasDto> datos)
         {
@@ -289,6 +377,33 @@ namespace FoodWare.View.UserControls
                 colCosto.HeaderText = "Costo Perdido";
                 colCosto.DefaultCellStyle.Format = "C2";
             }
+        }
+
+        private void ConfigurarGridRentabilidad(List<ReporteRentabilidadDto> datos)
+        {
+            dgvReporte.DataSource = datos;
+            if (dgvReporte.Columns["Platillo"] is DataGridViewColumn colP) colP.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            if (dgvReporte.Columns["PrecioVenta"] is DataGridViewColumn colPV) { colPV.HeaderText = "Precio Venta"; colPV.DefaultCellStyle.Format = "C2"; }
+            if (dgvReporte.Columns["CostoReceta"] is DataGridViewColumn colCR) { colCR.HeaderText = "Costo Receta"; colCR.DefaultCellStyle.Format = "C2"; }
+            if (dgvReporte.Columns["GananciaBruta"] is DataGridViewColumn colGB) { colGB.HeaderText = "Ganancia Bruta"; colGB.DefaultCellStyle.Format = "C2"; }
+            if (dgvReporte.Columns["UnidadesVendidas"] is DataGridViewColumn colUV) colUV.HeaderText = "Unidades";
+            if (dgvReporte.Columns["GananciaTotal"] is DataGridViewColumn colGT) { colGT.HeaderText = "Ganancia Total"; colGT.DefaultCellStyle.Format = "C2"; }
+        }
+
+        private void ConfigurarGridVentasHora(List<ReporteVentasHoraDto> datos)
+        {
+            dgvReporte.DataSource = datos;
+            if (dgvReporte.Columns["Hora"] is DataGridViewColumn colH) colH.HeaderText = "Hora del Día";
+            if (dgvReporte.Columns["TotalVendido"] is DataGridViewColumn colTV) { colTV.HeaderText = "Total Vendido"; colTV.DefaultCellStyle.Format = "C2"; }
+            if (dgvReporte.Columns["NumeroVentas"] is DataGridViewColumn colNV) colNV.HeaderText = "N° de Ventas";
+
+            dgvReporte.CellFormatting += (sender, e) => {
+                if (dgvReporte.Columns[e.ColumnIndex].Name == "Hora" && e.Value is int hora)
+                {
+                    e.Value = $"{hora:00}:00";
+                    e.FormattingApplied = true;
+                }
+            };
         }
     }
 }

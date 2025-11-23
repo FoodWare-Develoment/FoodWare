@@ -29,5 +29,15 @@ namespace FoodWare.Controller.Logic
         {
             return await _repositorio.ObtenerReporteMermasAsync(inicio, fin);
         }
+
+        public async Task<List<ReporteRentabilidadDto>> CargarReporteRentabilidadAsync(DateTime inicio, DateTime fin)
+        {
+            return await _repositorio.ObtenerReporteRentabilidadAsync(inicio, fin);
+        }
+
+        public async Task<List<ReporteVentasHoraDto>> CargarReporteVentasPorHoraAsync(DateTime inicio, DateTime fin)
+        {
+            return await _repositorio.ObtenerReporteVentasPorHoraAsync(inicio, fin);
+        }
     }
 }

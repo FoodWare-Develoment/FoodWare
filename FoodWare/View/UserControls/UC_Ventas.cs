@@ -27,17 +27,23 @@ namespace FoodWare.View.UserControls
         private const string TituloComandaVacia = "Comanda Vacía";
         private const string DefaultFormaPago = "Efectivo";
 
+        private const string FiltroTodos = "Todos";
+
         // --- Controladores ---
         private readonly MenuController _menuController;
         private readonly VentasController _ventasController;
 
         // --- Listas de Estado ---
         private List<Platillo> _listaPlatillosCompleta;
+        private List<Platillo> _listaPlatillosFiltrada;
         private readonly BindingList<DetalleVenta> _comandaActual;
 
         // --- Variables de Estado de UI ---
         private string _formaDePagoSeleccionada = DefaultFormaPago;
-        private string _categoriaSeleccionada = "Todos";
+        private string _categoriaSeleccionada = FiltroTodos;
+
+        // --- Timer para Debounce ---
+        private readonly System.Windows.Forms.Timer _debounceTimer;
 
         public UC_Ventas()
         {
@@ -55,8 +61,16 @@ namespace FoodWare.View.UserControls
             );
 
             _listaPlatillosCompleta = [];
+            _listaPlatillosFiltrada = [];
             _comandaActual = [];
             dgvComanda.DataSource = _comandaActual;
+
+            // --- Configuración del Debounce (400ms) ---
+            _debounceTimer = new System.Windows.Forms.Timer
+            {
+                Interval = 400
+            };
+            _debounceTimer.Tick += DebounceTimer_Tick;
 
             // --- Conexión de Eventos ---
             this.btnRegistrarVenta.Click += BtnRegistrarVenta_Click;
@@ -65,7 +79,9 @@ namespace FoodWare.View.UserControls
             this.btnQtyAumentar.Click += BtnQtyAumentar_Click;
             this.btnEfectivo.Click += BtnEfectivo_Click;
             this.btnTarjeta.Click += BtnTarjeta_Click;
+
             this.txtBusquedaTPV.TextChanged += TxtBusquedaTPV_TextChanged;
+            this.txtBusquedaTPV.KeyDown += TxtBusquedaTPV_KeyDown;
         }
 
         private void AplicarEstilos()
@@ -92,7 +108,6 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloTextBoxModulo(txtBusquedaTPV);
             flpFormaPago.BackColor = EstilosApp.ColorFondo;
 
-            // Estilos botones de pago
             EstilosApp.EstiloBotonModulo(btnEfectivo);
             EstilosApp.EstiloBotonModuloSecundario(btnTarjeta);
         }
@@ -102,7 +117,7 @@ namespace FoodWare.View.UserControls
             if (!DesignMode)
             {
                 await CargarDatosInicialesAsync();
-                ActualizarBotonesPago(); // Asegura que el botón "Efectivo" inicie verde
+                ActualizarBotonesPago();
             }
         }
 
@@ -114,9 +129,10 @@ namespace FoodWare.View.UserControls
             {
                 this.Cursor = Cursors.WaitCursor;
                 _listaPlatillosCompleta = await _menuController.CargarPlatillosAsync();
+                _listaPlatillosFiltrada = [.. _listaPlatillosCompleta];
 
                 PoblarBotonesCategorias();
-                ActualizarFiltroPlatillos(); //Llama al filtro inicial
+                ActualizarFiltroPlatillos(usarDebounce: false);
                 ConfigurarGridComanda();
             }
             catch (Exception ex)
@@ -134,7 +150,8 @@ namespace FoodWare.View.UserControls
         {
             flpCategorias.Controls.Clear();
 
-            Button btnTodos = new() { Text = "Todos", Height = 50, Width = 100, Tag = "Todos" };
+            // Usamos la constante FiltroTodos
+            Button btnTodos = new() { Text = FiltroTodos, Height = 50, Width = 100, Tag = FiltroTodos };
             EstilosApp.EstiloBotonModulo(btnTodos);
             btnTodos.Click += BotonCategoria_Click;
             flpCategorias.Controls.Add(btnTodos);
@@ -155,7 +172,9 @@ namespace FoodWare.View.UserControls
 
         private void PoblarBotonesPlatillos(List<Platillo> platillos)
         {
+            flpPlatillos.SuspendLayout();
             flpPlatillos.Controls.Clear();
+
             foreach (var platillo in platillos)
             {
                 Button btnPlatillo = new()
@@ -170,6 +189,7 @@ namespace FoodWare.View.UserControls
                 btnPlatillo.Click += BotonPlatillo_Click;
                 flpPlatillos.Controls.Add(btnPlatillo);
             }
+            flpPlatillos.ResumeLayout();
         }
 
         private void ConfigurarGridComanda()
@@ -194,78 +214,68 @@ namespace FoodWare.View.UserControls
 
         private void ActualizarBotonesPago()
         {
-            // Resetear ambos
             EstilosApp.EstiloBotonModuloSecundario(btnEfectivo);
             EstilosApp.EstiloBotonModuloSecundario(btnTarjeta);
 
-            // Activar el seleccionado
             if (_formaDePagoSeleccionada == "Efectivo")
             {
-                EstilosApp.EstiloBotonModulo(btnEfectivo); // Verde
+                EstilosApp.EstiloBotonModulo(btnEfectivo);
             }
             else if (_formaDePagoSeleccionada == "Tarjeta")
             {
-                EstilosApp.EstiloBotonModulo(btnTarjeta); // Verde
+                EstilosApp.EstiloBotonModulo(btnTarjeta);
             }
         }
 
-        private void ActualizarFiltroPlatillos()
+        private void ActualizarFiltroPlatillos(bool usarDebounce = false)
+        {
+            if (usarDebounce)
+            {
+                _debounceTimer.Stop();
+                _debounceTimer.Start();
+            }
+            else
+            {
+                EjecutarFiltro();
+            }
+        }
+
+        private void DebounceTimer_Tick(object? sender, EventArgs e)
+        {
+            _debounceTimer.Stop();
+            EjecutarFiltro();
+        }
+
+        private void EjecutarFiltro()
         {
             try
             {
                 string filtroBusqueda = txtBusquedaTPV.Text.Trim();
-                var listaFiltrada = _listaPlatillosCompleta;
+                var listaTemp = _listaPlatillosCompleta;
 
                 // 1. Filtrar por Categoría
-                if (_categoriaSeleccionada != "Todos")
+                if (_categoriaSeleccionada != FiltroTodos)
                 {
-                    listaFiltrada = listaFiltrada.Where(p => p.Categoria == _categoriaSeleccionada).ToList();
+                    listaTemp = [.. listaTemp.Where(p => p.Categoria == _categoriaSeleccionada)];
                 }
 
                 // 2. Filtrar por Búsqueda
                 if (!string.IsNullOrWhiteSpace(filtroBusqueda))
                 {
-                    listaFiltrada = listaFiltrada
-                        .Where(p => p.Nombre.Contains(filtroBusqueda, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
+                    listaTemp = [.. listaTemp.Where(p => p.Nombre.Contains(filtroBusqueda, StringComparison.OrdinalIgnoreCase))];
                 }
 
-                // 3. Repoblar botones
-                PoblarBotonesPlatillos(listaFiltrada);
+                _listaPlatillosFiltrada = listaTemp;
+                PoblarBotonesPlatillos(_listaPlatillosFiltrada);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al filtrar platillos: {ex.Message}");
-                // No mostramos MessageBox para no interrumpir al usuario mientras escribe
+                System.Diagnostics.Debug.WriteLine($"Error al filtrar: {ex.Message}");
             }
         }
 
-
-        // --- EVENT HANDLERS (CLICS DE BOTONES) ---
-
-        private void BotonCategoria_Click(object? sender, EventArgs e)
+        private void AgregarPlatilloAComanda(Platillo platillo)
         {
-            if (sender is not Button btn) return;
-            if (btn.Tag is not string categoria) return;
-
-            _categoriaSeleccionada = categoria;
-
-            // Actualizar estilos de botones de categoría
-            foreach (Control c in flpCategorias.Controls)
-            {
-                if (c is Button b) EstilosApp.EstiloBotonModuloSecundario(b);
-            }
-            EstilosApp.EstiloBotonModulo(btn); // Activa el presionado
-
-            // Llamamos al helper centralizado
-            ActualizarFiltroPlatillos();
-        }
-
-        private void BotonPlatillo_Click(object? sender, EventArgs e)
-        {
-            Button btn = (Button)sender!;
-            Platillo platillo = (Platillo)btn.Tag!;
-
             var detalleExistente = _comandaActual.FirstOrDefault(d => d.IdPlatillo == platillo.IdPlatillo);
 
             if (detalleExistente != null)
@@ -285,6 +295,32 @@ namespace FoodWare.View.UserControls
                 _comandaActual.Add(nuevoDetalle);
             }
             ActualizarTotal();
+        }
+
+        // --- EVENT HANDLERS (CLICS DE BOTONES) ---
+
+        private void BotonCategoria_Click(object? sender, EventArgs e)
+        {
+            if (sender is not Button btn) return;
+            if (btn.Tag is not string categoria) return;
+
+            _categoriaSeleccionada = categoria;
+
+            foreach (Control c in flpCategorias.Controls)
+            {
+                if (c is Button b) EstilosApp.EstiloBotonModuloSecundario(b);
+            }
+            EstilosApp.EstiloBotonModulo(btn);
+
+            ActualizarFiltroPlatillos(usarDebounce: false);
+        }
+
+        private void BotonPlatillo_Click(object? sender, EventArgs e)
+        {
+            Button btn = (Button)sender!;
+            Platillo platillo = (Platillo)btn.Tag!;
+
+            AgregarPlatilloAComanda(platillo);
         }
 
         private void BtnQtyAumentar_Click(object? sender, EventArgs e)
@@ -357,8 +393,29 @@ namespace FoodWare.View.UserControls
 
         private void TxtBusquedaTPV_TextChanged(object? sender, EventArgs e)
         {
-            // Llamamos al helper centralizado
-            ActualizarFiltroPlatillos();
+            ActualizarFiltroPlatillos(usarDebounce: true);
+        }
+
+        private void TxtBusquedaTPV_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+
+                if (_debounceTimer.Enabled)
+                {
+                    _debounceTimer.Stop();
+                    EjecutarFiltro();
+                }
+
+                var primerResultado = _listaPlatillosFiltrada.FirstOrDefault();
+
+                if (primerResultado != null)
+                {
+                    AgregarPlatilloAComanda(primerResultado);
+                    txtBusquedaTPV.Clear();
+                }
+            }
         }
 
         private async void BtnRegistrarVenta_Click(object? sender, EventArgs e)

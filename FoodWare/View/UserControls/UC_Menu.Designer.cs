@@ -31,7 +31,7 @@
             itemGestionarReceta = new ToolStripMenuItem();
             itemEditarPlatillo = new ToolStripMenuItem();
             panelEdicionReceta = new Panel();
-            lblCostoReceta = new Label(); // <-- NUEVO LABEL
+            lblCostoReceta = new Label();
             btnVolverAlMenu = new Button();
             btnEliminarIngrediente = new Button();
             btnAgregarIngrediente = new Button();
@@ -189,7 +189,7 @@
             // 
             // panelEdicionReceta
             // 
-            panelEdicionReceta.Controls.Add(lblCostoReceta); // <-- AÑADIDO
+            panelEdicionReceta.Controls.Add(lblCostoReceta);
             panelEdicionReceta.Controls.Add(btnVolverAlMenu);
             panelEdicionReceta.Controls.Add(btnEliminarIngrediente);
             panelEdicionReceta.Controls.Add(btnAgregarIngrediente);
@@ -344,6 +344,6 @@
         private Button btnEliminarIngrediente;
         private Button btnAgregarIngrediente;
         private ToolStripMenuItem itemEditarPlatillo;
-        private Label lblCostoReceta; // <-- NUEVO LABEL
+        private Label lblCostoReceta;
     }
 }

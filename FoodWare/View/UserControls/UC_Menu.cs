@@ -9,12 +9,13 @@ using FoodWare.Validations;
 using FoodWare.View.Helpers;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Menu : UserControl
     {
-        // --- CONSTANTES PARA SONARLINT (S1192) ---
+        // Constantes
         private const string TituloExito = "Éxito";
         private const string TituloError = "Error";
         private const string TituloDatoInvalido = "Dato inválido";
@@ -24,8 +25,10 @@ namespace FoodWare.View.UserControls
         private readonly MenuController _controller;
         private readonly RecetaController _recetaController;
         private readonly InventarioController _inventarioController;
+
         private Platillo? _platilloEnEdicion;
         private Platillo? _platilloSeleccionado;
+        private bool _modoEdicion = false;
 
         public UC_Menu()
         {
@@ -58,10 +61,13 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloTextBoxModulo(txtNombre);
             EstilosApp.EstiloTextBoxModulo(txtPrecio);
             EstilosApp.EstiloComboBoxModulo(cmbCategoria);
+
             EstilosApp.EstiloBotonModulo(btnGuardar);
             EstilosApp.EstiloBotonModuloAlerta(btnEliminar);
             EstilosApp.EstiloBotonModuloSecundario(btnActualizar);
+
             EstilosApp.EstiloDataGridView(dgvMenu);
+
             EstilosApp.EstiloPanel(panelEdicionReceta, EstilosApp.ColorFondo);
             EstilosApp.EstiloLabelTitulo(lblTituloReceta);
             EstilosApp.EstiloLabelModulo(lblProducto);
@@ -80,37 +86,26 @@ namespace FoodWare.View.UserControls
             if (!DesignMode)
             {
                 await CargarGridPlatillosAsync();
+                EstablecerModoEdicion(false);
             }
         }
 
-        private async Task CargarGridPlatillosAsync()
+        private void EstablecerModoEdicion(bool activo)
         {
-            try
-            {
-                this.Cursor = Cursors.WaitCursor;
-                var platillos = await _controller.CargarPlatillosAsync();
-                this.dgvMenu.DataSource = null;
-                this.dgvMenu.DataSource = platillos;
+            _modoEdicion = activo;
 
-                var columnas = this.dgvMenu.Columns;
-                if (columnas != null && columnas["IdPlatillo"] is not null)
-                {
-                    columnas["IdPlatillo"]!.HeaderText = "ID";
-                    columnas["IdPlatillo"]!.Width = 50;
-                }
-                if (columnas != null && columnas["PrecioVenta"] is not null)
-                {
-                    columnas["PrecioVenta"]!.HeaderText = "Precio de Venta";
-                }
-            }
-            catch (Exception ex)
+            if (activo)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar menú: {ex.Message}");
-                MessageBox.Show("Error al cargar el menú. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnGuardar.Visible = false;
+                btnActualizar.Visible = true;
+                btnEliminar.Visible = true;
             }
-            finally
+            else
             {
-                this.Cursor = Cursors.Default;
+                btnGuardar.Visible = true;
+                btnActualizar.Visible = false;
+                btnEliminar.Visible = false;
+                _platilloSeleccionado = null;
             }
         }
 
@@ -120,69 +115,29 @@ namespace FoodWare.View.UserControls
             cmbCategoria.SelectedIndex = -1;
             txtPrecio.Text = "";
             txtNombre.Focus();
-            _platilloSeleccionado = null;
+
+            EstablecerModoEdicion(false);
         }
 
-        private async Task CargarProductosComboBoxAsync()
+        private void ItemEditarPlatillo_Click(object? sender, EventArgs e)
         {
-            try
+            if (dgvMenu.CurrentRow != null && dgvMenu.CurrentRow.DataBoundItem is Platillo platillo)
             {
-                cmbProductos.DataSource = null;
-                var productos = await _inventarioController.CargarProductosAsync();
-                cmbProductos.DataSource = productos;
-                cmbProductos.DisplayMember = "Nombre";
-                cmbProductos.ValueMember = "IdProducto";
-                cmbProductos.SelectedIndex = -1;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar productos combo: {ex.Message}");
-                MessageBox.Show("Error al cargar productos. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+                _platilloSeleccionado = platillo;
 
-        private async Task CargarGridRecetaAsync(int idPlatillo)
-        {
-            try
-            {
-                dgvReceta.DataSource = null;
-                var receta = await _recetaController.CargarRecetaDePlatilloAsync(idPlatillo);
-                dgvReceta.DataSource = receta;
+                txtNombre.Text = platillo.Nombre;
+                cmbCategoria.SelectedItem = platillo.Categoria;
+                txtPrecio.Text = platillo.PrecioVenta.ToString("F2");
 
-                if (dgvReceta.Columns["IdReceta"] is DataGridViewColumn colReceta)
-                {
-                    colReceta.Visible = false;
-                }
-                if (dgvReceta.Columns["IdProducto"] is DataGridViewColumn colProducto)
-                {
-                    colProducto.Visible = false;
-                }
-                if (dgvReceta.Columns["PrecioCosto"] is DataGridViewColumn colCosto)
-                {
-                    colCosto.Visible = false;
-                }
+                EstablecerModoEdicion(true);
+                txtNombre.Focus();
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar receta: {ex.Message}");
-                MessageBox.Show("Error al cargar la receta. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void ActualizarCostoRecetaUI()
-        {
-            if (dgvReceta.DataSource is not List<RecetaDetalle> receta)
-            {
-                lblCostoReceta.Text = "Costo: $0.00";
-                return;
-            }
-
-            decimal costoTotal = receta.Sum(item => item.Cantidad * item.PrecioCosto);
-            lblCostoReceta.Text = $"Costo Total de Receta: {costoTotal:C}";
         }
 
         private async void BtnGuardar_Click(object sender, EventArgs e)
         {
+            if (_modoEdicion) return;
+
             try
             {
                 string nombre = txtNombre.Text;
@@ -202,66 +157,18 @@ namespace FoodWare.View.UserControls
                 LimpiarCampos();
                 await CargarGridPlatillosAsync();
             }
-            catch (ArgumentException aex)
-            {
-                MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            catch (ArgumentException aex) { MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al guardar platillo: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error guardar platillo: {ex.Message}");
                 MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-        private async void BtnEliminar_Click(object sender, EventArgs e)
-        {
-            if (this.dgvMenu.CurrentRow != null && this.dgvMenu.CurrentRow.DataBoundItem is Platillo platilloSeleccionado)
-            {
-                int id = platilloSeleccionado.IdPlatillo;
-                string nombre = platilloSeleccionado.Nombre;
-
-                var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{nombre}'?",
-                                               "Confirmar eliminación",
-                                               MessageBoxButtons.YesNo,
-                                               MessageBoxIcon.Warning);
-
-                if (confirm == DialogResult.Yes)
-                {
-                    try
-                    {
-                        this.Cursor = Cursors.WaitCursor;
-                        await _controller.EliminarPlatilloAsync(id);
-                        await CargarGridPlatillosAsync();
-                        LimpiarCampos();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Error al eliminar platillo: {ex.Message}");
-                        MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        this.Cursor = Cursors.Default;
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Por favor, selecciona un platillo de la lista para eliminar.", "Ningún platillo seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            finally { this.Cursor = Cursors.Default; }
         }
 
         private async void BtnActualizar_Click(object sender, EventArgs e)
         {
-            if (_platilloSeleccionado == null)
-            {
-                MessageBox.Show("Por favor, selecciona un platillo de la lista para actualizar.", "Ningún platillo seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            if (!_modoEdicion || _platilloSeleccionado == null) return;
 
             try
             {
@@ -275,15 +182,16 @@ namespace FoodWare.View.UserControls
                     return;
                 }
 
+                // 1. Guardar ID
+                int idParaSeleccionar = _platilloSeleccionado.IdPlatillo;
+
                 Platillo platilloActualizado = new()
                 {
-                    IdPlatillo = _platilloSeleccionado.IdPlatillo,
+                    IdPlatillo = idParaSeleccionar,
                     Nombre = nombre,
                     Categoria = categoria,
                     PrecioVenta = precio
                 };
-
-                int idActualizado = platilloActualizado.IdPlatillo;
 
                 this.Cursor = Cursors.WaitCursor;
                 await _controller.ActualizarPlatilloAsync(platilloActualizado);
@@ -292,40 +200,69 @@ namespace FoodWare.View.UserControls
 
                 LimpiarCampos();
                 await CargarGridPlatillosAsync();
-                SeleccionarPlatilloEnGrid(idActualizado);
+
+                // 2. Reseleccionar
+                SeleccionarPlatilloEnGrid(idParaSeleccionar);
             }
-            catch (ArgumentException aex)
-            {
-                MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            catch (ArgumentException aex) { MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al actualizar platillo: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error actualizar platillo: {ex.Message}");
                 MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
+            finally { this.Cursor = Cursors.Default; }
+        }
+
+        private async void BtnEliminar_Click(object sender, EventArgs e)
+        {
+            if (this.dgvMenu.CurrentRow != null && this.dgvMenu.CurrentRow.DataBoundItem is Platillo platilloSeleccionado)
             {
-                this.Cursor = Cursors.Default;
+                var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{platilloSeleccionado.Nombre}'?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (confirm == DialogResult.Yes)
+                {
+                    try
+                    {
+                        this.Cursor = Cursors.WaitCursor;
+                        await _controller.EliminarPlatilloAsync(platilloSeleccionado.IdPlatillo);
+                        await CargarGridPlatillosAsync();
+                        LimpiarCampos();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error eliminar platillo: {ex.Message}");
+                        MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally { this.Cursor = Cursors.Default; }
+                }
             }
         }
 
-        private void DgvMenu_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+
+        private async Task CargarGridPlatillosAsync()
         {
-            if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
+            try
             {
-                dgvMenu.CurrentCell = dgvMenu.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                this.Cursor = Cursors.WaitCursor;
+                var platillos = await _controller.CargarPlatillosAsync();
+                this.dgvMenu.DataSource = null;
+                this.dgvMenu.DataSource = platillos;
+
+                var cols = dgvMenu.Columns;
+                if (cols["IdPlatillo"] != null) { cols["IdPlatillo"]!.HeaderText = "ID"; cols["IdPlatillo"]!.Width = 50; }
+                if (cols["PrecioVenta"] != null) cols["PrecioVenta"]!.HeaderText = "Precio de Venta";
             }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+            finally { this.Cursor = Cursors.Default; }
         }
 
         private async void ItemGestionarReceta_Click(object sender, EventArgs e)
         {
-            if (dgvMenu.CurrentRow == null || dgvMenu.CurrentRow.DataBoundItem is not Platillo platilloSeleccionado)
-                return;
+            if (dgvMenu.CurrentRow == null || dgvMenu.CurrentRow.DataBoundItem is not Platillo platillo) return;
 
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                _platilloEnEdicion = platilloSeleccionado;
+                _platilloEnEdicion = platillo;
                 lblTituloReceta.Text = $"Gestionando Receta de: {_platilloEnEdicion.Nombre}";
 
                 dgvReceta.DataSource = null;
@@ -336,18 +273,15 @@ namespace FoodWare.View.UserControls
 
                 await CargarGridRecetaAsync(_platilloEnEdicion.IdPlatillo);
                 await CargarProductosComboBoxAsync();
-                ActualizarCostoRecetaUI(); // (C-6)
+                ActualizarCostoRecetaUI();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al gestionar receta: {ex.Message}");
-                MessageBox.Show("Error al preparar la gestión de receta. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error cargar receta: {ex.Message}");
+                MessageBox.Show("Error al cargar receta.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 BtnVolverAlMenu_Click(sender, e);
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            finally { this.Cursor = Cursors.Default; }
         }
 
         private void BtnVolverAlMenu_Click(object sender, EventArgs e)
@@ -356,98 +290,103 @@ namespace FoodWare.View.UserControls
             dgvMenu.Visible = true;
             _platilloEnEdicion = null;
             dgvReceta.DataSource = null;
+            LimpiarCampos();
+        }
+
+        private async Task CargarProductosComboBoxAsync()
+        {
+            try
+            {
+                cmbProductos.DataSource = null;
+                var productos = await _inventarioController.CargarProductosAsync();
+                cmbProductos.DataSource = productos;
+                cmbProductos.DisplayMember = "Nombre";
+                cmbProductos.ValueMember = "IdProducto";
+                cmbProductos.SelectedIndex = -1;
+            }
+            catch { /* Log */ }
+        }
+
+        private async Task CargarGridRecetaAsync(int idPlatillo)
+        {
+            try
+            {
+                dgvReceta.DataSource = null;
+                var receta = await _recetaController.CargarRecetaDePlatilloAsync(idPlatillo);
+                dgvReceta.DataSource = receta;
+                if (dgvReceta.Columns["IdReceta"] != null) dgvReceta.Columns["IdReceta"]!.Visible = false;
+                if (dgvReceta.Columns["IdProducto"] != null) dgvReceta.Columns["IdProducto"]!.Visible = false;
+                if (dgvReceta.Columns["PrecioCosto"] != null) dgvReceta.Columns["PrecioCosto"]!.Visible = false;
+            }
+            catch { /* Log */ }
+        }
+
+        private void ActualizarCostoRecetaUI()
+        {
+            if (dgvReceta.DataSource is not List<RecetaDetalle> receta)
+            {
+                lblCostoReceta.Text = "Costo: $0.00";
+                return;
+            }
+            decimal costoTotal = receta.Sum(item => item.Cantidad * item.PrecioCosto);
+            lblCostoReceta.Text = $"Costo Total de Receta: {costoTotal:C}";
         }
 
         private async void BtnAgregarIngrediente_Click(object sender, EventArgs e)
         {
-            if (_platilloEnEdicion == null || cmbProductos.SelectedValue == null)
-            {
-                MessageBox.Show("Debe seleccionar un producto.", TituloDatosIncompletos, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (_platilloEnEdicion == null || cmbProductos.SelectedValue == null) { MessageBox.Show("Seleccione producto.", TituloDatosIncompletos, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
 
             try
             {
                 int idPlatillo = _platilloEnEdicion.IdPlatillo;
                 int idProducto = (int)cmbProductos.SelectedValue;
-
-                if (!decimal.TryParse(txtCantidadReceta.Text, out decimal cantidad))
-                {
-                    MessageBox.Show("La cantidad debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+                if (!decimal.TryParse(txtCantidadReceta.Text, out decimal cantidad)) { MessageBox.Show("Cantidad inválida.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
 
                 await _recetaController.GuardarNuevoIngredienteAsync(idPlatillo, idProducto, cantidad);
                 await CargarGridRecetaAsync(idPlatillo);
-                ActualizarCostoRecetaUI(); // (C-6)
-
+                ActualizarCostoRecetaUI();
                 txtCantidadReceta.Clear();
                 cmbProductos.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al agregar ingrediente: {ex.Message}");
-                MessageBox.Show("Error al guardar el ingrediente. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error agregar ingrediente: {ex.Message}");
+                MessageBox.Show("Error al agregar.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void BtnEliminarIngrediente_Click(object sender, EventArgs e)
         {
-            if (dgvReceta.CurrentRow == null || dgvReceta.CurrentRow.DataBoundItem is not RecetaDetalle ingrediente)
+            if (dgvReceta.CurrentRow == null || dgvReceta.CurrentRow.DataBoundItem is not RecetaDetalle ingrediente) return;
+            if (_platilloEnEdicion == null) return;
+
+            try
             {
-                MessageBox.Show("Debe seleccionar un ingrediente de la lista de receta.", TituloDatosIncompletos, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                await _recetaController.EliminarIngredienteAsync(ingrediente.IdReceta);
+                await CargarGridRecetaAsync(_platilloEnEdicion.IdPlatillo);
+                ActualizarCostoRecetaUI();
             }
-
-            var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{ingrediente.NombreProducto}' de la receta?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-            if (confirm == DialogResult.Yes)
+            catch (Exception ex)
             {
-                Platillo? platillo = _platilloEnEdicion;
-
-                if (platillo is null)
-                {
-                    MessageBox.Show("Error de lógica: No hay ningún platillo en modo de edición.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                try
-                {
-                    await _recetaController.EliminarIngredienteAsync(ingrediente.IdReceta);
-                    await CargarGridRecetaAsync(platillo.IdPlatillo);
-                    ActualizarCostoRecetaUI(); // (C-6)
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error al eliminar ingrediente: {ex.Message}");
-                    MessageBox.Show("Error al eliminar el ingrediente. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                System.Diagnostics.Debug.WriteLine($"Error eliminar ingrediente: {ex.Message}");
+                MessageBox.Show("Error al eliminar.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ItemEditarPlatillo_Click(object? sender, EventArgs e)
+        private void DgvMenu_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (dgvMenu.CurrentRow != null && dgvMenu.CurrentRow.DataBoundItem is Platillo platillo)
-            {
-                _platilloSeleccionado = platillo;
-                txtNombre.Text = platillo.Nombre;
-                cmbCategoria.SelectedItem = platillo.Categoria;
-                txtPrecio.Text = platillo.PrecioVenta.ToString("F2");
-                txtNombre.Focus();
-            }
-            else
-            {
-                LimpiarCampos();
-            }
+            if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
+                dgvMenu.CurrentCell = dgvMenu.Rows[e.RowIndex].Cells[e.ColumnIndex];
         }
 
         private void SeleccionarPlatilloEnGrid(int idPlatillo)
         {
             foreach (DataGridViewRow row in dgvMenu.Rows)
             {
-                if (row.DataBoundItem is Platillo platillo && platillo.IdPlatillo == idPlatillo)
+                if (row.DataBoundItem is Platillo p && p.IdPlatillo == idPlatillo)
                 {
                     row.Selected = true;
+                    dgvMenu.CurrentCell = row.Cells[0];
                     dgvMenu.FirstDisplayedScrollingRowIndex = row.Index;
                     break;
                 }

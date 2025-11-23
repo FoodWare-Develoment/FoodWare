@@ -7,13 +7,12 @@ using FoodWare.Model.DataAccess;
 using FoodWare.Model.Interfaces;
 using FoodWare.View.Helpers;
 using FoodWare.Model.Entities;
-using Microsoft.VisualBasic; // Para InputBox
+using Microsoft.VisualBasic;
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Empleados : UserControl
     {
-        // --- Constantes (S1192) ---
         private const string TituloExito = "Éxito";
         private const string TituloError = "Error";
         private const string TituloDatoInvalido = "Datos Inválidos";
@@ -23,16 +22,12 @@ namespace FoodWare.View.UserControls
 
         private readonly EmpleadosController _controller;
         private UsuarioDto? _usuarioSeleccionado;
+        private bool _modoEdicion = false;
 
         public UC_Empleados()
         {
             InitializeComponent();
-
-            _controller = new EmpleadosController(
-                new UsuarioSqlRepository(),
-                new RolSqlRepository()
-            );
-
+            _controller = new EmpleadosController(new UsuarioSqlRepository(), new RolSqlRepository());
             AplicarEstilos();
         }
 
@@ -48,10 +43,12 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloTextBoxModulo(txtNombreUsuario);
             EstilosApp.EstiloTextBoxModulo(txtPassword);
             EstilosApp.EstiloComboBoxModulo(cmbRol);
+
             EstilosApp.EstiloBotonModulo(btnGuardar);
             EstilosApp.EstiloBotonModuloSecundario(btnActualizar);
             EstilosApp.EstiloBotonModuloAlerta(btnResetPassword);
             EstilosApp.EstiloBotonModuloSecundario(btnLimpiar);
+
             EstilosApp.EstiloDataGridView(dgvEmpleados);
 
             btnResetPassword.Visible = (UserSession.NombreRol == "Administrador");
@@ -60,88 +57,64 @@ namespace FoodWare.View.UserControls
         private async void UC_Empleados_Load(object sender, EventArgs e)
         {
             if (DesignMode) return;
-
             await CargarRolesDropdownAsync();
             await CargarGridEmpleadosAsync();
+            EstablecerModoEdicion(false);
         }
 
-        private async Task CargarRolesDropdownAsync()
+        private void EstablecerModoEdicion(bool activo)
         {
-            try
-            {
-                var roles = await _controller.CargarRolesAsync();
-                cmbRol.DataSource = roles;
-                cmbRol.DisplayMember = "NombreRol";
-                cmbRol.ValueMember = "IdRol";
-                cmbRol.SelectedIndex = -1;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar roles: {ex.Message}");
-                MessageBox.Show("Error al cargar roles. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+            _modoEdicion = activo;
 
-        private async Task CargarGridEmpleadosAsync()
-        {
-            try
+            if (activo)
             {
-                this.Cursor = Cursors.WaitCursor;
-                dgvEmpleados.DataSource = null;
-                var empleados = await _controller.CargarEmpleadosAsync();
-                dgvEmpleados.DataSource = empleados;
-
-                // Configurar columnas
-                if (dgvEmpleados.Columns["IdUsuario"] is DataGridViewColumn colId) colId.Visible = false;
-                if (dgvEmpleados.Columns["IdRol"] is DataGridViewColumn colIdRol) colIdRol.Visible = false;
-
-                if (dgvEmpleados.Columns["NombreCompleto"] is DataGridViewColumn colNom)
-                {
-                    colNom.HeaderText = "Nombre Completo";
-                    colNom.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                }
-                if (dgvEmpleados.Columns["NombreUsuario"] is DataGridViewColumn colUser)
-                {
-                    colUser.HeaderText = "Usuario";
-                    colUser.Width = 150;
-                }
-                if (dgvEmpleados.Columns["NombreRol"] is DataGridViewColumn colRol)
-                {
-                    colRol.HeaderText = "Rol";
-                    colRol.Width = 150;
-                }
-                if (dgvEmpleados.Columns["Estado"] is DataGridViewColumn colEstado)
-                {
-                    colEstado.Width = 100;
-                }
-                if (dgvEmpleados.Columns["Activo"] is DataGridViewColumn colAct)
-                {
-                    colAct.Visible = false;
-                }
+                btnGuardar.Visible = false;
+                btnActualizar.Visible = true;
+                btnResetPassword.Visible = true;
+                btnLimpiar.Text = "Cancelar";
+                txtPassword.Enabled = false;
+                lblPassword.Visible = false;
+                txtPassword.Visible = false;
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar empleados: {ex.Message}");
-                MessageBox.Show("Error al cargar empleados. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
+                btnGuardar.Visible = true;
+                btnActualizar.Visible = false;
+                btnResetPassword.Visible = false;
+                btnLimpiar.Text = "Limpiar";
+                txtPassword.Enabled = true;
+                lblPassword.Visible = true;
+                txtPassword.Visible = true;
+                lblPassword.Text = "Contraseña*";
+
+                _usuarioSeleccionado = null;
             }
         }
 
         private void LimpiarCampos()
         {
-            _usuarioSeleccionado = null;
             txtNombreCompleto.Clear();
             txtNombreUsuario.Clear();
             txtPassword.Clear();
             cmbRol.SelectedIndex = -1;
             chkActivo.Checked = true;
 
-            txtPassword.Enabled = true;
-            lblPassword.Visible = true;
-            lblPassword.Text = "Contraseña*";
+            EstablecerModoEdicion(false);
+        }
+
+        private void ItemEditar_Click(object sender, EventArgs e)
+        {
+            if (dgvEmpleados.CurrentRow != null && dgvEmpleados.CurrentRow.DataBoundItem is UsuarioDto usuario)
+            {
+                _usuarioSeleccionado = usuario;
+
+                txtNombreCompleto.Text = usuario.NombreCompleto;
+                txtNombreUsuario.Text = usuario.NombreUsuario;
+                cmbRol.SelectedValue = usuario.IdRol;
+                chkActivo.Checked = usuario.Activo;
+
+                EstablecerModoEdicion(true);
+            }
         }
 
         private void BtnLimpiar_Click(object sender, EventArgs e)
@@ -151,6 +124,8 @@ namespace FoodWare.View.UserControls
 
         private async void BtnGuardar_Click(object sender, EventArgs e)
         {
+            if (_modoEdicion) return;
+
             try
             {
                 string nombreCompleto = txtNombreCompleto.Text;
@@ -166,131 +141,126 @@ namespace FoodWare.View.UserControls
                 LimpiarCampos();
                 await CargarGridEmpleadosAsync();
             }
-            catch (ArgumentException aex)
-            {
-                MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            catch (ArgumentException aex) { MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al guardar empleado: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error guardar empleado: {ex.Message}");
                 MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            finally { this.Cursor = Cursors.Default; }
         }
 
         private async void BtnActualizar_Click(object sender, EventArgs e)
         {
-            if (_usuarioSeleccionado == null)
-            {
-                MessageBox.Show("Por favor, selecciona un empleado de la lista para actualizar.", TituloNoSeleccionado, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            if (!_modoEdicion || _usuarioSeleccionado == null) return;
 
             try
             {
-                // 1. Recoger datos
                 int idUsuario = _usuarioSeleccionado.IdUsuario;
                 string nombreCompleto = txtNombreCompleto.Text;
                 string nombreUsuario = txtNombreUsuario.Text;
                 int idRol = (int)(cmbRol.SelectedValue ?? 0);
                 bool activo = chkActivo.Checked;
-                string rolDelEditado = _usuarioSeleccionado.NombreRol; // <-- Se pasa el Rol
+                string rolDelEditado = _usuarioSeleccionado.NombreRol;
 
-                // 2. Llamar al controlador
                 this.Cursor = Cursors.WaitCursor;
                 await _controller.ActualizarEmpleadoAsync(idUsuario, nombreCompleto, nombreUsuario, idRol, activo, rolDelEditado);
 
-                // 3. Actualizar UI
                 MessageBox.Show("¡Empleado actualizado!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LimpiarCampos();
                 await CargarGridEmpleadosAsync();
+
+                // 2. Reseleccionar
+                SeleccionarEmpleadoEnGrid(idUsuario);
             }
-            catch (ArgumentException aex) // Errores de validación
+            catch (ArgumentException aex) { MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            catch (InvalidOperationException ioex) { MessageBox.Show(ioex.Message, TituloAccionBloqueada, MessageBoxButtons.OK, MessageBoxIcon.Stop); }
+            catch (Exception ex)
             {
-                MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (InvalidOperationException ioex) // Errores de Regla de Negocio
-            {
-                MessageBox.Show(ioex.Message, TituloAccionBloqueada, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-            }
-            catch (Exception ex) // Errores inesperados
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al actualizar empleado: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error actualizar empleado: {ex.Message}");
                 MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            finally { this.Cursor = Cursors.Default; }
         }
 
         private async void BtnResetPassword_Click(object sender, EventArgs e)
         {
-            if (_usuarioSeleccionado == null)
+            if (!_modoEdicion || _usuarioSeleccionado == null)
             {
-                MessageBox.Show("Por favor, selecciona un empleado de la lista primero.", TituloNoSeleccionado, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Selecciona un empleado para editar primero.", TituloNoSeleccionado, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             if (UserSession.NombreRol == "Gerente" && _usuarioSeleccionado.NombreRol == "Administrador")
             {
-                MessageBox.Show("Un Gerente no tiene permisos para resetear la contraseña de un Administrador.", TituloAccionBloqueada, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Un Gerente no puede cambiar la contraseña de un Admin.", TituloAccionBloqueada, MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
             }
 
-            string? nuevaPassword = Interaction.InputBox($"Resetear contraseña para:\n{_usuarioSeleccionado.NombreUsuario}", "Resetear Contraseña", "");
-
-            if (string.IsNullOrWhiteSpace(nuevaPassword))
-            {
-                return;
-            }
+            string? nuevaPassword = Interaction.InputBox($"Nueva contraseña para {_usuarioSeleccionado.NombreUsuario}:", "Reset Password", "");
+            if (string.IsNullOrWhiteSpace(nuevaPassword)) return;
 
             try
             {
                 this.Cursor = Cursors.WaitCursor;
                 await _controller.ResetearPasswordAsync(_usuarioSeleccionado.IdUsuario, nuevaPassword);
-                MessageBox.Show("¡Contraseña actualizada exitosamente!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (ArgumentException aex)
-            {
-                MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("¡Contraseña cambiada!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al resetear password: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error reset password: {ex.Message}");
                 MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+            finally { this.Cursor = Cursors.Default; }
         }
 
-        private void ItemEditar_Click(object sender, EventArgs e)
+        private async Task CargarRolesDropdownAsync()
         {
-            if (dgvEmpleados.CurrentRow != null && dgvEmpleados.CurrentRow.DataBoundItem is UsuarioDto usuario)
+            try
             {
-                _usuarioSeleccionado = usuario;
-
-                txtNombreCompleto.Text = usuario.NombreCompleto;
-                txtNombreUsuario.Text = usuario.NombreUsuario;
-                cmbRol.SelectedValue = usuario.IdRol;
-                chkActivo.Checked = usuario.Activo;
-
-                txtPassword.Clear();
-                txtPassword.Enabled = false;
-                lblPassword.Visible = false;
+                var roles = await _controller.CargarRolesAsync();
+                cmbRol.DataSource = roles;
+                cmbRol.DisplayMember = "NombreRol";
+                cmbRol.ValueMember = "IdRol";
+                cmbRol.SelectedIndex = -1;
             }
+            catch { /* log */ }
+        }
+
+        private async Task CargarGridEmpleadosAsync()
+        {
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                dgvEmpleados.DataSource = null;
+                var empleados = await _controller.CargarEmpleadosAsync();
+                dgvEmpleados.DataSource = empleados;
+                if (dgvEmpleados.Columns["IdUsuario"] != null) dgvEmpleados.Columns["IdUsuario"]!.Visible = false;
+                if (dgvEmpleados.Columns["IdRol"] != null) dgvEmpleados.Columns["IdRol"]!.Visible = false;
+                if (dgvEmpleados.Columns["Activo"] != null) dgvEmpleados.Columns["Activo"]!.Visible = false;
+            }
+            catch { /* log */ }
+            finally { this.Cursor = Cursors.Default; }
         }
 
         private void DgvEmpleados_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
-            {
                 dgvEmpleados.CurrentCell = dgvEmpleados.Rows[e.RowIndex].Cells[e.ColumnIndex];
+        }
+
+        // --- Helper ---
+        private void SeleccionarEmpleadoEnGrid(int idUsuario)
+        {
+            foreach (DataGridViewRow row in dgvEmpleados.Rows)
+            {
+                if (row.DataBoundItem is UsuarioDto usuario && usuario.IdUsuario == idUsuario)
+                {
+                    row.Selected = true;
+                    dgvEmpleados.CurrentCell = row.Cells[0];
+                    dgvEmpleados.FirstDisplayedScrollingRowIndex = row.Index;
+                    break;
+                }
             }
         }
     }

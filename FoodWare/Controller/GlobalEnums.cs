@@ -9,6 +9,4 @@
         CredencialesInvalidas,
         ErrorDeBaseDeDatos
     }
-
-    // En el futuro, podemos añadir más enums aquí debajo.
 }

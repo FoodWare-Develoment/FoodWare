@@ -26,9 +26,10 @@
             lblTotal = new Label();
             btnRegistrarVenta = new Button();
             panelMenuSeleccion = new Panel();
-            flpCategorias = new FlowLayoutPanel();
             flpPlatillos = new FlowLayoutPanel();
             txtBusquedaTPV = new TextBox();
+            flpCategorias = new FlowLayoutPanel();
+            pnlSeparadorVertical = new Panel();
             tlpPrincipal.SuspendLayout();
             panelComanda.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvComanda).BeginInit();
@@ -172,38 +173,51 @@
             panelMenuSeleccion.Controls.Add(flpPlatillos);
             panelMenuSeleccion.Controls.Add(txtBusquedaTPV);
             panelMenuSeleccion.Controls.Add(flpCategorias);
+            panelMenuSeleccion.Controls.Add(pnlSeparadorVertical);
             panelMenuSeleccion.Dock = DockStyle.Fill;
             panelMenuSeleccion.Location = new Point(3, 3);
             panelMenuSeleccion.Name = "panelMenuSeleccion";
+            panelMenuSeleccion.Padding = new Padding(5);
             panelMenuSeleccion.Size = new Size(617, 658);
             panelMenuSeleccion.TabIndex = 1;
-            // 
-            // flpCategorias
-            // 
-            flpCategorias.AutoScroll = true;
-            flpCategorias.Dock = DockStyle.Top;
-            flpCategorias.Location = new Point(0, 0);
-            flpCategorias.Name = "flpCategorias";
-            flpCategorias.Size = new Size(617, 60);
-            flpCategorias.TabIndex = 1;
             // 
             // flpPlatillos
             // 
             flpPlatillos.AutoScroll = true;
             flpPlatillos.Dock = DockStyle.Fill;
-            flpPlatillos.Location = new Point(0, 95);
+            flpPlatillos.Location = new Point(5, 97);
             flpPlatillos.Name = "flpPlatillos";
-            flpPlatillos.Size = new Size(617, 563);
+            flpPlatillos.Padding = new Padding(5);
+            flpPlatillos.Size = new Size(606, 556);
             flpPlatillos.TabIndex = 0;
             // 
             // txtBusquedaTPV
             // 
             txtBusquedaTPV.Dock = DockStyle.Top;
-            txtBusquedaTPV.Location = new Point(0, 60);
+            txtBusquedaTPV.Font = new Font("Segoe UI", 11F);
+            txtBusquedaTPV.Location = new Point(5, 65);
             txtBusquedaTPV.Name = "txtBusquedaTPV";
-            txtBusquedaTPV.PlaceholderText = "Buscar platillo por nombre...";
-            txtBusquedaTPV.Size = new Size(617, 35);
+            txtBusquedaTPV.PlaceholderText = " 🔍 Buscar platillo por nombre...";
+            txtBusquedaTPV.Size = new Size(606, 32);
             txtBusquedaTPV.TabIndex = 2;
+            // 
+            // flpCategorias
+            // 
+            flpCategorias.AutoScroll = true;
+            flpCategorias.Dock = DockStyle.Top;
+            flpCategorias.Location = new Point(5, 5);
+            flpCategorias.Name = "flpCategorias";
+            flpCategorias.Size = new Size(606, 60);
+            flpCategorias.TabIndex = 1;
+            // 
+            // pnlSeparadorVertical
+            // 
+            pnlSeparadorVertical.BackColor = Color.Silver;
+            pnlSeparadorVertical.Dock = DockStyle.Right;
+            pnlSeparadorVertical.Location = new Point(611, 5);
+            pnlSeparadorVertical.Name = "pnlSeparadorVertical";
+            pnlSeparadorVertical.Size = new Size(1, 648);
+            pnlSeparadorVertical.TabIndex = 10;
             // 
             // UC_Ventas
             // 
@@ -238,5 +252,6 @@
         private FlowLayoutPanel flpFormaPago;
         private Button btnEfectivo;
         private Button btnTarjeta;
+        private Panel pnlSeparadorVertical;
     }
 }

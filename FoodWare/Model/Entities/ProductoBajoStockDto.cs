@@ -1,5 +1,4 @@
-﻿// DTO para el reporte de productos con stock bajo.
-namespace FoodWare.Model.Entities
+﻿namespace FoodWare.Model.Entities
 {
     public class ProductoBajoStockDto
     {
@@ -7,6 +6,6 @@ namespace FoodWare.Model.Entities
         public decimal StockActual { get; set; }
         public decimal StockMinimo { get; set; }
         public decimal CantidadAReordenar { get; set; }
-        public long Prioridad { get; set; } // RANK() devuelve un long (bigint)
+        public long Prioridad { get; set; } 
     }
 }

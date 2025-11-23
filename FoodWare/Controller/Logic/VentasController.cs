@@ -1,7 +1,4 @@
-﻿// --- ARCHIVO MODIFICADO ---
-// Ruta: ./FoodWare/Controller/Logic/VentasController.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FoodWare.Controller.Exceptionss;

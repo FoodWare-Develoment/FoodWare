@@ -256,6 +256,7 @@
             dgvInventario.RowHeadersWidth = 51;
             dgvInventario.Size = new Size(960, 399);
             dgvInventario.TabIndex = 1;
+            this.dgvInventario.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.DgvInventario_CellFormatting);
             // 
             // contextMenuInventario
             // 
@@ -308,7 +309,7 @@
         private ComboBox cmbCategoria;
         private ContextMenuStrip contextMenuInventario;
         private ToolStripMenuItem itemEditarProducto;
-        private Button btnRegistrarMerma; 
+        private Button btnRegistrarMerma;
         private Button btnAnadirStock;
     }
 }

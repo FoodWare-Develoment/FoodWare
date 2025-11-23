@@ -15,7 +15,7 @@ namespace FoodWare.Model.Interfaces
     public interface IProductoRepository
     {
         Task<List<Producto>> ObtenerTodosAsync();        // R - Read (Leer todos)
-        Task<Producto?> ObtenerPorIdAsync(int id);     // R - Read (Leer uno) <-- MODIFICADO: Acepta nulabilidad
+        Task<Producto?> ObtenerPorIdAsync(int id);     // R - Read (Leer uno)
         Task AgregarAsync(Producto producto);      // C - Create (Crear)
         Task ActualizarAsync(Producto producto);   // U - Update (Actualizar)
         Task EliminarAsync(int id);                // D - Delete (Eliminar)
