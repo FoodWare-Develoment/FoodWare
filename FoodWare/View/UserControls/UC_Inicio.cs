@@ -15,8 +15,6 @@ namespace FoodWare.View.UserControls
         /// </summary>
         public UC_Inicio()
         {
-            // Este método carga TODOS los componentes definidos en el archivo .Designer.cs
-            // (En este caso, carga el 'pictureBoxBienvenida').
             InitializeComponent();
         }
 

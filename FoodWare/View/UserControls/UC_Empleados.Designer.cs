@@ -25,7 +25,7 @@
             btnActualizar = new Button();
             lblPassword = new Label();
             txtPassword = new TextBox();
-            btnDesactivar = new Button();
+            btnResetPassword = new Button();
             lblRol = new Label();
             cmbRol = new ComboBox();
             btnLimpiar = new Button();
@@ -40,24 +40,24 @@
             // 
             // tlpInputs
             // 
-            tlpInputs.ColumnCount = 4; // --- CAMBIO: 3 a 4 ---
-            tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tlpInputs.ColumnCount = 4;
+            tlpInputs.ColumnStyles.Add(new ColumnStyle());
             tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10F)); // --- NUEVA COLUMNA DE PADDING ---
+            tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 10F));
             tlpInputs.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120F));
             tlpInputs.Controls.Add(lblNombreCompleto, 0, 0);
             tlpInputs.Controls.Add(txtNombreCompleto, 1, 0);
-            tlpInputs.Controls.Add(btnGuardar, 3, 0); // --- CAMBIO: Col 2 a 3 ---
+            tlpInputs.Controls.Add(btnGuardar, 3, 0);
             tlpInputs.Controls.Add(lblNombreUsuario, 0, 1);
             tlpInputs.Controls.Add(txtNombreUsuario, 1, 1);
-            tlpInputs.Controls.Add(btnActualizar, 3, 1); // --- CAMBIO: Col 2 a 3 ---
+            tlpInputs.Controls.Add(btnActualizar, 3, 1);
             tlpInputs.Controls.Add(lblPassword, 0, 2);
             tlpInputs.Controls.Add(txtPassword, 1, 2);
-            tlpInputs.Controls.Add(btnDesactivar, 3, 2); // --- CAMBIO: Col 2 a 3 ---
             tlpInputs.Controls.Add(lblRol, 0, 3);
             tlpInputs.Controls.Add(cmbRol, 1, 3);
-            tlpInputs.Controls.Add(btnLimpiar, 3, 3); // --- CAMBIO: Col 2 a 3 ---
+            tlpInputs.Controls.Add(btnResetPassword, 3, 3);
             tlpInputs.Controls.Add(chkActivo, 1, 4);
+            tlpInputs.Controls.Add(btnLimpiar, 3, 2);
             tlpInputs.Dock = DockStyle.Top;
             tlpInputs.Location = new Point(0, 0);
             tlpInputs.Name = "tlpInputs";
@@ -75,25 +75,26 @@
             // 
             lblNombreCompleto.Anchor = AnchorStyles.Right;
             lblNombreCompleto.AutoSize = true;
+            lblNombreCompleto.Location = new Point(23, 35);
             lblNombreCompleto.Name = "lblNombreCompleto";
-            lblNombreCompleto.Size = new Size(131, 20);
+            lblNombreCompleto.Size = new Size(134, 20);
             lblNombreCompleto.TabIndex = 0;
             lblNombreCompleto.Text = "Nombre Completo";
             // 
             // txtNombreCompleto
             // 
             txtNombreCompleto.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtNombreCompleto.Location = new Point(160, 31);
+            txtNombreCompleto.Location = new Point(163, 31);
             txtNombreCompleto.Name = "txtNombreCompleto";
-            txtNombreCompleto.Size = new Size(647, 27); // Ancho se ajustará
+            txtNombreCompleto.Size = new Size(644, 27);
             txtNombreCompleto.TabIndex = 1;
             // 
             // btnGuardar
             // 
             btnGuardar.Anchor = AnchorStyles.None;
-            btnGuardar.Location = new Point(823, 22);
+            btnGuardar.Location = new Point(823, 23);
             btnGuardar.Name = "btnGuardar";
-            btnGuardar.Size = new Size(114, 45);
+            btnGuardar.Size = new Size(114, 44);
             btnGuardar.TabIndex = 9;
             btnGuardar.Text = "Guardar";
             btnGuardar.UseVisualStyleBackColor = true;
@@ -103,25 +104,26 @@
             // 
             lblNombreUsuario.Anchor = AnchorStyles.Right;
             lblNombreUsuario.AutoSize = true;
+            lblNombreUsuario.Location = new Point(39, 85);
             lblNombreUsuario.Name = "lblNombreUsuario";
-            lblNombreUsuario.Size = new Size(110, 20);
+            lblNombreUsuario.Size = new Size(118, 20);
             lblNombreUsuario.TabIndex = 2;
             lblNombreUsuario.Text = "Nombre Usuario";
             // 
             // txtNombreUsuario
             // 
             txtNombreUsuario.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtNombreUsuario.Location = new Point(160, 81);
+            txtNombreUsuario.Location = new Point(163, 81);
             txtNombreUsuario.Name = "txtNombreUsuario";
-            txtNombreUsuario.Size = new Size(647, 27);
+            txtNombreUsuario.Size = new Size(644, 27);
             txtNombreUsuario.TabIndex = 3;
             // 
             // btnActualizar
             // 
             btnActualizar.Anchor = AnchorStyles.None;
-            btnActualizar.Location = new Point(823, 72);
+            btnActualizar.Location = new Point(823, 73);
             btnActualizar.Name = "btnActualizar";
-            btnActualizar.Size = new Size(114, 45);
+            btnActualizar.Size = new Size(114, 44);
             btnActualizar.TabIndex = 10;
             btnActualizar.Text = "Actualizar";
             btnActualizar.UseVisualStyleBackColor = true;
@@ -131,35 +133,37 @@
             // 
             lblPassword.Anchor = AnchorStyles.Right;
             lblPassword.AutoSize = true;
+            lblPassword.Location = new Point(68, 135);
             lblPassword.Name = "lblPassword";
-            lblPassword.Size = new Size(88, 20);
+            lblPassword.Size = new Size(89, 20);
             lblPassword.TabIndex = 4;
             lblPassword.Text = "Contraseña*";
             // 
             // txtPassword
             // 
             txtPassword.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            txtPassword.Location = new Point(160, 131);
+            txtPassword.Location = new Point(163, 131);
             txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(647, 27);
+            txtPassword.Size = new Size(644, 27);
             txtPassword.TabIndex = 5;
             txtPassword.UseSystemPasswordChar = true;
             // 
-            // btnDesactivar
+            // btnResetPassword
             // 
-            btnDesactivar.Anchor = AnchorStyles.None;
-            btnDesactivar.Location = new Point(823, 122);
-            btnDesactivar.Name = "btnDesactivar";
-            btnDesactivar.Size = new Size(114, 45);
-            btnDesactivar.TabIndex = 11;
-            btnDesactivar.Text = "Desactivar";
-            btnDesactivar.UseVisualStyleBackColor = true;
-            btnDesactivar.Click += BtnDesactivar_Click;
+            btnResetPassword.Anchor = AnchorStyles.None;
+            btnResetPassword.Location = new Point(823, 173);
+            btnResetPassword.Name = "btnResetPassword";
+            btnResetPassword.Size = new Size(114, 44);
+            btnResetPassword.TabIndex = 11;
+            btnResetPassword.Text = "Reset Pass";
+            btnResetPassword.UseVisualStyleBackColor = true;
+            btnResetPassword.Click += BtnResetPassword_Click;
             // 
             // lblRol
             // 
             lblRol.Anchor = AnchorStyles.Right;
             lblRol.AutoSize = true;
+            lblRol.Location = new Point(126, 185);
             lblRol.Name = "lblRol";
             lblRol.Size = new Size(31, 20);
             lblRol.TabIndex = 6;
@@ -170,17 +174,17 @@
             cmbRol.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             cmbRol.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbRol.FormattingEnabled = true;
-            cmbRol.Location = new Point(160, 181);
+            cmbRol.Location = new Point(163, 181);
             cmbRol.Name = "cmbRol";
-            cmbRol.Size = new Size(647, 28);
+            cmbRol.Size = new Size(644, 28);
             cmbRol.TabIndex = 7;
             // 
             // btnLimpiar
             // 
             btnLimpiar.Anchor = AnchorStyles.None;
-            btnLimpiar.Location = new Point(823, 172);
+            btnLimpiar.Location = new Point(823, 123);
             btnLimpiar.Name = "btnLimpiar";
-            btnLimpiar.Size = new Size(114, 45);
+            btnLimpiar.Size = new Size(114, 44);
             btnLimpiar.TabIndex = 12;
             btnLimpiar.Text = "Limpiar";
             btnLimpiar.UseVisualStyleBackColor = true;
@@ -192,7 +196,7 @@
             chkActivo.AutoSize = true;
             chkActivo.Checked = true;
             chkActivo.CheckState = CheckState.Checked;
-            chkActivo.Location = new Point(160, 233);
+            chkActivo.Location = new Point(163, 233);
             chkActivo.Name = "chkActivo";
             chkActivo.Size = new Size(73, 24);
             chkActivo.TabIndex = 8;
@@ -216,17 +220,18 @@
             contextMenuEmpleados.ImageScalingSize = new Size(20, 20);
             contextMenuEmpleados.Items.AddRange(new ToolStripItem[] { itemEditar });
             contextMenuEmpleados.Name = "contextMenuEmpleados";
-            contextMenuEmpleados.Size = new Size(181, 28);
+            contextMenuEmpleados.Size = new Size(190, 28);
             // 
             // itemEditar
             // 
             itemEditar.Name = "itemEditar";
-            itemEditar.Size = new Size(180, 24);
+            itemEditar.Size = new Size(189, 24);
             itemEditar.Text = "Editar Empleado";
             itemEditar.Click += ItemEditar_Click;
             // 
             // UC_Empleados
             // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(dgvEmpleados);
             Controls.Add(tlpInputs);
@@ -252,7 +257,7 @@
         private CheckBox chkActivo;
         private Button btnGuardar;
         private Button btnActualizar;
-        private Button btnDesactivar;
+        private Button btnResetPassword;
         private Button btnLimpiar;
         private DataGridView dgvEmpleados;
         private ContextMenuStrip contextMenuEmpleados;

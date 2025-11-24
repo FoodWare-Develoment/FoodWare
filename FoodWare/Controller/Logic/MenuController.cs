@@ -34,7 +34,6 @@ namespace FoodWare.Controller.Logic
         /// </summary>
         public async Task GuardarNuevoPlatilloAsync(string nombre, string categoria, decimal precio)
         {
-            // Las validaciones ahora son más específicas.
             if (string.IsNullOrWhiteSpace(nombre))
             {
                 throw new ArgumentException("El nombre del platillo no puede estar vacío.", nameof(nombre));
@@ -72,8 +71,7 @@ namespace FoodWare.Controller.Logic
         /// <summary>
         /// Actualiza un platillo existente en el repositorio de forma asíncrona.
         /// </summary>
-        /// <param name="platillo">El platillo con los datos actualizados.</param>
-        // ... (encima del método pones el comentario del paso 1) ...
+        /// <param name="platillo">El platillo con los datos actualizados.</param>.
         public async Task ActualizarPlatilloAsync(Platillo platillo)
         {
             // Validaciones

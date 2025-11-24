@@ -2,126 +2,143 @@
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Threading.Tasks;    // Para tareas asíncronas
-using System.Linq;               // Para LINQ (filtros y selecciones)
-using System.ComponentModel;     // Para BindingList
+using System.Threading.Tasks;
+using System.Linq;
+using System.ComponentModel;
 using System.Collections.Generic;
 using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
 using FoodWare.Model.DataAccess;
 using FoodWare.Controller.Logic;
 using FoodWare.View.Helpers;
+using FoodWare.Controller.Exceptionss;
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Ventas : UserControl
     {
-        // --- Controladores y Listas de Estado ---
+        // --- Constantes de Literales (SonarLint S1192) ---
+        private const string TituloAviso = "Aviso";
+        private const string TituloConfirmar = "Confirmar";
+        private const string TituloError = "Error";
+        private const string TituloErrorConexion = "Error de Conexión";
+        private const string TituloExito = "Éxito";
+        private const string TituloStockInsuficiente = "Stock Insuficiente";
+        private const string TituloComandaVacia = "Comanda Vacía";
+        private const string DefaultFormaPago = "Efectivo";
 
-        // Controlador para traer los platillos del menú
+        private const string FiltroTodos = "Todos";
+
+        // --- Controladores ---
         private readonly MenuController _menuController;
         private readonly VentasController _ventasController;
 
-        // Lista con TODOS los platillos de la BD. La usamos para filtrar.
+        // --- Listas de Estado ---
         private List<Platillo> _listaPlatillosCompleta;
-
-        // Lista para la comanda (ticket) actual.
-        // Usamos BindingList para que el DataGridView se actualice solo.
+        private List<Platillo> _listaPlatillosFiltrada;
         private readonly BindingList<DetalleVenta> _comandaActual;
+
+        // --- Variables de Estado de UI ---
+        private string _formaDePagoSeleccionada = DefaultFormaPago;
+        private string _categoriaSeleccionada = FiltroTodos;
+
+        // --- Timer para Debounce ---
+        private readonly System.Windows.Forms.Timer _debounceTimer;
 
         public UC_Ventas()
         {
             InitializeComponent();
             AplicarEstilos();
 
-            // 1. Inicializar el controlador
             IPlatilloRepository platilloRepo = new PlatilloSqlRepository();
             _menuController = new MenuController(platilloRepo);
 
-            // 2. Inicializar el VentasController
             _ventasController = new VentasController(
                 new VentaSqlRepository(),
                 new RecetaSqlRepository(),
-                new ProductoSqlRepository()
+                new ProductoSqlRepository(),
+                new MovimientoSqlRepository()
             );
 
-            // 3. Inicializar nuestras listas de estado
             _listaPlatillosCompleta = [];
+            _listaPlatillosFiltrada = [];
             _comandaActual = [];
-
-            // 4. Conectar la comanda (BindingList) al DataGridView
             dgvComanda.DataSource = _comandaActual;
 
-            // 5. Conectar los eventos de los botones del panel de comanda
-            // (Los botones de platillos/categorías se conectan al crearse)
+            // --- Configuración del Debounce (400ms) ---
+            _debounceTimer = new System.Windows.Forms.Timer
+            {
+                Interval = 400
+            };
+            _debounceTimer.Tick += DebounceTimer_Tick;
+
+            // --- Conexión de Eventos ---
             this.btnRegistrarVenta.Click += BtnRegistrarVenta_Click;
             this.btnEliminarPlatillo.Click += BtnEliminarPlatillo_Click;
             this.btnQtyDisminuir.Click += BtnQtyDisminuir_Click;
             this.btnQtyAumentar.Click += BtnQtyAumentar_Click;
+            this.btnEfectivo.Click += BtnEfectivo_Click;
+            this.btnTarjeta.Click += BtnTarjeta_Click;
+
+            this.txtBusquedaTPV.TextChanged += TxtBusquedaTPV_TextChanged;
+            this.txtBusquedaTPV.KeyDown += TxtBusquedaTPV_KeyDown;
         }
 
-        /// <summary>
-        /// Aplica los estilos de EstilosApp a este UserControl.
-        /// </summary>
         private void AplicarEstilos()
         {
-            // Fondo general
             this.BackColor = EstilosApp.ColorFondo;
             this.tlpPrincipal.BackColor = EstilosApp.ColorFondo;
             this.panelComanda.BackColor = EstilosApp.ColorFondo;
             this.panelMenuSeleccion.BackColor = EstilosApp.ColorFondo;
 
-            // Paneles de botones (les damos un color blanco para distinguirlos)
             this.flpCategorias.BackColor = Color.White;
             this.flpPlatillos.BackColor = Color.White;
             this.flpGestionTicket.BackColor = EstilosApp.ColorFondo;
 
-            // Grid y Botones principales
             EstilosApp.EstiloDataGridView(dgvComanda);
             EstilosApp.EstiloBotonAccionPrincipal(btnRegistrarVenta);
 
-            // Botones de gestión
             EstilosApp.EstiloBotonModuloAlerta(btnEliminarPlatillo);
             EstilosApp.EstiloBotonModuloSecundario(btnQtyDisminuir);
             EstilosApp.EstiloBotonModuloSecundario(btnQtyAumentar);
 
-            // Total
             lblTotal.ForeColor = EstilosApp.ColorTextoOscuro;
             lblTotal.BackColor = EstilosApp.ColorFondo;
+
+            EstilosApp.EstiloTextBoxModulo(txtBusquedaTPV);
+            flpFormaPago.BackColor = EstilosApp.ColorFondo;
+
+            EstilosApp.EstiloBotonModulo(btnEfectivo);
+            EstilosApp.EstiloBotonModuloSecundario(btnTarjeta);
         }
 
-        /// <summary>
-        /// Evento de carga: Se dispara cuando el módulo de Ventas se hace visible.
-        /// </summary>
         private async void UC_Ventas_Load(object sender, EventArgs e)
         {
             if (!DesignMode)
             {
                 await CargarDatosInicialesAsync();
+                ActualizarBotonesPago();
             }
         }
 
         // --- MÉTODOS DE LÓGICA PRINCIPAL ---
 
-        /// <summary>
-        /// Tarea principal: Carga platillos y pobla los botones de la UI.
-        /// </summary>
         private async Task CargarDatosInicialesAsync()
         {
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                await Task.Delay(1);
-
                 _listaPlatillosCompleta = await _menuController.CargarPlatillosAsync();
+                _listaPlatillosFiltrada = [.. _listaPlatillosCompleta];
+
                 PoblarBotonesCategorias();
-                PoblarBotonesPlatillos(_listaPlatillosCompleta);
+                ActualizarFiltroPlatillos(usarDebounce: false);
                 ConfigurarGridComanda();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error al cargar menú de ventas: {ex.Message}");
-                MessageBox.Show("Error al cargar el menú. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al cargar el menú. Contacte al administrador.", TituloErrorConexion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -129,26 +146,16 @@ namespace FoodWare.View.UserControls
             }
         }
 
-        /// <summary>
-        /// Lee las categorías de la lista de platillos y crea los botones en flpCategorias.
-        /// </summary>
         private void PoblarBotonesCategorias()
         {
             flpCategorias.Controls.Clear();
 
-            // 1. Botón "Todos"
-            Button btnTodos = new()
-            {
-                Text = "Todos",
-                Height = 50,
-                Width = 100,
-                Tag = "Todos" // Usamos Tag para guardar el valor
-            };
-            EstilosApp.EstiloBotonModulo(btnTodos); // Estilo verde
-            btnTodos.Click += BotonCategoria_Click; // Asignamos el evento
+            // Usamos la constante FiltroTodos
+            Button btnTodos = new() { Text = FiltroTodos, Height = 50, Width = 100, Tag = FiltroTodos };
+            EstilosApp.EstiloBotonModulo(btnTodos);
+            btnTodos.Click += BotonCategoria_Click;
             flpCategorias.Controls.Add(btnTodos);
 
-            // 2. Un botón por cada categoría única (usando LINQ)
             var categorias = _listaPlatillosCompleta
                                 .Select(p => p.Categoria)
                                 .Distinct()
@@ -156,153 +163,124 @@ namespace FoodWare.View.UserControls
 
             foreach (var categoria in categorias)
             {
-                Button btnCat = new()
-                {
-                    Text = categoria,
-                    Height = 50,
-                    Width = 100,
-                    Tag = categoria
-                };
-                EstilosApp.EstiloBotonModuloSecundario(btnCat); // Estilo blanco
+                Button btnCat = new() { Text = categoria, Height = 50, Width = 100, Tag = categoria };
+                EstilosApp.EstiloBotonModuloSecundario(btnCat);
                 btnCat.Click += BotonCategoria_Click;
                 flpCategorias.Controls.Add(btnCat);
             }
         }
 
-        /// <summary>
-        /// Recibe una lista de platillos y crea los botones en flpPlatillos.
-        /// </summary>
         private void PoblarBotonesPlatillos(List<Platillo> platillos)
         {
+            flpPlatillos.SuspendLayout();
             flpPlatillos.Controls.Clear();
 
             foreach (var platillo in platillos)
             {
                 Button btnPlatillo = new()
                 {
-                    Text = $"{platillo.Nombre}\n{platillo.PrecioVenta:C}", // 'C' es formato de moneda ($0.00)
+                    Text = $"{platillo.Nombre}\n{platillo.PrecioVenta:C}",
                     Width = 130,
                     Height = 80,
                     Font = new Font("Segoe UI", 9, FontStyle.Bold),
-                    Tag = platillo // ¡CLAVE! Guardamos el objeto Platillo entero en el Tag.
+                    Tag = platillo
                 };
-
                 EstilosApp.EstiloBotonModulo(btnPlatillo);
-                btnPlatillo.Click += BotonPlatillo_Click; // Asignamos el evento
+                btnPlatillo.Click += BotonPlatillo_Click;
                 flpPlatillos.Controls.Add(btnPlatillo);
             }
+            flpPlatillos.ResumeLayout();
         }
 
-        /// <summary>
-        /// Configura las columnas del DataGridView de la comanda la primera vez.
-        /// </summary>
         private void ConfigurarGridComanda()
         {
             dgvComanda.DataSource = _comandaActual;
-
-            // Ocultamos las columnas de IDs que el usuario no necesita ver
-            // Esta sintaxis ("is DataGridViewColumn col") comprueba si no es nulo
-            // y lo asigna a la variable "col" en un solo paso.
-            if (dgvComanda.Columns["IdDetalleVenta"] is DataGridViewColumn colDetalle)
-            {
-                colDetalle.Visible = false;
-            }
-
-            if (dgvComanda.Columns["IdVenta"] is DataGridViewColumn colVenta)
-            {
-                colVenta.Visible = false;
-            }
-
-            if (dgvComanda.Columns["IdPlatillo"] is DataGridViewColumn colPlatillo)
-            {
-                colPlatillo.Visible = false;
-            }
-
-            // Cambiamos los nombres de los encabezados
+            if (dgvComanda.Columns["IdDetalleVenta"] is DataGridViewColumn colDetalle) colDetalle.Visible = false;
+            if (dgvComanda.Columns["IdVenta"] is DataGridViewColumn colVenta) colVenta.Visible = false;
+            if (dgvComanda.Columns["IdPlatillo"] is DataGridViewColumn colPlatillo) colPlatillo.Visible = false;
             if (dgvComanda.Columns["NombrePlatillo"] is DataGridViewColumn colNombre)
             {
                 colNombre.HeaderText = "Platillo";
-                // Hacemos que la columna de nombre ocupe el espacio sobrante
                 colNombre.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
-
-            if (dgvComanda.Columns["PrecioUnitario"] is DataGridViewColumn colPrecio)
-            {
-                colPrecio.HeaderText = "Precio";
-            }
+            if (dgvComanda.Columns["PrecioUnitario"] is DataGridViewColumn colPrecio) colPrecio.HeaderText = "Precio";
         }
 
-        /// <summary>
-        /// Actualiza el Label lblTotal sumando los items de la comanda.
-        /// </summary>
         private void ActualizarTotal()
         {
             decimal total = _comandaActual.Sum(detalle => detalle.Cantidad * detalle.PrecioUnitario);
             lblTotal.Text = total.ToString("C");
         }
 
-        // --- EVENT HANDLERS (CLICS DE BOTONES) ---
-
-        /// <summary>
-        /// Se ejecuta al hacer clic en un botón de Categoría (ej. "Bebidas").
-        /// Filtra la lista de botones de platillos.
-        /// </summary>
-        private void BotonCategoria_Click(object? sender, EventArgs e)
+        private void ActualizarBotonesPago()
         {
-            // 1. Verificamos si el 'sender' es un Button y lo asignamos a 'btn'
-            if (sender is not Button btn)
+            EstilosApp.EstiloBotonModuloSecundario(btnEfectivo);
+            EstilosApp.EstiloBotonModuloSecundario(btnTarjeta);
+
+            if (_formaDePagoSeleccionada == "Efectivo")
             {
-                return; // Si no es un botón, no hacemos nada.
+                EstilosApp.EstiloBotonModulo(btnEfectivo);
             }
-
-            // 2. Verificamos si el 'Tag' de ese botón es un 'string'
-            //    y lo asignamos a 'categoria'
-            if (btn.Tag is not string categoria)
+            else if (_formaDePagoSeleccionada == "Tarjeta")
             {
-                return; // Si el Tag no es un string (o es nulo), no hacemos nada.
-            }
-
-            try
-            {
-                this.Cursor = Cursors.WaitCursor;
-
-                // 3. A partir de aquí, 'categoria' es un 'string' válido y no nulo.
-                if (categoria == "Todos")
-                {
-                    // Si es "Todos", pasamos la lista completa
-                    PoblarBotonesPlatillos(_listaPlatillosCompleta);
-                }
-                else
-                {
-                    // Si es otra categoría, filtramos la lista usando LINQ
-                    var platillosFiltrados = _listaPlatillosCompleta
-                                                .Where(p => p.Categoria == categoria)
-                                                .ToList();
-                    PoblarBotonesPlatillos(platillosFiltrados);
-                }
-
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
+                EstilosApp.EstiloBotonModulo(btnTarjeta);
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en un botón de Platillo (ej. "Hamburguesa").
-        /// Añade el platillo a la comanda (ticket).
-        /// </summary>
-        private void BotonPlatillo_Click(object? sender, EventArgs e)
+        private void ActualizarFiltroPlatillos(bool usarDebounce = false)
         {
-            Button btn = (Button)sender!;
-            Platillo platillo = (Platillo)btn.Tag!;
+            if (usarDebounce)
+            {
+                _debounceTimer.Stop();
+                _debounceTimer.Start();
+            }
+            else
+            {
+                EjecutarFiltro();
+            }
+        }
 
+        private void DebounceTimer_Tick(object? sender, EventArgs e)
+        {
+            _debounceTimer.Stop();
+            EjecutarFiltro();
+        }
+
+        private void EjecutarFiltro()
+        {
+            try
+            {
+                string filtroBusqueda = txtBusquedaTPV.Text.Trim();
+                var listaTemp = _listaPlatillosCompleta;
+
+                // 1. Filtrar por Categoría
+                if (_categoriaSeleccionada != FiltroTodos)
+                {
+                    listaTemp = [.. listaTemp.Where(p => p.Categoria == _categoriaSeleccionada)];
+                }
+
+                // 2. Filtrar por Búsqueda
+                if (!string.IsNullOrWhiteSpace(filtroBusqueda))
+                {
+                    listaTemp = [.. listaTemp.Where(p => p.Nombre.Contains(filtroBusqueda, StringComparison.OrdinalIgnoreCase))];
+                }
+
+                _listaPlatillosFiltrada = listaTemp;
+                PoblarBotonesPlatillos(_listaPlatillosFiltrada);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al filtrar: {ex.Message}");
+            }
+        }
+
+        private void AgregarPlatilloAComanda(Platillo platillo)
+        {
             var detalleExistente = _comandaActual.FirstOrDefault(d => d.IdPlatillo == platillo.IdPlatillo);
 
             if (detalleExistente != null)
             {
                 detalleExistente.Cantidad++;
-                // Forzamos al BindingList a notificar al grid que un item cambió
                 _comandaActual.ResetBindings();
             }
             else
@@ -316,13 +294,35 @@ namespace FoodWare.View.UserControls
                 };
                 _comandaActual.Add(nuevoDetalle);
             }
-
             ActualizarTotal();
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Añadir (+)"
-        /// </summary>
+        // --- EVENT HANDLERS (CLICS DE BOTONES) ---
+
+        private void BotonCategoria_Click(object? sender, EventArgs e)
+        {
+            if (sender is not Button btn) return;
+            if (btn.Tag is not string categoria) return;
+
+            _categoriaSeleccionada = categoria;
+
+            foreach (Control c in flpCategorias.Controls)
+            {
+                if (c is Button b) EstilosApp.EstiloBotonModuloSecundario(b);
+            }
+            EstilosApp.EstiloBotonModulo(btn);
+
+            ActualizarFiltroPlatillos(usarDebounce: false);
+        }
+
+        private void BotonPlatillo_Click(object? sender, EventArgs e)
+        {
+            Button btn = (Button)sender!;
+            Platillo platillo = (Platillo)btn.Tag!;
+
+            AgregarPlatilloAComanda(platillo);
+        }
+
         private void BtnQtyAumentar_Click(object? sender, EventArgs e)
         {
             if (dgvComanda.CurrentRow != null && dgvComanda.CurrentRow.DataBoundItem is DetalleVenta detalle)
@@ -333,26 +333,21 @@ namespace FoodWare.View.UserControls
             }
             else
             {
-                MessageBox.Show("Selecciona un platillo de la comanda primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Selecciona un platillo de la comanda primero.", TituloAviso, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Quitar (-)"
-        /// </summary>
         private void BtnQtyDisminuir_Click(object? sender, EventArgs e)
         {
             if (dgvComanda.CurrentRow != null && dgvComanda.CurrentRow.DataBoundItem is DetalleVenta detalle)
             {
                 if (detalle.Cantidad > 1)
                 {
-                    // Si hay más de 1, solo restamos
                     detalle.Cantidad--;
                 }
                 else
                 {
-                    // Si la cantidad es 1, preguntamos si quiere eliminarlo
-                    var confirm = MessageBox.Show($"¿Quitar '{detalle.NombrePlatillo}' de la comanda?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    var confirm = MessageBox.Show($"¿Quitar '{detalle.NombrePlatillo}' de la comanda?", TituloConfirmar, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (confirm == DialogResult.Yes)
                     {
                         _comandaActual.Remove(detalle);
@@ -363,18 +358,15 @@ namespace FoodWare.View.UserControls
             }
             else
             {
-                MessageBox.Show("Selecciona un platillo de la comanda primero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Selecciona un platillo de la comanda primero.", TituloAviso, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Eliminar"
-        /// </summary>
         private void BtnEliminarPlatillo_Click(object? sender, EventArgs e)
         {
             if (dgvComanda.CurrentRow != null && dgvComanda.CurrentRow.DataBoundItem is DetalleVenta detalle)
             {
-                var confirm = MessageBox.Show($"¿Eliminar '{detalle.NombrePlatillo}' (Cantidad: {detalle.Cantidad}) de la comanda?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                var confirm = MessageBox.Show($"¿Eliminar '{detalle.NombrePlatillo}' (Cantidad: {detalle.Cantidad}) de la comanda?", TituloConfirmar, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (confirm == DialogResult.Yes)
                 {
                     _comandaActual.Remove(detalle);
@@ -383,63 +375,92 @@ namespace FoodWare.View.UserControls
             }
             else
             {
-                MessageBox.Show("Selecciona un platillo de la comanda para eliminar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Selecciona un platillo de la comanda para eliminar.", TituloAviso, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        /// <summary>
-        /// Se ejecuta al hacer clic en "Registrar Venta"
-        /// </summary>
+        private void BtnEfectivo_Click(object? sender, EventArgs e)
+        {
+            _formaDePagoSeleccionada = "Efectivo";
+            ActualizarBotonesPago();
+        }
+
+        private void BtnTarjeta_Click(object? sender, EventArgs e)
+        {
+            _formaDePagoSeleccionada = "Tarjeta";
+            ActualizarBotonesPago();
+        }
+
+        private void TxtBusquedaTPV_TextChanged(object? sender, EventArgs e)
+        {
+            ActualizarFiltroPlatillos(usarDebounce: true);
+        }
+
+        private void TxtBusquedaTPV_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+
+                if (_debounceTimer.Enabled)
+                {
+                    _debounceTimer.Stop();
+                    EjecutarFiltro();
+                }
+
+                var primerResultado = _listaPlatillosFiltrada.FirstOrDefault();
+
+                if (primerResultado != null)
+                {
+                    AgregarPlatilloAComanda(primerResultado);
+                    txtBusquedaTPV.Clear();
+                }
+            }
+        }
+
         private async void BtnRegistrarVenta_Click(object? sender, EventArgs e)
         {
-            // 1. Validar que hay items en la comanda
             if (_comandaActual.Count == 0)
             {
-                MessageBox.Show("No hay platillos en la comanda para registrar.", "Comanda Vacía", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("No hay platillos en la comanda para registrar.", TituloComandaVacia, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. Confirmación
             var confirm = MessageBox.Show($"¿Desea registrar esta venta por un total de {lblTotal.Text}?", "Confirmar Venta", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (confirm == DialogResult.No)
-            {
-                return;
-            }
+            if (confirm == DialogResult.No) return;
 
             try
             {
                 this.Cursor = Cursors.WaitCursor;
                 btnRegistrarVenta.Enabled = false;
 
-                // 3. Crear el objeto Venta principal
                 Venta nuevaVenta = new()
                 {
-                    // TODO: Cuando el Login esté listo, aquí irá el ID del usuario real.
                     IdUsuario = UserSession.IdUsuario,
-                    FormaDePago = "Efectivo",
+                    FormaDePago = _formaDePagoSeleccionada,
                     TotalVenta = _comandaActual.Sum(d => d.Cantidad * d.PrecioUnitario)
                 };
 
-                // 4. Enviar la venta y los detalles al controlador
                 await _ventasController.RegistrarVentaAsync(nuevaVenta, [.. _comandaActual]);
 
-                // 5. Éxito
-                MessageBox.Show("¡Venta registrada exitosamente!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // 6. Limpiar la UI para la siguiente venta
+                MessageBox.Show("¡Venta registrada exitosamente!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _comandaActual.Clear();
                 ActualizarTotal();
             }
+            catch (StockInsuficienteException stockEx)
+            {
+                string mensaje = $"{stockEx.Message}\n\n" +
+                                 $"Para el platillo: '{stockEx.PlatilloConProblema}'\n" +
+                                 $"Solo puede vender un máximo de {stockEx.MaximaCantidadVendible} unidades.";
+                MessageBox.Show(mensaje, TituloStockInsuficiente, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
-                // 7. Manejo de errores
                 System.Diagnostics.Debug.WriteLine($"Error al registrar venta: {ex.Message}");
-                MessageBox.Show("Ocurrió un error al registrar la venta. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ocurrió un error al registrar la venta. Contacte al administrador.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                // 8. Reactivar la UI
                 this.Cursor = Cursors.Default;
                 btnRegistrarVenta.Enabled = true;
             }

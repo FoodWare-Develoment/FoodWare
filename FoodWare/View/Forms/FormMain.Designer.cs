@@ -10,7 +10,7 @@
 
         private System.Windows.Forms.Label lblTitulo;
         private System.Windows.Forms.TextBox txtBusqueda;
-        private System.Windows.Forms.Panel panelBusqueda; // contenedor para el buscador
+        private System.Windows.Forms.Panel panelBusqueda;
 
         private System.Windows.Forms.Button btnGP;
         private System.Windows.Forms.Panel panelGPSubmenu;

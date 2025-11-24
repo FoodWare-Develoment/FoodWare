@@ -16,6 +16,10 @@ namespace FoodWare.Model.Interfaces
 
         // Elimina un ingrediente de un platillo
         Task EliminarAsync(int idReceta);
-        
+
+        /// <summary>
+        /// Verifica si un producto (ingrediente) está siendo usado en alguna receta.
+        /// </summary>
+        Task<bool> ProductoEstaEnUsoAsync(int idProducto);
     }
-}//contraseña 123
+}

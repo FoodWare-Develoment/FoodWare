@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FoodWare.Controller.Exceptionss;
+using FoodWare.Controller.Logic;
 using FoodWare.Model.Entities;
 using FoodWare.Model.Interfaces;
 using Microsoft.Data.SqlClient;
@@ -8,66 +10,106 @@ using Microsoft.Extensions.Configuration;
 
 namespace FoodWare.Controller.Logic
 {
-    public class VentasController(IVentaRepository ventaRepo, IRecetaRepository recetaRepo, IProductoRepository productoRepo)
+    public class VentasController(
+        IVentaRepository ventaRepo,
+        IRecetaRepository recetaRepo,
+        IProductoRepository productoRepo,
+        IMovimientoRepository movimientoRepo
+        )
     {
         private readonly IVentaRepository _ventaRepo = ventaRepo;
         private readonly IRecetaRepository _recetaRepo = recetaRepo;
         private readonly IProductoRepository _productoRepo = productoRepo;
+        private readonly IMovimientoRepository _movimientoRepo = movimientoRepo;
         private readonly string _connectionString = Program.Configuration.GetConnectionString("FoodWareDB")!;
 
-        /// <summary>
-        /// Registra una venta completa como una transacción atómica.
-        /// </summary>
         public async Task RegistrarVentaAsync(Venta venta, List<DetalleVenta> detalles)
         {
-            // 1. Abrir la conexión y COMENZAR TRANSACCIÓN
+            await VerificarDisponibilidadStockAsync(detalles);
+
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
             await using SqlTransaction transaction = (SqlTransaction)await connection.BeginTransactionAsync();
 
             try
             {
-                // 2. Guardar la Venta principal y obtener su ID
                 int idVenta = await _ventaRepo.AgregarVentaAsync(venta, connection, transaction);
 
-                // 3. Iterar sobre los detalles de la venta
                 foreach (var detalle in detalles)
                 {
-                    detalle.IdVenta = idVenta; // Asignar el ID de la venta padre
-
-                    // 3a. Guardar el detalle de la venta
+                    detalle.IdVenta = idVenta;
                     await _ventaRepo.AgregarDetalleAsync(detalle, connection, transaction);
 
-                    // 3b. Descontar el inventario (El núcleo)
-                    await DescontarInventarioPorPlatilloAsync(detalle.IdPlatillo, detalle.Cantidad, connection, transaction);
+                    await DescontarInventarioPorPlatilloAsync(detalle.IdPlatillo, detalle.Cantidad, idVenta, venta.IdUsuario, connection, transaction);
                 }
 
-                // 4. Si todo salió bien, COMMIT (confirmar cambios)
                 await transaction.CommitAsync();
             }
             catch (Exception)
             {
-                // 5. Si algo falló, ROLLBACK (deshacer cambios)
                 await transaction.RollbackAsync();
-                throw; // Relanza la excepción para que la Vista la atrape
+                throw;
             }
         }
 
         /// <summary>
-        /// Helper privado para descontar ingredientes de un platillo vendido.
+        /// Registra los movimientos de inventario (salidas) para un platillo vendido.
         /// </summary>
-        private async Task DescontarInventarioPorPlatilloAsync(int idPlatillo, int cantidadVendida, SqlConnection connection, SqlTransaction transaction)
+        private async Task DescontarInventarioPorPlatilloAsync(int idPlatillo, int cantidadVendida, int idVenta, int idUsuario, SqlConnection connection, SqlTransaction transaction)
         {
-            // 1. Obtener la receta del platillo
             var receta = await _recetaRepo.ObtenerPorPlatilloAsync(idPlatillo, connection, transaction);
 
-            // 2. Iterar sobre cada ingrediente de la receta
             foreach (var ingrediente in receta)
             {
                 decimal cantidadADescontar = ingrediente.Cantidad * cantidadVendida;
 
-                // 3. Actualizar el stock del producto
-                await _productoRepo.ActualizarStockAsync(ingrediente.IdProducto, cantidadADescontar, connection, transaction);
+                MovimientoInventario movimiento = new()
+                {
+                    IdProducto = ingrediente.IdProducto,
+                    IdUsuario = idUsuario,
+                    TipoMovimiento = "Venta",
+                    Cantidad = -cantidadADescontar,
+                    Motivo = $"Venta ID: {idVenta}"
+                };
+
+                await _movimientoRepo.AgregarAsync(movimiento, connection, transaction);
+            }
+        }
+
+        /// <summary>
+        /// Verifica la comanda contra el stock actual. Lanza una StockInsuficienteException si falla.
+        /// </summary>
+        private async Task VerificarDisponibilidadStockAsync(List<DetalleVenta> detalles)
+        {
+            var stockDisponible = await _productoRepo.ObtenerMapaStockAsync();
+
+            foreach (var detalle in detalles)
+            {
+                var receta = await _recetaRepo.ObtenerPorPlatilloAsync(detalle.IdPlatillo);
+
+                foreach (var ingrediente in receta)
+                {
+                    decimal cantidadRequerida = ingrediente.Cantidad * detalle.Cantidad;
+
+                    if (!stockDisponible.TryGetValue(ingrediente.IdProducto, out decimal stockActual) || cantidadRequerida > stockActual)
+                    {
+                        int maxPosible = 0;
+                        if (ingrediente.Cantidad > 0)
+                        {
+                            maxPosible = (int)Math.Floor(stockActual / ingrediente.Cantidad);
+                        }
+
+                        throw new StockInsuficienteException(
+                            $"Stock insuficiente para '{ingrediente.NombreProducto}'.",
+                            detalle.NombrePlatillo,
+                            ingrediente.NombreProducto,
+                            maxPosible);
+                    }
+                    else
+                    {
+                        stockDisponible[ingrediente.IdProducto] -= cantidadRequerida;
+                    }
+                }
             }
         }
     }

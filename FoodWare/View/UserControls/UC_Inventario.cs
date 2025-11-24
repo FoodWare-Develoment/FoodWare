@@ -1,35 +1,42 @@
 ﻿using System;
 using System.Drawing;
-using System.Threading.Tasks;     // Para tareas asíncronas
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using FoodWare.Controller.Logic;  // Para MenuController
-using FoodWare.Model.Entities;    // Para la clase Platillo
-using FoodWare.Model.Interfaces; // Para IProductoRepository
-using FoodWare.Model.DataAccess;  // Para ProductoSqlRepository
-using FoodWare.Validations;      // Para nuestra librería de validación
-using FoodWare.View.Helpers;      // Para EstilosApp
+using FoodWare.Controller.Logic;
+using FoodWare.Model.Entities;
+using FoodWare.Model.Interfaces;
+using FoodWare.Model.DataAccess;
+using FoodWare.Validations;
+using FoodWare.View.Helpers;
+using Microsoft.VisualBasic;
 
 namespace FoodWare.View.UserControls
 {
     public partial class UC_Inventario : UserControl
     {
+        private const string TituloExito = "Éxito";
+        private const string TituloError = "Error";
         private const string TituloDatoInvalido = "Dato inválido";
+        private const string TituloAdvertencia = "Aviso";
+        private const string TituloAccionBloqueada = "Acción Bloqueada";
+        private const string MsgErrorInesperado = "Ocurrió un error inesperado. Contacte al administrador.";
+        private const string MsgProductoNoSelEditar = "Por favor, selecciona un producto de la lista (con clic derecho > Editar) antes de esta acción.";
+
         private readonly InventarioController _controller;
-        // Campo para guardar el producto que está seleccionado en el grid
         private Producto? _productoSeleccionado;
+        private bool _modoEdicion = false;
 
         public UC_Inventario()
         {
             InitializeComponent();
-            AplicarEstilos(); // Llamamos a nuestro método de estilos
+            AplicarEstilos();
 
-            // 1. Usamos el repositorio SQL real.
             IProductoRepository repositorioParaUsar = new ProductoSqlRepository();
+            IMovimientoRepository movimientoRepo = new MovimientoSqlRepository();
+            IRecetaRepository recetaRepo = new RecetaSqlRepository();
 
-            // 2. La Vista CREA el controlador y le PASA (inyecta) el repositorio.
-            _controller = new InventarioController(repositorioParaUsar);
+            _controller = new InventarioController(repositorioParaUsar, movimientoRepo, recetaRepo);
 
-            // Agrega más categorías según sea necesario
             cmbCategoria.Items.Add("Abarrotes Secos");
             cmbCategoria.Items.Add("Proteínas");
             cmbCategoria.Items.Add("Frutas y Verduras");
@@ -42,7 +49,6 @@ namespace FoodWare.View.UserControls
             cmbCategoria.Items.Add("Productos de Limpieza");
             cmbCategoria.Items.Add("Otros");
 
-            // Agrega más unidades de medida según sea necesario
             cmbUnidadMedida.Items.Add("kg");
             cmbUnidadMedida.Items.Add("g");
             cmbUnidadMedida.Items.Add("L");
@@ -56,302 +62,69 @@ namespace FoodWare.View.UserControls
             cmbUnidadMedida.Items.Add("Botella");
         }
 
-        /// <summary>
-        /// Aplica los estilos de EstilosApp a este UserControl.
-        /// </summary>
         private void AplicarEstilos()
         {
-            // Fondo del UserControl y Panel
             this.BackColor = EstilosApp.ColorFondo;
             EstilosApp.EstiloPanel(panelInputs, EstilosApp.ColorFondo);
-
-            // Etiquetas
             EstilosApp.EstiloLabelModulo(lblNombre);
             EstilosApp.EstiloLabelModulo(lblCategoria);
             EstilosApp.EstiloLabelModulo(lblUnidad);
             EstilosApp.EstiloLabelModulo(lblStock);
             EstilosApp.EstiloLabelModulo(lblStockMinimo);
             EstilosApp.EstiloLabelModulo(lblPrecio);
-
-            // Cajas de Texto
             EstilosApp.EstiloTextBoxModulo(txtNombre);
             EstilosApp.EstiloTextBoxModulo(txtStock);
             EstilosApp.EstiloTextBoxModulo(txtStockMinimo);
             EstilosApp.EstiloTextBoxModulo(txtPrecio);
-
-            // ComboBox
             EstilosApp.EstiloComboBoxModulo(cmbCategoria);
             EstilosApp.EstiloComboBoxModulo(cmbUnidadMedida);
 
-            // Botones
             EstilosApp.EstiloBotonModulo(btnGuardar);
             EstilosApp.EstiloBotonModuloAlerta(btnEliminar);
-            // Aplicamos estilo al botón actualizar
             EstilosApp.EstiloBotonModuloSecundario(btnActualizar);
             EstilosApp.EstiloBotonModuloSecundario(btnLimpiar);
+            EstilosApp.EstiloBotonModulo(btnAnadirStock);
+            EstilosApp.EstiloBotonModuloAlerta(btnRegistrarMerma);
 
-            // Grid
             EstilosApp.EstiloDataGridView(dgvInventario);
         }
 
-        /// <summary>
-        /// Manejador de carga del UserControl. Se convierte en 'async void'
-        /// para permitir la carga de datos sin bloquear la UI.
-        /// </summary>
         private async void UC_Inventario_Load(object sender, EventArgs e)
         {
             if (!DesignMode)
             {
-                // Ahora llamamos a la versión asíncrona
                 await CargarGridInventarioAsync();
+                EstablecerModoEdicion(false);
             }
         }
 
-        /// <summary>
-        /// Manejador del clic en 'Guardar'. Se convierte en 'async void'
-        /// para guardar sin bloquear la UI.
-        /// </summary>
-        private async void BtnGuardar_Click(object sender, EventArgs e)
+        private void EstablecerModoEdicion(bool activo)
         {
-            try
+            _modoEdicion = activo;
+
+            if (activo)
             {
-                // 1. La Vista RECOGE los datos.
-                string nombre = txtNombre.Text;
-                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
-                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? ""; // <-- CAMPO CORREGIDO
-
-                if (!decimal.TryParse(txtStock.Text, out decimal stock))
-                {
-                    MessageBox.Show("El stock debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtStock.Focus();
-                    return;
-                }
-
-                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo)) // <-- CAMPO CORREGIDO
-                {
-                    MessageBox.Show("El stockMinimo debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtStockMinimo.Focus();
-                    return;
-                }
-
-                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
-                {
-                    MessageBox.Show("El precio debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtPrecio.Focus();
-                    return;
-                }
-
-                // --- Llamada Asíncrona ---
-                this.Cursor = Cursors.WaitCursor; // Indicador visual
-
-                // 2. La Vista ENVÍA los datos al controlador
-                await _controller.GuardarNuevoProductoAsync(nombre, categoria, unidad, stock, stockminimo, precio);
-
-                // 3. Si todo salió bien, la Vista se ACTUALIZA.
-                MessageBox.Show("¡Producto guardado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                LimpiarCampos();
-
-                // Recargamos el grid de forma asíncrona
-                await CargarGridInventarioAsync();
-            }
-            catch (ArgumentException aex) // Errores de validación del Controlador
-            {
-                MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex) // Errores inesperados (BD, etc.)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al guardar producto: {ex.Message}");
-                MessageBox.Show("Ocurrió un error inesperado al guardar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-        /// <summary>
-        /// Manejador del clic en 'Actualizar'. Se convierte en 'async void'.
-        /// </summary>
-        private async void BtnActualizar_Click(object sender, EventArgs e)
-        {
-            // 1. Validar que haya un producto seleccionado
-            if (_productoSeleccionado == null)
-            {
-                MessageBox.Show("Por favor, selecciona un producto de la lista para actualizar.", "Ningún producto seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            try
-            {
-                // 2. La Vista RECOGE los datos de los campos.
-                string nombre = txtNombre.Text;
-                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
-                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? "";
-
-                if (!decimal.TryParse(txtStock.Text, out decimal stock))
-                {
-                    MessageBox.Show("El stock debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtStock.Focus();
-                    return;
-                }
-
-                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo))
-                {
-                    MessageBox.Show("El stock Mínimo debe ser un número válido.", "Dato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtStockMinimo.Focus();
-                    return;
-                }
-
-                if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
-                {
-                    MessageBox.Show("El precio debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtPrecio.Focus();
-                    return;
-                }
-
-                // 3. Creamos el objeto Producto con los datos actualizados Y el ID original
-                Producto productoActualizado = new()
-                {
-                    IdProducto = _productoSeleccionado.IdProducto, // <-- El ID original es clave
-                    Nombre = nombre,
-                    Categoria = categoria,
-                    UnidadMedida = unidad,
-                    StockActual = stock,
-                    StockMinimo = stockminimo,
-                    PrecioCosto = precio
-                };
-
-                // 4. Guardamos el ID antes de hacer nada
-                int idActualizado = productoActualizado.IdProducto;
-
-                this.Cursor = Cursors.WaitCursor;
-                await _controller.ActualizarProductoAsync(productoActualizado);
-
-                MessageBox.Show("¡Producto actualizado!", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                LimpiarCampos(); // Limpia campos de texto PERO NO la selección
-                await CargarGridInventarioAsync(); // Recarga el grid
-
-                // 5. Llamamos al método para re-seleccionar la fila
-                SeleccionarProductoEnGrid(idActualizado);
-            }
-            catch (ArgumentException aex) // Errores de validación
-            {
-                MessageBox.Show(aex.Message, "Datos Inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex) // Errores inesperados
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al actualizar producto: {ex.Message}");
-                MessageBox.Show("Ocurrió un error inesperado al actualizar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-
-        /// <summary>
-        /// Manejador del clic en 'Eliminar'. Se convierte en 'async void'.
-        /// </summary>
-        private async void BtnEliminar_Click(object sender, EventArgs e)
-        {
-            // Verifica si hay una fila seleccionada
-            if (this.dgvInventario.CurrentRow != null && this.dgvInventario.CurrentRow.DataBoundItem is Producto producto)
-            {
-                int id = producto.IdProducto;
-                var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{producto.Nombre}'?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-                if (confirm == DialogResult.Yes)
-                {
-                    try
-                    {
-                        this.Cursor = Cursors.WaitCursor;
-                        // --- Llamada Asíncrona ---
-                        await _controller.EliminarProductoAsync(id);
-
-                        // Actualiza la vista
-                        await CargarGridInventarioAsync();
-                        LimpiarCampos();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Error al eliminar producto: {ex.Message}");
-                        MessageBox.Show("Ocurrió un error inesperado al eliminar. Contacte al administrador.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        this.Cursor = Cursors.Default;
-                    }
-                }
+                btnGuardar.Visible = false;
+                btnActualizar.Visible = true;
+                btnEliminar.Visible = true;
+                btnAnadirStock.Visible = true;
+                btnRegistrarMerma.Visible = true;
+                btnLimpiar.Text = "Cancelar";
+                txtStock.Enabled = false;
             }
             else
             {
-                MessageBox.Show("Por favor, selecciona un producto de la lista para eliminar.", "Ningún producto seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                btnGuardar.Visible = true;
+                btnActualizar.Visible = false;
+                btnEliminar.Visible = false;
+                btnAnadirStock.Visible = false;
+                btnRegistrarMerma.Visible = false;
+                btnLimpiar.Text = "Limpiar";
+                txtStock.Enabled = true;
+                _productoSeleccionado = null;
             }
         }
 
-        // --- MÉTODOS DE AYUDA DE LA VISTA ---
-
-        /// <summary>
-        /// Pide los productos al controlador y actualiza el DataGridView de forma asíncrona.
-        /// </summary>
-        private async Task CargarGridInventarioAsync()
-        {
-            try
-            {
-                // Mostramos un indicador de carga
-                this.Cursor = Cursors.WaitCursor;
-                dgvInventario.DataSource = null;
-
-                // 1. Obtenemos los datos de forma asíncrona
-                var productos = await _controller.CargarProductosAsync();
-
-                // 2. Volvemos al hilo de la UI para actualizar el Grid
-                this.dgvInventario.DataSource = productos;
-
-                // Opcional: ajustar columnas
-                var columnas = this.dgvInventario.Columns;
-                if (columnas != null && columnas["IdProducto"] is not null)
-                {
-                    columnas["IdProducto"]!.HeaderText = "ID";
-                    columnas["IdProducto"]!.Width = 50;
-                }
-                if (columnas != null && columnas["StockActual"] is not null)
-                {
-                    columnas["StockActual"]!.HeaderText = "Stock Actual";
-                }
-                // --- AJUSTE DE COLUMNAS ---
-                if (columnas != null && columnas["StockMinimo"] is not null)
-                {
-                    columnas["StockMinimo"]!.HeaderText = "Stock Mínimo";
-                }
-                if (columnas != null && columnas["UnidadMedida"] is not null)
-                {
-                    columnas["UnidadMedida"]!.HeaderText = "Unidad";
-                }
-                if (columnas != null && columnas["PrecioCosto"] is not null)
-                {
-                    columnas["PrecioCosto"]!.HeaderText = "Precio Costo";
-                    columnas["PrecioCosto"]!.Width = 150;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error al cargar inventario: {ex.Message}");
-                MessageBox.Show("Error al cargar el inventario. Contacte al administrador.", "Error de Conexión", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                // Nos aseguramos de regresar el cursor a la normalidad
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-        /// <summary>
-        /// Limpia las cajas de texto del formulario.
-        /// </summary>
         private void LimpiarCampos()
         {
             txtNombre.Text = "";
@@ -361,24 +134,15 @@ namespace FoodWare.View.UserControls
             txtStockMinimo.Text = "";
             txtPrecio.Text = "";
 
-            // Limpiamos la variable de estado
-            _productoSeleccionado = null;
-        }
-
-        private void BtnLimpiar_Click(object sender, EventArgs e)
-        {
-            LimpiarCampos();
+            EstablecerModoEdicion(false);
         }
 
         private void ItemEditarProducto_Click(object sender, EventArgs e)
         {
-            // Verificamos si hay una fila seleccionada y si podemos obtener el objeto Producto
             if (dgvInventario.CurrentRow != null && dgvInventario.CurrentRow.DataBoundItem is Producto producto)
             {
-                // 1. Guardamos el producto seleccionado en nuestra variable de estado
-                _productoSeleccionado = producto; // (Asegúrate de tener esta variable _productoSeleccionado a nivel de clase)
+                _productoSeleccionado = producto;
 
-                // 2. Rellenamos los campos del formulario
                 txtNombre.Text = producto.Nombre;
                 cmbCategoria.SelectedItem = producto.Categoria;
                 cmbUnidadMedida.SelectedItem = producto.UnidadMedida;
@@ -386,8 +150,241 @@ namespace FoodWare.View.UserControls
                 txtStockMinimo.Text = producto.StockMinimo.ToString("F2");
                 txtPrecio.Text = producto.PrecioCosto.ToString("F2");
 
-                // 3. Ponemos el foco en el primer campo
+                EstablecerModoEdicion(true);
                 txtNombre.Focus();
+            }
+        }
+
+        private void BtnLimpiar_Click(object sender, EventArgs e)
+        {
+            LimpiarCampos();
+        }
+
+        private async void BtnGuardar_Click(object sender, EventArgs e)
+        {
+            if (_modoEdicion) return;
+
+            try
+            {
+                string nombre = txtNombre.Text;
+                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
+                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? "";
+
+                if (!decimal.TryParse(txtStock.Text, out decimal stock)) { MessageBox.Show("El stock debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo)) { MessageBox.Show("El stockMinimo debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio)) { MessageBox.Show("El precio debe ser un número válido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+
+                this.Cursor = Cursors.WaitCursor;
+                await _controller.GuardarNuevoProductoAsync(nombre, categoria, unidad, stock, stockminimo, precio);
+
+                MessageBox.Show("¡Producto guardado exitosamente!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LimpiarCampos();
+                await CargarGridInventarioAsync();
+            }
+            catch (ArgumentException aex)
+            {
+                MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al guardar producto: {ex.Message}");
+                MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private async void BtnActualizar_Click(object sender, EventArgs e)
+        {
+            if (!_modoEdicion || _productoSeleccionado == null) return;
+
+            try
+            {
+                string nombre = txtNombre.Text;
+                string categoria = cmbCategoria.SelectedItem?.ToString() ?? "";
+                string unidad = cmbUnidadMedida.SelectedItem?.ToString() ?? "";
+                decimal stock = _productoSeleccionado.StockActual;
+
+                if (!decimal.TryParse(txtStockMinimo.Text, out decimal stockminimo)) { MessageBox.Show("Stock Mínimo inválido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (!decimal.TryParse(txtPrecio.Text, out decimal precio)) { MessageBox.Show("Precio inválido.", TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+
+                // 1. Guardamos el ID antes de que se pierda la referencia
+                int idParaSeleccionar = _productoSeleccionado.IdProducto;
+
+                Producto productoActualizado = new()
+                {
+                    IdProducto = idParaSeleccionar,
+                    Nombre = nombre,
+                    Categoria = categoria,
+                    UnidadMedida = unidad,
+                    StockActual = stock,
+                    StockMinimo = stockminimo,
+                    PrecioCosto = precio
+                };
+
+                this.Cursor = Cursors.WaitCursor;
+                await _controller.ActualizarProductoAsync(productoActualizado);
+                MessageBox.Show("¡Producto actualizado correctamente!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                LimpiarCampos();
+                await CargarGridInventarioAsync();
+
+                // 2. Volvemos a seleccionar la fila en el grid
+                SeleccionarProductoEnGrid(idParaSeleccionar);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al actualizar producto: {ex.Message}");
+                MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private async void BtnEliminar_Click(object sender, EventArgs e)
+        {
+            if (this.dgvInventario.CurrentRow != null && this.dgvInventario.CurrentRow.DataBoundItem is Producto producto)
+            {
+                var confirm = MessageBox.Show($"¿Seguro que deseas eliminar '{producto.Nombre}'?", "Confirmar Eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    try
+                    {
+                        this.Cursor = Cursors.WaitCursor;
+                        await _controller.EliminarProductoAsync(producto.IdProducto);
+
+                        await CargarGridInventarioAsync();
+                        LimpiarCampos();
+                    }
+                    catch (InvalidOperationException ioex)
+                    {
+                        MessageBox.Show(ioex.Message, TituloAccionBloqueada, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error al eliminar: {ex.Message}");
+                        MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                    }
+                }
+            }
+        }
+
+        private async Task CargarGridInventarioAsync()
+        {
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                dgvInventario.DataSource = null;
+                var productos = await _controller.CargarProductosAsync();
+                this.dgvInventario.DataSource = productos;
+
+                ConfigurarColumnasGrid();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error carga inventario: {ex.Message}");
+                MessageBox.Show("Error de conexión al cargar inventario.", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void ConfigurarColumnasGrid()
+        {
+            var columnas = this.dgvInventario.Columns;
+            if (columnas["IdProducto"] != null) { columnas["IdProducto"]!.HeaderText = "ID"; columnas["IdProducto"]!.Width = 50; }
+            if (columnas["StockActual"] != null) columnas["StockActual"]!.HeaderText = "Stock Actual";
+            if (columnas["StockMinimo"] != null) columnas["StockMinimo"]!.HeaderText = "Stock Mínimo";
+            if (columnas["UnidadMedida"] != null) columnas["UnidadMedida"]!.HeaderText = "Unidad";
+            if (columnas["PrecioCosto"] != null) { columnas["PrecioCosto"]!.HeaderText = "Precio Costo"; columnas["PrecioCosto"]!.Width = 150; }
+        }
+
+        private void DgvInventario_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex == this.dgvInventario.NewRowIndex) return;
+
+            if (dgvInventario.Rows[e.RowIndex].DataBoundItem is Producto producto &&
+                producto.StockActual <= producto.StockMinimo)
+            {
+                e.CellStyle.BackColor = Color.FromArgb(255, 230, 230);
+                e.CellStyle.ForeColor = Color.Black;
+                e.CellStyle.SelectionBackColor = Color.Red;
+                e.CellStyle.SelectionForeColor = Color.White;
+            }
+        }
+
+        private async void BtnAnadirStock_Click(object sender, EventArgs e)
+        {
+            if (!_modoEdicion || _productoSeleccionado == null)
+            {
+                MessageBox.Show(MsgProductoNoSelEditar, TituloAdvertencia, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string sCantidad = Interaction.InputBox($"Añadir stock para: {_productoSeleccionado.Nombre}\n(Stock actual: {_productoSeleccionado.StockActual})", "Registrar Entrada", "0.00");
+            if (decimal.TryParse(sCantidad, out decimal cantidad) && cantidad > 0)
+            {
+                string motivo = Interaction.InputBox("Motivo de la entrada (Opcional):", "Registrar Entrada", "Compra proveedor");
+                try
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    int idProducto = _productoSeleccionado.IdProducto; // Guardar ID
+
+                    await _controller.RegistrarEntradaAsync(idProducto, UserSession.IdUsuario, cantidad, motivo);
+                    MessageBox.Show("¡Stock actualizado!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    await CargarGridInventarioAsync();
+                    LimpiarCampos();
+
+                    // Re-seleccionar
+                    SeleccionarProductoEnGrid(idProducto);
+                }
+                catch (Exception ex) { MessageBox.Show($"Error: {ex.Message}", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                finally { this.Cursor = Cursors.Default; }
+            }
+        }
+
+        private async void BtnRegistrarMerma_Click(object sender, EventArgs e)
+        {
+            if (!_modoEdicion || _productoSeleccionado == null)
+            {
+                MessageBox.Show(MsgProductoNoSelEditar, TituloAdvertencia, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string sCantidad = Interaction.InputBox($"Registrar merma para: {_productoSeleccionado.Nombre}\n(Stock actual: {_productoSeleccionado.StockActual})", "Registrar Merma", "0.00");
+            if (decimal.TryParse(sCantidad, out decimal cantidad) && cantidad > 0)
+            {
+                string motivo = Interaction.InputBox("Motivo de la merma (Obligatorio):", "Registrar Merma", "Caducado");
+                if (string.IsNullOrWhiteSpace(motivo)) { MessageBox.Show("El motivo es obligatorio.", TituloAdvertencia, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+
+                try
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    int idProducto = _productoSeleccionado.IdProducto; // Guardar ID
+
+                    await _controller.RegistrarMermaAsync(idProducto, UserSession.IdUsuario, cantidad, motivo);
+                    MessageBox.Show("¡Merma registrada!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    await CargarGridInventarioAsync();
+                    LimpiarCampos();
+
+                    // Re-seleccionar
+                    SeleccionarProductoEnGrid(idProducto);
+                }
+                catch (Exception ex) { MessageBox.Show($"Error: {ex.Message}", TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                finally { this.Cursor = Cursors.Default; }
             }
         }
 
@@ -395,14 +392,11 @@ namespace FoodWare.View.UserControls
         {
             foreach (DataGridViewRow row in dgvInventario.Rows)
             {
-                // El 'if' se fusiona en una sola línea con &&
                 if (row.DataBoundItem is Producto producto && producto.IdProducto == idProducto)
                 {
-                    // Mueve el foco de la celda activa a esta fila.
+                    row.Selected = true;
                     dgvInventario.CurrentCell = row.Cells[0];
-
-                    // Nos aseguramos de que sea visible
-                    dgvInventario.FirstDisplayedScrollingRowIndex = row.Index;
+                    dgvInventario.FirstDisplayedScrollingRowIndex = row.Index; // Hacer visible
                     break;
                 }
             }

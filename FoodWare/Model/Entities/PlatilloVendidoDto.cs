@@ -1,5 +1,4 @@
-﻿//DTO para recibir el resultado del reporte.
-namespace FoodWare.Model.Entities
+﻿namespace FoodWare.Model.Entities
 {
     public class PlatilloVendidoDto
     {

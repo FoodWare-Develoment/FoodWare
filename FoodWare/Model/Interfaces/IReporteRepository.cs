@@ -1,22 +1,17 @@
 ﻿using FoodWare.Model.Entities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FoodWare.Model.Interfaces
 {
-    /// <summary>
-    /// Define las operaciones de solo lectura para obtener reportes complejos.
-    /// </summary>
     public interface IReporteRepository
     {
-        /// <summary>
-        /// Obtiene un ranking de los platillos más vendidos por cantidad.
-        /// </summary>
-        Task<List<PlatilloVendidoDto>> ObtenerTopPlatillosVendidosAsync();
-
-        /// <summary>
-        /// Obtiene un ranking de prioridad de productos con stock bajo.
-        /// </summary>
+        Task<List<PlatilloVendidoDto>> ObtenerTopPlatillosVendidosAsync(DateTime inicio, DateTime fin);
         Task<List<ProductoBajoStockDto>> ObtenerProductosBajoStockAsync();
+        Task<List<ReporteVentasDto>> ObtenerReporteVentasAsync(DateTime inicio, DateTime fin);
+        Task<List<ReporteMermasDto>> ObtenerReporteMermasAsync(DateTime inicio, DateTime fin);
+        Task<List<ReporteRentabilidadDto>> ObtenerReporteRentabilidadAsync(DateTime inicio, DateTime fin);
+        Task<List<ReporteVentasHoraDto>> ObtenerReporteVentasPorHoraAsync(DateTime inicio, DateTime fin);
     }
 }

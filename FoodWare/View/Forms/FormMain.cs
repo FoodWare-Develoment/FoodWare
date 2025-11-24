@@ -36,7 +36,6 @@ namespace FoodWare.View.Forms
 
         private void AplicarEstilos()
         {
-            // Asegúrate de que 'EstilosApp.' esté presente aquí
             EstilosApp.EstiloPanel(panelMenu, EstilosApp.ColorMenu);
             EstilosApp.EstiloPanel(panelBarra, EstilosApp.ColorBarra);
             EstilosApp.EstiloPanel(panelContenido, EstilosApp.ColorFondo);
