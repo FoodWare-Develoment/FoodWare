@@ -8,21 +8,16 @@ namespace FoodWare.View.Forms
 {
     public partial class FormMain : Form
     {
-        // Almacena el rol del usuario que inició sesión
         private readonly string _rolUsuario;
 
-        /// <summary>
-        /// Constructor modificado para aceptar el rol del usuario.
-        /// </summary>
         public FormMain()
         {
             InitializeComponent();
-            // Leemos el rol desde la sesión estática
             _rolUsuario = UserSession.NombreRol;
 
             PersonalizarDiseno();
             AplicarEstilos();
-            AplicarSeguridadPorRol(); // Aplica seguridad basada en el rol
+            AplicarSeguridadPorRol();
             CargarInicio();
         }
 
@@ -40,27 +35,22 @@ namespace FoodWare.View.Forms
             EstilosApp.EstiloPanel(panelBarra, EstilosApp.ColorBarra);
             EstilosApp.EstiloPanel(panelContenido, EstilosApp.ColorFondo);
 
-            // Botón Gestión Principal
             EstilosApp.EstiloBotonMenu(btnGP);
             btnGP.Image = Properties.Resources.icons_gestion_24;
             btnGP.Text = " Gestion Principal";
 
-            // Botón Administración
             EstilosApp.EstiloBotonMenu(btnAdmin);
             btnAdmin.Image = Properties.Resources.icons_administracion_24;
             btnAdmin.Text = " Administracion";
 
-            // Botón Análisis
             EstilosApp.EstiloBotonMenu(btnAnalisis);
             btnAnalisis.Image = Properties.Resources.icons_analisis_24;
             btnAnalisis.Text = " Analisis";
 
-            // Botón Configuración
             EstilosApp.EstiloBotonMenu(btnConfig);
             btnConfig.Image = Properties.Resources.icons_configuracion_24;
             btnConfig.Text = " Configuracion";
 
-            // --- Submenú Gestión Principal ---
             EstilosApp.EstiloBotonSubmenu(btnInicio);
             btnInicio.Image = Properties.Resources.icons_inicio_24;
             btnInicio.Text = " Inicio";
@@ -77,7 +67,6 @@ namespace FoodWare.View.Forms
             btnVentas.Image = Properties.Resources.icons_ventas_24;
             btnVentas.Text = " Ventas";
 
-            // --- Submenú Administración ---
             EstilosApp.EstiloBotonSubmenu(btnEmpleados);
             btnEmpleados.Image = Properties.Resources.icons_empleados_24;
             btnEmpleados.Text = " Empleados";
@@ -86,53 +75,55 @@ namespace FoodWare.View.Forms
             btnFinanzas.Image = Properties.Resources.icons_finanzas_24;
             btnFinanzas.Text = " Finanzas";
 
-            // --- Submenú Análisis ---
             EstilosApp.EstiloBotonSubmenu(btnReportes);
             btnReportes.Image = Properties.Resources.icons_reportes_24;
             btnReportes.Text = " Reportes";
         }
 
-        /// <summary>
-        /// Oculta o muestra botones del menú según el rol del usuario.
-        /// </summary>
         private void AplicarSeguridadPorRol()
         {
-
-            // Primero, ocultamos todo lo sensible por defecto (permisos de Mesero)
+            // 1. Ocultar todo lo sensible por defecto
             btnInventario.Visible = false;
             btnAdmin.Visible = false;
             btnAnalisis.Visible = false;
             btnConfig.Visible = false;
+            btnFinanzas.Visible = false;
 
-            // Los meseros SÍ ven esto
+            // 2. Módulos operativos básicos siempre visibles
             btnGP.Visible = true;
             btnVentas.Visible = true;
             btnMenu.Visible = true;
 
-            // Usamos un switch para añadir permisos
             switch (_rolUsuario)
             {
                 case "Administrador":
                 case "Gerente":
-                    // Admin y Gerente ven todo
+                    // Acceso Total
                     btnInventario.Visible = true;
                     btnAdmin.Visible = true;
+                    btnFinanzas.Visible = true;
                     btnAnalisis.Visible = true;
                     btnConfig.Visible = true;
                     break;
 
+                case "Cajero":
+                    // Tarea: Ver Ventas, Ver Menú, Cerrar Caja (Finanzas)
+                    // NO ve inventario, ni empleados, ni reportes.
+                    btnFinanzas.Visible = true; // Permitimos entrar (UC_Finanzas se blindará solo)
+                    btnAdmin.Visible = true; // Mostramos el padre
+                    btnEmpleados.Visible = false; // Ocultamos el hermano prohibido
+                    break;
+
                 case "Chef":
-                    // Chef ve Inventario y Menú
                     btnInventario.Visible = true;
-                    btnMenu.Visible = true;
+                    // Chef ve Inventario y Menú. No ve Finanzas.
                     break;
 
                 case "Mesero":
-                    // Ya está configurado por defecto
+                    // Solo Ventas y Menú (Configuración default)
                     break;
 
                 default:
-                    // Si el rol es desconocido, ocultamos todo por seguridad
                     btnGP.Visible = false;
                     btnAdmin.Visible = false;
                     btnAnalisis.Visible = false;
@@ -141,10 +132,7 @@ namespace FoodWare.View.Forms
             }
         }
 
-        private void CargarInicio()
-        {
-            AbrirModulo(new UC_Inicio());
-        }
+        private void CargarInicio() { AbrirModulo(new UC_Inicio()); }
 
         private void OcultarSubmenu()
         {
@@ -174,7 +162,6 @@ namespace FoodWare.View.Forms
             modulo.BringToFront();
         }
 
-        // --- Event Handlers ---
         private void BtnGP_Click(object sender, EventArgs e) => MostrarSubmenu(panelGPSubmenu);
         private void BtnAdmin_Click(object sender, EventArgs e) => MostrarSubmenu(panelAdminSubmenu);
         private void BtnAnalisis_Click(object sender, EventArgs e) => MostrarSubmenu(panelAnalisisSubmenu);
