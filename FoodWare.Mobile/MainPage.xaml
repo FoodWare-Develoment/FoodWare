@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FoodWare.Mobile.MainPage"
+             BackgroundColor="#ECF0F1">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto">
+
+        <Border Grid.Row="0" 
+                BackgroundColor="#2C3E50" 
+                Padding="20" 
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 0">
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Label Text="FoodWare Móvil" 
+                       TextColor="White" 
+                       FontSize="20" 
+                       FontAttributes="Bold" 
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </Border>
+
+        <Label Grid.Row="1" 
+               Text="Hola, Mesero Juan" 
+               TextColor="#2C3E50" 
+               FontSize="18" 
+               Padding="20,10"/>
+
+        <ScrollView Grid.Row="2" Padding="15">
+            <VerticalStackLayout Spacing="15">
+
+                <Border BackgroundColor="White" 
+                        Stroke="Transparent" 
+                        Padding="10"
+                        StrokeShape="RoundRectangle 10">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.1"/>
+                    </Border.Shadow>
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Hamburguesa Especial" FontSize="16" FontAttributes="Bold" TextColor="#2C3E50"/>
+                            <Label Text="Platos Fuertes" FontSize="12" TextColor="Gray"/>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="$165.00" TextColor="#27AE60" FontAttributes="Bold" VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="White" 
+                        Stroke="Transparent" 
+                        Padding="10"
+                        StrokeShape="RoundRectangle 10">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.1"/>
+                    </Border.Shadow>
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Tacos de Arrachera (3)" FontSize="16" FontAttributes="Bold" TextColor="#2C3E50"/>
+                            <Label Text="Platos Fuertes" FontSize="12" TextColor="Gray"/>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="$195.00" TextColor="#27AE60" FontAttributes="Bold" VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="White" 
+                        Stroke="Transparent" 
+                        Padding="10"
+                        StrokeShape="RoundRectangle 10">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.1"/>
+                    </Border.Shadow>
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Coca-Cola" FontSize="16" FontAttributes="Bold" TextColor="#2C3E50"/>
+                            <Label Text="Bebidas" FontSize="12" TextColor="Gray"/>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="$38.00" TextColor="#27AE60" FontAttributes="Bold" VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="3" 
+                Text="Nueva Orden (+)" 
+                BackgroundColor="#1ABC9C" 
+                TextColor="White" 
+                FontAttributes="Bold"
+                CornerRadius="25"
+                HeightRequest="50"
+                Margin="20, 10, 20, 20"/>
+    </Grid>
+</ContentPage>
