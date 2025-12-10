@@ -44,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FoodWare.Shared\FoodWare.Shared.csproj" />
     <ProjectReference Include="..\FoodWare.Theme\FoodWare.Theme.csproj" />
     <ProjectReference Include="..\FoodWare.Validations\FoodWare.Validations.csproj" />
   </ItemGroup>

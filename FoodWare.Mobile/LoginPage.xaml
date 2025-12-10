@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FoodWare.Mobile.LoginPage"
+             BackgroundColor="#2C3E50">
+
+    <VerticalStackLayout Spacing="20" VerticalOptions="Center" Padding="30">
+
+        <Label Text="FoodWare Móvil"
+               FontSize="32"
+               FontAttributes="Bold"
+               TextColor="White"
+               HorizontalOptions="Center" />
+
+        <Label Text="Bienvenido al equipo"
+               FontSize="18"
+               TextColor="#ECF0F1"
+               HorizontalOptions="Center" 
+               Margin="0,0,0,20"/>
+
+        <Entry x:Name="TxtUsuario"
+               Placeholder="Usuario"
+               PlaceholderColor="LightGray"
+               TextColor="Black"
+               BackgroundColor="White" />
+
+        <Entry x:Name="TxtPassword"
+               Placeholder="Contraseña"
+               PlaceholderColor="LightGray"
+               TextColor="Black"
+               IsPassword="True"
+               BackgroundColor="White" />
+
+        <Button Text="INICIAR SESIÓN"
+                Clicked="BtnLogin_Clicked"
+                BackgroundColor="#1ABC9C"
+                TextColor="White"
+                FontAttributes="Bold"
+                HeightRequest="50"
+                CornerRadius="25"
+                Margin="0,20,0,0"/>
+
+        <ActivityIndicator x:Name="AiCargando" 
+                           IsRunning="False" 
+                           Color="#1ABC9C"/>
+
+    </VerticalStackLayout>
+</ContentPage>

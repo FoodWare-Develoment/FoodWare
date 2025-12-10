@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Interfaces;
 using FoodWare.Model.DataAccess;
 using FoodWare.Controller.Logic;
-using FoodWare.Model.Entities;
+using FoodWare.Shared.Entities;
 using FoodWare.Validations;
 using FoodWare.View.Helpers;
 using System.Threading.Tasks;

@@ -9,8 +9,6 @@
         private System.Windows.Forms.Panel panelContenido;
 
         private System.Windows.Forms.Label lblTitulo;
-        private System.Windows.Forms.TextBox txtBusqueda;
-        private System.Windows.Forms.Panel panelBusqueda;
 
         private System.Windows.Forms.Button btnGP;
         private System.Windows.Forms.Panel panelGPSubmenu;
@@ -56,15 +54,12 @@
             btnGP = new Button();
             panelBarra = new Panel();
             lblTitulo = new Label();
-            panelBusqueda = new Panel();
-            txtBusqueda = new TextBox();
             panelContenido = new Panel();
             panelMenu.SuspendLayout();
             panelAnalisisSubmenu.SuspendLayout();
             panelAdminSubmenu.SuspendLayout();
             panelGPSubmenu.SuspendLayout();
             panelBarra.SuspendLayout();
-            panelBusqueda.SuspendLayout();
             SuspendLayout();
             // 
             // panelMenu
@@ -227,7 +222,6 @@
             // panelBarra
             // 
             panelBarra.Controls.Add(lblTitulo);
-            panelBarra.Controls.Add(panelBusqueda);
             panelBarra.Dock = DockStyle.Top;
             panelBarra.Location = new Point(0, 0);
             panelBarra.Name = "panelBarra";
@@ -244,25 +238,6 @@
             lblTitulo.TabIndex = 1;
             lblTitulo.Text = "FoodWare";
             lblTitulo.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // panelBusqueda
-            // 
-            panelBusqueda.Controls.Add(txtBusqueda);
-            panelBusqueda.Dock = DockStyle.Right;
-            panelBusqueda.Location = new Point(940, 0);
-            panelBusqueda.Name = "panelBusqueda";
-            panelBusqueda.Padding = new Padding(10, 14, 10, 14);
-            panelBusqueda.Size = new Size(260, 56);
-            panelBusqueda.TabIndex = 0;
-            // 
-            // txtBusqueda
-            // 
-            txtBusqueda.Dock = DockStyle.Fill;
-            txtBusqueda.Location = new Point(10, 14);
-            txtBusqueda.Name = "txtBusqueda";
-            txtBusqueda.Size = new Size(240, 27);
-            txtBusqueda.TabIndex = 101;
-            txtBusqueda.KeyDown += TxtBusqueda_KeyDown;
             // 
             // panelContenido
             // 
@@ -287,8 +262,6 @@
             panelAdminSubmenu.ResumeLayout(false);
             panelGPSubmenu.ResumeLayout(false);
             panelBarra.ResumeLayout(false);
-            panelBusqueda.ResumeLayout(false);
-            panelBusqueda.PerformLayout();
             ResumeLayout(false);
         }
     }
