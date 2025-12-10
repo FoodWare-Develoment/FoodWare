@@ -1,10 +1,10 @@
 ﻿using BCrypt.Net;
 using System;
 using System.Diagnostics;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Interfaces;
 using System.Threading.Tasks;
 using FoodWare.Model.DataAccess;
-using FoodWare.Model.Entities;
+using FoodWare.Shared.Entities;
 
 namespace FoodWare.Controller.Logic
 {

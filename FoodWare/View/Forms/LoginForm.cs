@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using FoodWare.Controller;
 using FoodWare.Controller.Logic;
 using FoodWare.View.Helpers;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Interfaces;
 using FoodWare.Model.DataAccess;
 
 namespace FoodWare.View.Forms

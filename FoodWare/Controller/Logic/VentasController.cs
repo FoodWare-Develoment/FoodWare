@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FoodWare.Controller.Exceptionss;
 using FoodWare.Controller.Logic;
-using FoodWare.Model.Entities;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Entities;
+using FoodWare.Shared.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 

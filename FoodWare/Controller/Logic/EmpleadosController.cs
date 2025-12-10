@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FoodWare.Model.Entities;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Entities;
+using FoodWare.Shared.Interfaces;
 using BCrypt.Net;
 
 namespace FoodWare.Controller.Logic

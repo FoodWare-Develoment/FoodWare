@@ -4,9 +4,9 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using FoodWare.Controller.Logic;
 using FoodWare.Model.DataAccess;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Interfaces;
 using FoodWare.View.Helpers;
-using FoodWare.Model.Entities;
+using FoodWare.Shared.Entities;
 using Microsoft.VisualBasic;
 
 namespace FoodWare.View.UserControls

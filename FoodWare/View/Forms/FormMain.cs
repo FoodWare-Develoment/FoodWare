@@ -26,7 +26,6 @@ namespace FoodWare.View.Forms
             panelGPSubmenu.Visible = false;
             panelAdminSubmenu.Visible = false;
             panelAnalisisSubmenu.Visible = false;
-            txtBusqueda.PlaceholderText = "Buscar en FoodWare";
         }
 
         private void AplicarEstilos()
@@ -174,13 +173,5 @@ namespace FoodWare.View.Forms
         private void BtnReportes_Click(object sender, EventArgs e) { AbrirModulo(new UC_Reportes()); OcultarSubmenu(); }
         private void BtnConfig_Click(object sender, EventArgs e) { AbrirModulo(new UC_Configuracion()); OcultarSubmenu(); }
 
-        private void TxtBusqueda_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.SuppressKeyPress = true;
-                MessageBox.Show("Buscando: " + txtBusqueda.Text);
-            }
-        }
     }
 }

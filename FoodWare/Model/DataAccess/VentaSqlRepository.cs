@@ -1,6 +1,6 @@
 ﻿using Dapper;
-using FoodWare.Model.Entities;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Entities;
+using FoodWare.Shared.Interfaces;
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 

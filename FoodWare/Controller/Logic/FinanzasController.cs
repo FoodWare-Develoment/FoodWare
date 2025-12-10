@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FoodWare.Model.DataAccess;
-using FoodWare.Model.Entities;
-using FoodWare.Model.Interfaces;
+using FoodWare.Shared.Entities;
+using FoodWare.Shared.Interfaces;
 
 namespace FoodWare.Controller.Logic
 {
