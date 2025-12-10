@@ -17,7 +17,6 @@ namespace FoodWare.View.UserControls
         {
             InitializeComponent();
 
-            // Inyección manual de dependencias
             IConfiguracionRepository repo = new ConfiguracionSqlRepository();
             _controller = new ConfiguracionController(repo);
 
@@ -31,25 +30,21 @@ namespace FoodWare.View.UserControls
 
             EstilosApp.EstiloLabelTitulo(lblTitulo);
 
-            // Estilos para GroupBoxes
             gbDatosGenerales.ForeColor = EstilosApp.ColorTextoOscuro;
             gbFinanciero.ForeColor = EstilosApp.ColorTextoOscuro;
 
-            // Labels
             EstilosApp.EstiloLabelModulo(lblNombre);
             EstilosApp.EstiloLabelModulo(lblDireccion);
             EstilosApp.EstiloLabelModulo(lblMensaje);
             EstilosApp.EstiloLabelModulo(lblImpuesto);
             EstilosApp.EstiloLabelModulo(lblMoneda);
 
-            // TextBoxes
             EstilosApp.EstiloTextBoxModulo(txtNombre);
             EstilosApp.EstiloTextBoxModulo(txtDireccion);
             EstilosApp.EstiloTextBoxModulo(txtMensaje);
             EstilosApp.EstiloTextBoxModulo(txtImpuesto);
             EstilosApp.EstiloTextBoxModulo(txtMoneda);
 
-            // Botón
             EstilosApp.EstiloBotonModulo(btnGuardar);
         }
 
@@ -86,7 +81,6 @@ namespace FoodWare.View.UserControls
         {
             try
             {
-                // Validación básica de UI para decimal
                 if (!decimal.TryParse(txtImpuesto.Text, out decimal impuesto))
                 {
                     MessageBox.Show("El impuesto debe ser un número válido.", "Dato Inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -104,7 +98,6 @@ namespace FoodWare.View.UserControls
                 );
 
                 MessageBox.Show("Configuración actualizada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                 await CargarDatosAsync();
             }
             catch (ArgumentException aex)
@@ -119,6 +112,29 @@ namespace FoodWare.View.UserControls
             finally
             {
                 this.Cursor = Cursors.Default;
+            }
+        }
+
+        private void BtnCerrarSesion_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("¿Desea cerrar la sesión actual y volver al login?",
+                "Cerrar Sesión",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                Application.Restart();
+                Environment.Exit(0);
+            }
+        }
+
+        private void BtnSalir_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("¿Seguro que desea salir de FoodWare?",
+                "Salir del Sistema",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                Application.Exit();
             }
         }
     }
