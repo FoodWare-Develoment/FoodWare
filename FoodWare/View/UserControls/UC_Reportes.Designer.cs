@@ -12,7 +12,7 @@ namespace FoodWare.View.UserControls
                 components.Dispose();
             base.Dispose(disposing);
         }
-
+        // contrasseña: 123
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();

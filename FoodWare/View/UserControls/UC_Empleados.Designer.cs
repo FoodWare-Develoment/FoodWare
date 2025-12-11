@@ -1,4 +1,7 @@
-﻿namespace FoodWare.View.UserControls
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace FoodWare.View.UserControls
 {
     partial class UC_Empleados
     {
@@ -30,6 +33,7 @@
             cmbRol = new ComboBox();
             btnLimpiar = new Button();
             chkActivo = new CheckBox();
+            btnEliminar = new Button();
             dgvEmpleados = new DataGridView();
             contextMenuEmpleados = new ContextMenuStrip(components);
             itemEditar = new ToolStripMenuItem();
@@ -58,6 +62,7 @@
             tlpInputs.Controls.Add(btnResetPassword, 3, 3);
             tlpInputs.Controls.Add(chkActivo, 1, 4);
             tlpInputs.Controls.Add(btnLimpiar, 3, 2);
+            tlpInputs.Controls.Add(btnEliminar, 3, 4);
             tlpInputs.Dock = DockStyle.Top;
             tlpInputs.Location = new Point(0, 0);
             tlpInputs.Name = "tlpInputs";
@@ -203,6 +208,17 @@
             chkActivo.Text = "Activo";
             chkActivo.UseVisualStyleBackColor = true;
             // 
+            // btnEliminar
+            // 
+            btnEliminar.Anchor = AnchorStyles.None;
+            btnEliminar.Location = new Point(823, 223);
+            btnEliminar.Name = "btnEliminar";
+            btnEliminar.Size = new Size(114, 44);
+            btnEliminar.TabIndex = 13;
+            btnEliminar.Text = "Eliminar";
+            btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += BtnEliminar_Click;
+            // 
             // dgvEmpleados
             // 
             dgvEmpleados.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -231,8 +247,7 @@
             // 
             // UC_Empleados
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
             Controls.Add(dgvEmpleados);
             Controls.Add(tlpInputs);
             Name = "UC_Empleados";
@@ -259,6 +274,7 @@
         private Button btnActualizar;
         private Button btnResetPassword;
         private Button btnLimpiar;
+        private Button btnEliminar;
         private DataGridView dgvEmpleados;
         private ContextMenuStrip contextMenuEmpleados;
         private ToolStripMenuItem itemEditar;

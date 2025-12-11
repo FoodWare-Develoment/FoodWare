@@ -35,10 +35,12 @@ namespace FoodWare.View.UserControls
         {
             this.BackColor = EstilosApp.ColorFondo;
             EstilosApp.EstiloPanel(tlpInputs, EstilosApp.ColorFondo);
+
             EstilosApp.EstiloLabelModulo(lblNombreCompleto);
             EstilosApp.EstiloLabelModulo(lblNombreUsuario);
             EstilosApp.EstiloLabelModulo(lblPassword);
             EstilosApp.EstiloLabelModulo(lblRol);
+
             EstilosApp.EstiloTextBoxModulo(txtNombreCompleto);
             EstilosApp.EstiloTextBoxModulo(txtNombreUsuario);
             EstilosApp.EstiloTextBoxModulo(txtPassword);
@@ -48,10 +50,13 @@ namespace FoodWare.View.UserControls
             EstilosApp.EstiloBotonModuloSecundario(btnActualizar);
             EstilosApp.EstiloBotonModuloAlerta(btnResetPassword);
             EstilosApp.EstiloBotonModuloSecundario(btnLimpiar);
+            EstilosApp.EstiloBotonModuloAlerta(btnEliminar);
 
             EstilosApp.EstiloDataGridView(dgvEmpleados);
 
-            btnResetPassword.Visible = (UserSession.NombreRol == "Administrador");
+            bool esAdmin = UserSession.NombreRol == "Administrador";
+            btnResetPassword.Visible = esAdmin;
+            btnEliminar.Visible = esAdmin;
         }
 
         private async void UC_Empleados_Load(object sender, EventArgs e)
@@ -65,13 +70,14 @@ namespace FoodWare.View.UserControls
         private void EstablecerModoEdicion(bool activo)
         {
             _modoEdicion = activo;
-
             if (activo)
             {
                 btnGuardar.Visible = false;
                 btnActualizar.Visible = true;
                 btnResetPassword.Visible = true;
+                btnEliminar.Visible = true;
                 btnLimpiar.Text = "Cancelar";
+
                 txtPassword.Enabled = false;
                 lblPassword.Visible = false;
                 txtPassword.Visible = false;
@@ -81,7 +87,9 @@ namespace FoodWare.View.UserControls
                 btnGuardar.Visible = true;
                 btnActualizar.Visible = false;
                 btnResetPassword.Visible = false;
+                btnEliminar.Visible = false;
                 btnLimpiar.Text = "Limpiar";
+
                 txtPassword.Enabled = true;
                 lblPassword.Visible = true;
                 txtPassword.Visible = true;
@@ -98,7 +106,6 @@ namespace FoodWare.View.UserControls
             txtPassword.Clear();
             cmbRol.SelectedIndex = -1;
             chkActivo.Checked = true;
-
             EstablecerModoEdicion(false);
         }
 
@@ -107,12 +114,10 @@ namespace FoodWare.View.UserControls
             if (dgvEmpleados.CurrentRow != null && dgvEmpleados.CurrentRow.DataBoundItem is UsuarioDto usuario)
             {
                 _usuarioSeleccionado = usuario;
-
                 txtNombreCompleto.Text = usuario.NombreCompleto;
                 txtNombreUsuario.Text = usuario.NombreUsuario;
                 cmbRol.SelectedValue = usuario.IdRol;
                 chkActivo.Checked = usuario.Activo;
-
                 EstablecerModoEdicion(true);
             }
         }
@@ -169,8 +174,6 @@ namespace FoodWare.View.UserControls
                 MessageBox.Show("¡Empleado actualizado!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LimpiarCampos();
                 await CargarGridEmpleadosAsync();
-
-                // 2. Reseleccionar
                 SeleccionarEmpleadoEnGrid(idUsuario);
             }
             catch (ArgumentException aex) { MessageBox.Show(aex.Message, TituloDatoInvalido, MessageBoxButtons.OK, MessageBoxIcon.Warning); }
@@ -178,6 +181,36 @@ namespace FoodWare.View.UserControls
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error actualizar empleado: {ex.Message}");
+                MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally { this.Cursor = Cursors.Default; }
+        }
+
+        private async void BtnEliminar_Click(object sender, EventArgs e)
+        {
+            if (!_modoEdicion || _usuarioSeleccionado == null) return;
+
+            var confirm = MessageBox.Show($"¿Está seguro que desea eliminar a '{_usuarioSeleccionado.NombreUsuario}'?\n\nEsta acción es irreversible.",
+                                          "Confirmar Eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (confirm == DialogResult.No) return;
+
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                await _controller.EliminarEmpleadoAsync(_usuarioSeleccionado.IdUsuario, _usuarioSeleccionado.NombreRol);
+
+                MessageBox.Show("¡Empleado eliminado correctamente!", TituloExito, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LimpiarCampos();
+                await CargarGridEmpleadosAsync();
+            }
+            catch (InvalidOperationException ioex)
+            {
+                MessageBox.Show(ioex.Message, TituloAccionBloqueada, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al eliminar empleado: {ex.Message}");
                 MessageBox.Show(MsgErrorInesperado, TituloError, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally { this.Cursor = Cursors.Default; }
@@ -224,7 +257,7 @@ namespace FoodWare.View.UserControls
                 cmbRol.ValueMember = "IdRol";
                 cmbRol.SelectedIndex = -1;
             }
-            catch { /* log */ }
+            catch {/*log*/ }
         }
 
         private async Task CargarGridEmpleadosAsync()
@@ -235,21 +268,23 @@ namespace FoodWare.View.UserControls
                 dgvEmpleados.DataSource = null;
                 var empleados = await _controller.CargarEmpleadosAsync();
                 dgvEmpleados.DataSource = empleados;
+
                 if (dgvEmpleados.Columns["IdUsuario"] != null) dgvEmpleados.Columns["IdUsuario"]!.Visible = false;
                 if (dgvEmpleados.Columns["IdRol"] != null) dgvEmpleados.Columns["IdRol"]!.Visible = false;
                 if (dgvEmpleados.Columns["Activo"] != null) dgvEmpleados.Columns["Activo"]!.Visible = false;
             }
-            catch { /* log */ }
+            catch {/*log*/ }
             finally { this.Cursor = Cursors.Default; }
         }
 
         private void DgvEmpleados_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
+            {
                 dgvEmpleados.CurrentCell = dgvEmpleados.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            }
         }
 
-        // --- Helper ---
         private void SeleccionarEmpleadoEnGrid(int idUsuario)
         {
             foreach (DataGridViewRow row in dgvEmpleados.Rows)
