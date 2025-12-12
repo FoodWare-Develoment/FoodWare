@@ -3,6 +3,7 @@ using FoodWare.Shared.Entities;
 using FoodWare.Shared.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,23 +17,17 @@ namespace FoodWare.API.DataAccess
         {
             using var connection = new SqlConnection(_connectionString);
             string query = "SELECT ContraseñaHash FROM Usuarios WHERE NombreUsuario = @username AND Activo = 1";
-            var storedPasswordHash = await connection.QuerySingleOrDefaultAsync<string>(query, new { username });
-            return storedPasswordHash;
+            return await connection.QuerySingleOrDefaultAsync<string>(query, new { username });
         }
 
         public async Task<string?> ObtenerRolPorNombreUsuarioAsync(string username)
         {
             using var connection = new SqlConnection(_connectionString);
             string sql = @"
-                SELECT 
-                    R.NombreRol 
-                FROM 
-                    Usuarios U
-                INNER JOIN 
-                    Roles R ON U.IdRol = R.IdRol
-                WHERE 
-                    U.NombreUsuario = @username AND U.Activo = 1;";
-
+                SELECT R.NombreRol 
+                FROM Usuarios U
+                INNER JOIN Roles R ON U.IdRol = R.IdRol
+                WHERE U.NombreUsuario = @username AND U.Activo = 1;";
             return await connection.QuerySingleOrDefaultAsync<string>(sql, new { username });
         }
 
@@ -45,17 +40,12 @@ namespace FoodWare.API.DataAccess
                     U.NombreCompleto,
                     U.ContraseñaHash,
                     R.NombreRol 
-                FROM 
-                    Usuarios U
-                INNER JOIN 
-                    Roles R ON U.IdRol = R.IdRol
-                WHERE 
-                    U.NombreUsuario = @username AND U.Activo = 1;";
-
+                FROM Usuarios U
+                INNER JOIN Roles R ON U.IdRol = R.IdRol
+                WHERE U.NombreUsuario = @username AND U.Activo = 1";
             return await connection.QuerySingleOrDefaultAsync<LoginInfo>(sql, new { username });
         }
 
-        // --- Métodos CRUD ---
         public async Task<List<UsuarioDto>> ObtenerTodosDtoAsync()
         {
             using var connection = new SqlConnection(_connectionString);
@@ -67,13 +57,9 @@ namespace FoodWare.API.DataAccess
                     U.Activo,
                     U.IdRol,
                     R.NombreRol
-                FROM 
-                    Usuarios U
-                INNER JOIN 
-                    Roles R ON U.IdRol = R.IdRol
-                ORDER BY
-                    U.NombreCompleto;";
-
+                FROM Usuarios U
+                INNER JOIN Roles R ON U.IdRol = R.IdRol
+                ORDER BY U.NombreCompleto;";
             var usuarios = await connection.QueryAsync<UsuarioDto>(sql);
             return [.. usuarios];
         }
@@ -84,7 +70,6 @@ namespace FoodWare.API.DataAccess
             string sql = @"
                 INSERT INTO Usuarios (NombreCompleto, NombreUsuario, ContraseñaHash, IdRol, Activo)
                 VALUES (@NombreCompleto, @NombreUsuario, @ContraseñaHash, @IdRol, @Activo);";
-
             await connection.ExecuteAsync(sql, usuario);
         }
 
@@ -97,9 +82,7 @@ namespace FoodWare.API.DataAccess
                     NombreUsuario = @NombreUsuario,
                     IdRol = @IdRol,
                     Activo = @Activo
-                WHERE
-                    IdUsuario = @IdUsuario;";
-
+                WHERE IdUsuario = @IdUsuario;";
             await connection.ExecuteAsync(sql, usuario);
         }
 
@@ -108,6 +91,21 @@ namespace FoodWare.API.DataAccess
             using var connection = new SqlConnection(_connectionString);
             string sql = "UPDATE Usuarios SET ContraseñaHash = @passwordHash WHERE IdUsuario = @IdUsuario;";
             await connection.ExecuteAsync(sql, new { passwordHash, idUsuario });
+        }
+
+        public async Task EliminarAsync(int idUsuario)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            string sql = "DELETE FROM Usuarios WHERE IdUsuario = @IdUsuario;";
+
+            try
+            {
+                await connection.ExecuteAsync(sql, new { IdUsuario = idUsuario });
+            }
+            catch (SqlException ex) when (ex.Number == 547)
+            {
+                throw new InvalidOperationException("No es posible eliminar este usuario porque tiene registros históricos asociados.");
+            }
         }
     }
 }
