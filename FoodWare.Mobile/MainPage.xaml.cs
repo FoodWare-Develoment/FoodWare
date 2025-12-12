@@ -156,7 +156,7 @@ public partial class MainPage : ContentPage
 
             if (response.IsSuccessStatusCode)
             {
-                await DisplayAlert("¡Éxito!", "La comanda se envió a cocina y se guardó en BD.", "OK");
+                await DisplayAlert("¡Éxito!", "La comanda se envió a cocina.", "OK");
                 _carrito.Clear();
                 ActualizarResumenPedido();
             }
